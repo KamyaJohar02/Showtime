@@ -1,5 +1,3 @@
-
-
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"
 import Image from "next/image"
 import { Button } from "@/components/ui/button";
@@ -16,16 +14,17 @@ export default function Home() {
       </section>
       
       {/* Carousel Section */}
-      <section className="w-full max-w-4xl mx-auto relative">
-        <Carousel className="h-96" opts={{ loop: true }}>
-          <CarouselContent>
+      <section className="w-full relative">
+        <Carousel className="h-96 w-full" opts={{ loop: true }}>
+          <CarouselContent className="w-full">
             {[5, 14, 3, 4, 13].map((index) => (
-              <CarouselItem key={index} className="relative h-96">
+              <CarouselItem key={index} className="relative h-96 w-full">
                 <Image
                   src={`/Images/${index}.webp`}
                   alt={`Carousel Image ${index}`}
                   layout="fill"
                   objectFit="cover"
+                  className="w-full"
                 />
               </CarouselItem>
             ))}
@@ -37,8 +36,8 @@ export default function Home() {
       </section>
 
       {/* Book Now Button */}
-      <section className=" flex mt-4 justify-end">
-        <Button className="bg-red-600 text-white py-2 px-4 rounded-full ">
+      <section className="flex mt-4 justify-end w-full px-6">
+        <Button className="bg-red-600 text-white py-2 px-4 rounded-full">
           Book Now
         </Button>
       </section>
