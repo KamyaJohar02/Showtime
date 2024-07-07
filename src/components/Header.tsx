@@ -2,24 +2,47 @@
 import React, { Fragment, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Bars3Icon, ChevronDownIcon, HomeIcon } from "@heroicons/react/24/outline";
-import { Popover, Transition } from "@headlessui/react";
+import { Bars3Icon, ChevronDownIcon, HomeIcon, ChatBubbleLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Popover, Transition, Dialog, Disclosure, DisclosurePanel } from "@headlessui/react";
+
+const icons = {
+  HomeIcon: HomeIcon,
+  ChatBubbleLeftIcon: ChatBubbleLeftIcon,
+};
+
+type IconName = keyof typeof icons;
+
+interface Product {
+  name: string;
+  description: string;
+  href: string;
+  icon: IconName;
+}
 
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const products =[{
-    name: "FAQs",
-    description: "Getter a better understanding of your traffic",
-    href: "#",
-    icon: HomeIcon,
-  },
-  {
-    name: "Refund Policy",
-    description: "Speak directly to your customers",
-    icon: HomeIcon
-  },
 
-  ]
+  const products: Product[] = [
+    {
+      name: "FAQs",
+      description: "Get a better understanding of your traffic",
+      href: "#",
+      icon: "HomeIcon",
+    },
+    {
+      name: "Refund Policy",
+      description: "Speak directly to your customers",
+      href: "#",
+      icon: "ChatBubbleLeftIcon",
+    },
+    {
+      name: "Contact us",
+      description: "Contact our team",
+      href: "#",
+      icon: "HomeIcon",
+    },
+  ];
+
   return (
     <header className="bg-black">
       <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
@@ -35,6 +58,64 @@ function Header() {
             />
           </Link>
         </div>
+        <div className="hidden lg:flex lg:flex-1 lg:justify-center">
+          <Popover.Group className="flex gap-x-12">
+            <a href="#" className="text-sm font-semibold leading-6 text-white">
+              Our Services
+            </a>
+            <a href="#" className="text-sm font-semibold leading-6 text-white">
+              About Us
+            </a>
+            <Popover>
+              {({ open }) => (
+                <>
+                  <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-white">
+                    Learn
+                    <ChevronDownIcon className={`${open ? "transform rotate-180" : ""} h-5 w-5 flex-none text-white`} aria-hidden="true" />
+                  </Popover.Button>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-200"
+                    enterFrom="opacity-0 translate-y-1"
+                    enterTo="opacity-100 translate-y-0"
+                    leave="transition ease-in duration-150"
+                    leaveFrom="opacity-100 translate-y-0"
+                    leaveTo="opacity-0 translate-y-1"
+                  >
+                    <Popover.Panel className="absolute bg-white left-1/2 -translate-x-1/2 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl shadow-lg ring-1 ring-gray-900/5">
+                      <div className="p-4">
+                        {products.map((item) => (
+                          <div
+                            key={item.name}
+                            className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
+                          >
+                            <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-100 group-hover:bg-gray-200">
+                              {React.createElement(icons[item.icon], {
+                                className: "h-6 w-6 text-[#013B94] group-hover:text-blue-600",
+                                "aria-hidden": "true",
+                              })}
+                            </div>
+                            <div className="flex-auto">
+                              <a href={item.href} className="block font-semibold text-gray-900">
+                                {item.name}
+                              </a>
+                              <p className="mt-1 text-gray-600">{item.description}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </Popover.Panel>
+                  </Transition>
+                </>
+              )}
+            </Popover>
+          </Popover.Group>
+        </div>
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+          <a href="#" className="text-sm font-semibold leading-6 text-white">
+            Log in<span aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
         <div className="flex lg:hidden">
           <button
             type="button"
@@ -45,31 +126,70 @@ function Header() {
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
-        <Popover.Group className="hidden lg:flex lg:gap-x-12">
-          <Popover className="relative">
-            <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-white">
-              Learn
-              <ChevronDownIcon
-                className="h-5 w-5 flex-none text-white"
-                aria-hidden="true"
-              />
-            </Popover.Button>
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-200"
-              enterFrom="opacity-0 translate-y-1"
-              enterTo="opacity-100 translate-y-0"
-              leave="transition ease-in duration-150"
-              leaveFrom="opacity-100 translate-y-0"
-              leaveTo="opacity-0 translate-y-1"
-            >
-              <Popover.Panel className="absolute bg-white -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl shadow-lg ring-1 ring-gray-900/5">
-               
-              </Popover.Panel>
-            </Transition>
-          </Popover>
-        </Popover.Group>
       </nav>
+      <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
+        <div className="fixed inset-0 z-10" />
+        <Dialog.Panel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-black px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+          <div className="flex items-center justify-between">
+            <a href="#" className="-m-1.5 p-1.5">
+              <span className="sr-only">ShowTime</span>
+              <Image
+                className="h-8 w-auto"
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Showtime.svg/2560px-Showtime.svg.png"
+                alt="Showtime Logo"
+                width={100}
+                height={40}
+              />
+            </a>
+            <button
+              type="button"
+              className="-m-2.5 rounded-md p-2.5 text-white"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <span className="sr-only">Close Menu</span>
+              <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="mt-6 flow-root">
+            <div className="-my-6 divide-y divide-gray-500/10">
+              <div className="space-y-2 py-6">
+                <Disclosure>
+                  {({ open }) => (
+                    <>
+                      <Disclosure.Button className="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-white hover:bg-red-500">
+                        Learn
+                        <ChevronDownIcon className={`${open ? "transform rotate-180" : ""} h-5 w-5 flex-none text-white`} aria-hidden="true" />
+                      </Disclosure.Button>
+                      <DisclosurePanel className="mt-2 space-y-2">
+                        {products.map((item) => (
+                          <a
+                            key={item.name}
+                            href={item.href}
+                            className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-white hover:bg-red-600"
+                          >
+                            {item.name}
+                          </a>
+                        ))}
+                      </DisclosurePanel>
+                    </>
+                  )}
+                </Disclosure>
+                <a href="#" className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-red-600">
+                  Our Services
+                </a>
+                <a href="#" className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-red-600">
+                  About Us
+                </a>
+              </div>
+              <div className="py-6">
+                <a href="#" className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-red-600">
+                  Log In
+                </a>
+              </div>
+            </div>
+          </div>
+        </Dialog.Panel>
+      </Dialog>
     </header>
   );
 }
