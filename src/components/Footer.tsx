@@ -20,8 +20,8 @@ const Footer = () => {
             <h5 className="font-bold mb-2">Reach Us</h5>
             <p className="text-gray-400">
               Wazirpur Industrial Area<br/>
-              +91 8618976974<br/>
-              <a href="mailto:officeshowtime@gmail.com" className="text-gray-400 hover:text-white">office@showtime.com</a>
+              +91 <br/>
+              <a href="mailto:officeshowtime@gmail.com" className="text-gray-400 hover:text-white">officeshowtime@gmail.com</a>
             </p>
           </div>
           <div className="w-full sm:w-1/4 mb-6">
