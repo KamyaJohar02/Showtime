@@ -4,24 +4,32 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import "./globals.css";
 import { trending_data } from "../../Data/trending";
+import Link  from "next/link";
+// import { useRouter } from "next/router";
 
 export default function Home() {
+  // const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const totalSlides = [5, 14, 3, 4, 13].length;
+ 
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % totalSlides);
     }, 3000); // Change slide every 3 seconds
 
+    
+
     return () => clearInterval(interval); // Clear interval on component unmount
   }, [totalSlides]);
+  
 
   return (
+    
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       {/* Trending Section */}
       <section className="mx-auto max-w-7xl mt-0 p-6 bg-white rounded-t-lg">
-        <div className="grid grid-cols-7  gap-4 py-5">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols- gap-4 py-5">
           {trending_data.map((item) => (
             <div key={item.id} className="space-y-1 cursor-pointer text-center">
               <div className="w-24 h-24 rounded-full overflow-hidden mx-auto">
@@ -73,15 +81,17 @@ export default function Home() {
 
       {/* Book Now Button */}
       <section className="flex mt-4 justify-end w-full px-6">
-        <Button className="bg-red-600 text-white py-2 px-4 rounded-full">
-          Book Now
-        </Button>
+      <Link href="/Booking">
+          <Button className="bg-red-600 text-white py-2 px-4 rounded-full">
+            Book Now
+          </Button>
+        </Link>
       </section>
 
       {/* WhatsApp Floating Icon */}
       <a
         href="https://wa.me/9911825047" // Replace with your WhatsApp number
-        className="fixed bottom-4 right-4 bg-green-500 p-4 rounded-full shadow-lg"
+        className="fixed bottom-4 right-4 p-4 rounded-full shadow-lg"
         target="_blank"
         rel="noopener noreferrer"
       >
