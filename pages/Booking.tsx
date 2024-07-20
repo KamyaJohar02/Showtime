@@ -1,7 +1,14 @@
-import Image from 'next/image';
 import React, { useState } from 'react';
+import Image from 'next/image'; // Assuming you're using Next.js for Image component
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+
+interface Room {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl?: string; // Make imageUrl optional if it can be undefined
+}
 
 const Booking: React.FC = () => {
   const [startDate, setStartDate] = useState<Date | null>(new Date());
@@ -14,6 +21,7 @@ const Booking: React.FC = () => {
 
   const handleDateChange = (date: Date | null) => {
     setStartDate(date);
+    setSelectedRoom(null); // Reset selected room when date changes
     setStep(2);
   };
 
@@ -25,6 +33,8 @@ const Booking: React.FC = () => {
   const handleNextStep = () => {
     if (step === 2 && !selectedSlot) {
       setError('Please select a slot');
+    } else if (step === 3 && !selectedRoom) {
+      setError('Please select a room');
     } else {
       setStep(step + 1);
       setError(null);
@@ -39,10 +49,11 @@ const Booking: React.FC = () => {
     { time: '06:00 PM - 08:00 PM', available: true },
   ];
 
-  const rooms = [
-    { id: 'room1', name: 'Room 1', description: 'A cozy room with a 150 inch screen.' },
-    { id: 'room2', name: 'Room 2', description: 'A spacious room with comfortable seating.' },
-    { id: 'room3', name: 'Room 3', description: 'A luxurious room with premium sound.' },
+  const rooms: Room[] = [
+    
+    { id: 'room1', name: 'Room 1', description: 'A cozy room with a 150 inch screen.', imageUrl: '/Images/Room1.jpg' },
+    { id: 'room2', name: 'Room 2', description: 'A spacious room with comfortable seating.',imageUrl: '/Images/Room2.jpg'  },
+    { id: 'room3', name: 'Room 3', description: 'A luxurious room with premium sound.', imageUrl: '/Images/Room3.jpg' },
   ];
 
   const celebrations = [
@@ -61,7 +72,7 @@ const Booking: React.FC = () => {
   ];
 
   const renderCalendar = () => (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex justify-center items-center fixed top-4 left-0 right-0 z-50">
       <DatePicker
         selected={startDate}
         onChange={handleDateChange}
@@ -71,6 +82,11 @@ const Booking: React.FC = () => {
       />
     </div>
   );
+
+  const handleRoomSelection = (roomId: string) => {
+    setSelectedRoom(roomId);
+    setError(null);
+  };
 
   const renderSlots = () => (
     <div className="flex flex-col justify-center items-center">
@@ -107,18 +123,25 @@ const Booking: React.FC = () => {
   const renderRooms = () => (
     <div className="flex flex-col justify-center items-center">
       <h2 className="text-xl font-bold mb-4 text-red-500">Choose a Room</h2>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
         {rooms.map((room) => (
           <div
             key={room.id}
-            onClick={() => setSelectedRoom(room.id)}
-            className={`p-4 border rounded ${selectedRoom === room.id ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'}`}
+            onClick={() => handleRoomSelection(room.id)} // Call handleRoomSelection onClick
+            className={`p-4 border rounded cursor-pointer ${selectedRoom === room.id ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'}`}
+            style={{ maxWidth: '300px' }} // Adjust max-width as needed
           >
-            <h3 className="font-bold">{room.name}</h3>
-            <p>{room.description}</p>
+            <div className="flex items-center justify-center mb-2">
+              {room.imageUrl && (
+                <Image src={room.imageUrl} alt={room.name} width={150} height={100} className="rounded-md" />
+              )}
+            </div>
+            <h3 className="font-bold text-center">{room.name}</h3>
+            <p className="text-center">{room.description}</p>
           </div>
         ))}
       </div>
+      {error && <p className="text-red-500 mt-2">{error}</p>}
       <div className="mt-4">
         <button
           className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
@@ -128,13 +151,15 @@ const Booking: React.FC = () => {
         </button>
         <button
           className="p-2 border rounded bg-white text-black hover:bg-gray-200"
-          onClick={() => setStep(4)}
+          onClick={handleNextStep}
+          disabled={!selectedRoom} // Disable button if no room is selected
         >
           Next
         </button>
       </div>
     </div>
   );
+  
 
   const renderCelebrations = () => (
     <div className="flex flex-col justify-center items-center">
@@ -189,7 +214,9 @@ const Booking: React.FC = () => {
               className="mr-2"
             />
             <label htmlFor={decoration.value} className="flex items-center">
-              <Image src={decoration.image} alt={decoration.label} className="w-12 h-12 object-cover mr-2" />
+              {decoration.image && (
+                <Image src={decoration.image} alt={decoration.label} className="w-12 h-12 object-cover mr-2" />
+              )}
               <span>{decoration.label} - ₹{decoration.rate}</span>
             </label>
           </div>
@@ -204,23 +231,61 @@ const Booking: React.FC = () => {
         </button>
         <button
           className="p-2 border rounded bg-white text-black hover:bg-gray-200"
-          onClick={() => alert('Booking Complete')}
+          onClick={() => setStep(6)}
         >
-          Finish
+          Next
         </button>
       </div>
     </div>
   );
 
-  return (
-    <div className="relative h-screen flex flex-col justify-center items-center bg-gray-800 text-white">
-      <div className="p-4 max-w-md w-full bg-black shadow-lg rounded-lg">
-        {step === 1 && renderCalendar()}
-        {step === 2 && renderSlots()}
-        {step === 3 && renderRooms()}
-        {step === 4 && renderCelebrations()}
-        {step === 5 && renderDecorations()}
+  const renderSummary = () => (
+    <div className="flex flex-col justify-center items-center">
+      <h2 className="text-xl font-bold mb-4 text-red-500">Booking Summary</h2>
+      <p>Date: {startDate?.toLocaleDateString()}</p>
+      <p>Time Slot: {selectedSlot}</p>
+      <p>Room: {rooms.find(room => room.id === selectedRoom)?.name}</p>
+      <p>Celebration Type: {selectedCelebration}</p>
+      <p>Decorations: {selectedDecorations.join(', ')}</p>
+      <div className="mt-4">
+        <button
+          className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
+          onClick={() => setStep(5)}
+        >
+          Back
+        </button>
+        <button
+          className="p-2 border rounded bg-white text-black hover:bg-gray-200"
+          onClick={() => alert('Booking confirmed!')}
+        >
+          Confirm Booking
+        </button>
       </div>
+    </div>
+  );
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return renderCalendar();
+      case 2:
+        return renderSlots();
+      case 3:
+        return renderRooms();
+      case 4:
+        return renderCelebrations();
+      case 5:
+        return renderDecorations();
+      case 6:
+        return renderSummary();
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col justify-center items-center">
+      {renderStep()}
     </div>
   );
 };
