@@ -1,5 +1,73 @@
-/* booking.css */
+body {
+  min-height: 100vh;
+  background-image: url('/Images/bgpic.png'); /* Update with the correct image path */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
 
+
+/* Define CSS variables for color themes */
+:root {
+  --primary-color: #f56565; /* Red color */
+  --secondary-color: #ffffff; /* White color */
+  --background-color: #f0f0f0; /* Light gray background */
+  --text-color: #000000; /* Black text */
+  --highlight-color: #e53e3e; /* Darker red for highlights */
+}
+
+/* Apply color theme to calendar */
+.calendar {
+  background-color: var(--secondary-color); /* White background */
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.calendar-container {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center;     /* Center vertically */
+  min-height: 100vh;       /* Full viewport height */
+}
+
+.calendar-header {
+  background-color: var(--primary-color); /* Red background */
+  color: var(--secondary-color); /* White text */
+  padding: 1rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.calendar-body {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background-color: #e5e7eb;
+}
+.calendar-day, .calendar-date {
+  background-color: var(--secondary-color); /* White background */
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-color); /* Black text */
+  font-weight: bold;
+}
+.calendar-date {
+  cursor: pointer;
+}
+.calendar-date:hover {
+  background-color: var(--primary-color); /* Red background */
+  color: var(--secondary-color); /* White text */
+}
+.calendar-date.selected {
+  background-color: var(--highlight-color); /* Darker red */
+  color: var(--secondary-color); /* White text */
+}
+
+/* Additional styles */
 .flex {
   display: flex;
 }
@@ -25,22 +93,22 @@
   z-index: 50;
 }
 .bg-black {
-  background-color: #000;
+  background-color: var(--primary-color);
 }
 .text-white {
-  color: #fff;
+  color: var(--secondary-color);
 }
 .text-red-500 {
-  color: #f56565;
+  color: var(--primary-color);
 }
 .bg-red-500 {
-  background-color: #f56565;
+  background-color: var(--primary-color);
 }
 .bg-red-600 {
-  background-color: #e53e3e;
+  background-color: var(--highlight-color);
 }
 .hover\:bg-red-600:hover {
-  background-color: #e53e3e;
+  background-color: var(--highlight-color);
 }
 .border {
   border: 1px solid;
@@ -91,10 +159,10 @@
   cursor: pointer;
 }
 .bg-white {
-  background-color: #fff;
+  background-color: var(--secondary-color);
 }
 .text-black {
-  color: #000;
+  color: var(--text-color);
 }
 .hover\:bg-gray-200:hover {
   background-color: #edf2f7;

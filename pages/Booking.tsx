@@ -72,15 +72,21 @@ const Booking: React.FC = () => {
   ];
 
   const renderCalendar = () => (
-    <div className="flex justify-center items-center fixed top-4 left-0 right-0 z-50">
-      <DayPicker
-        mode="single"
-        selected={selectedDate}
-        onSelect={handleDateChange}
-        className="bg-black text-white"
-      />
+    <div className="calendar-container">
+      <div className="calendar">
+        <div className="calendar-header">
+          Select a Date
+        </div>
+        <DayPicker
+          mode="single"
+          selected={selectedDate}
+          onSelect={handleDateChange}
+          className="calendar-body"
+        />
+      </div>
     </div>
   );
+  
 
   const handleRoomSelection = (roomId: string) => {
     setSelectedRoom(roomId);
