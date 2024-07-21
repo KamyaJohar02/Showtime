@@ -1,7 +1,16 @@
-/* booking.css */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0; /* Optional, for a nicer background */
+}
 
 .flex {
   display: flex;
+  margin: 0 auto;
 }
 .items-center {
   align-items: center;
@@ -25,7 +34,7 @@
   z-index: 50;
 }
 .bg-black {
-  background-color: #000;
+  background-color: black;
 }
 .text-white {
   color: #fff;
@@ -110,4 +119,145 @@
 }
 .max-w-xs {
   max-width: 20rem;
+}
+.booking-summary-container {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  background-color: black;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  color: white;
+  max-width: 500px;
+  
+}
+
+.booking-summary-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #f56565;
+}
+
+.booking-summary-container p {
+  margin: 0.5rem 0;
+}
+
+.booking-summary-buttons {
+  margin-top: 1rem;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  border: 1px solid white;
+  border-radius: 0.25rem;
+  background-color: #f56565;
+  color: black;
+  margin-right: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #edf2f7;
+}
+
+.button:last-child {
+  margin-right: 0;
+}
+
+
+/* Decorations Container */
+.decorations-container {
+  width: 100%;
+  max-width: 20rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+
+
+@media (min-width: 640px) {
+  .decorations-container {
+    max-width: 28rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .decorations-container {
+    max-width: 36rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .decorations-container {
+    max-width: 48rem;
+  }
+}
+
+/* Decoration Item */
+.decoration-item {
+  background-color: #fff;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.decoration-item label {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.decoration-item input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.decoration-item span {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.decoration-item img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  margin-right: 0.5rem;
+}
+
+/* Button Styles */
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.border {
+  border: 1px solid #e5e7eb;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.bg-white {
+  background-color: #fff;
+}
+
+.text-black {
+  color: #000;
+}
+
+.hover\:bg-gray-200:hover {
+  background-color: #edf2f7;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
 }

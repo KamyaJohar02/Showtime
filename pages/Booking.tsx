@@ -3,6 +3,7 @@ import Image from 'next/image'; // Assuming you're using Next.js for Image compo
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import './Booking.css';
+import Header from '@/components/Header';
 
 interface Room {
   id: string;
@@ -207,11 +208,11 @@ const Booking: React.FC = () => {
   );
 
   const renderDecorations = () => (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center ">
       <h2 className="text-xl font-bold mb-4 text-red-500">Choose Decorations</h2>
-      <div className="flex flex-col gap-4">
+      <div className="decorations-container">
         {decorations.map((decoration) => (
-          <div key={decoration.value} className="flex items-center">
+          <div key={decoration.value} className="decoration-item flex items-center">
             <input
               type="checkbox"
               id={decoration.value}
@@ -232,8 +233,8 @@ const Booking: React.FC = () => {
                 <Image 
                   src={decoration.image} 
                   alt={decoration.label} 
-                  width={100} 
-                  height={100} 
+                  width={48} 
+                  height={48} 
                   className="w-12 h-12 object-cover mr-2" 
                 />
               )}
@@ -260,26 +261,28 @@ const Booking: React.FC = () => {
       </div>
     </div>
   );
+  
+
 
   const renderSummary = () => (
-    <div className="flex flex-col justify-center items-center">
-      <h2 className="text-xl font-bold mb-4 text-red-500">Booking Summary</h2>
+    <div className="booking-summary-container">
+      <h2 className="booking-summary-title">Booking Summary</h2>
       <p>Date: {selectedDate?.toLocaleDateString()}</p>
       <p>Time Slot: {selectedSlot}</p>
       <p>Room: {rooms.find(room => room.id === selectedRoom)?.name}</p>
       <p>Celebration Type: {selectedCelebration}</p>
       <p>Decorations: {selectedDecorations.join(', ')}</p>
-      <div className="mt-4">
+      <div className="booking-summary-buttons">
         <button
           type="button"
-          className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
+          className="button"
           onClick={() => setStep(5)}
         >
           Back
         </button>
         <button
           type="button"
-          className="p-2 border rounded bg-white text-black hover:bg-gray-200"
+          className="button"
           onClick={() => alert('Booking confirmed!')}
         >
           Confirm Booking
@@ -287,7 +290,6 @@ const Booking: React.FC = () => {
       </div>
     </div>
   );
-
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -308,10 +310,15 @@ const Booking: React.FC = () => {
   };
 
   return (
+    <>
+    
+    
     <div className="min-h-screen flex flex-col justify-center items-center">
       {renderStep()}
     </div>
+    </>
   );
+ 
 };
 
 export default Booking;

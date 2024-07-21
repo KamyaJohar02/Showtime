@@ -1,35 +1,34 @@
-"use client"
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import "./globals.css";
-import { trending_data } from "../../Data/trending";
-import Link  from "next/link";
-// import { useRouter } from "next/router";
+// src/app/page.tsx
+
+"use client"; // Ensure this component is a client component
+
+import { useRouter } from 'next/navigation'; // Import useRouter from next/router
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { trending_data } from '../../Data/trending'; // Adjust path as necessary
 
 export default function Home() {
-  // const router = useRouter();
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = [5, 14, 3, 4, 13].length;
- 
+  const router = useRouter(); // Use router from Next.js
+  const [currentSlide, setCurrentSlide] = useState(0); // Manage carousel slide state
+  const totalSlides = [5, 14, 3, 4, 13].length; // Total number of slides
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % totalSlides);
     }, 3000); // Change slide every 3 seconds
 
-    
-
-    return () => clearInterval(interval); // Clear interval on component unmount
+    return () => clearInterval(interval); // Clean up interval on unmount
   }, [totalSlides]);
-  
+
+  const handleBookNowClick = () => {
+    router.push("/Booking"); // Navigate to booking page
+  };
 
   return (
-    
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       {/* Trending Section */}
       <section className="mx-auto max-w-7xl mt-0 p-6 bg-white rounded-t-lg">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols- gap-4 py-5">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 py-5">
           {trending_data.map((item) => (
             <div key={item.id} className="space-y-1 cursor-pointer text-center">
               <div className="w-24 h-24 rounded-full overflow-hidden mx-auto">
@@ -55,7 +54,7 @@ export default function Home() {
           Book your personal movie theatre for celebrating your life events and much more...
         </h3>
       </section>
-   
+
       {/* Carousel Section */}
       <section className="w-full relative">
         <div className="h-96 sm:h-screen w-full overflow-hidden relative bg-transparent">
@@ -81,16 +80,17 @@ export default function Home() {
 
       {/* Book Now Button */}
       <section className="flex mt-4 justify-end w-full px-6">
-      <Link href="/Booking">
-          <Button className="bg-red-600 text-white py-2 px-4 rounded-full">
-            Book Now
-          </Button>
-        </Link>
+        <button
+          onClick={handleBookNowClick}
+          className="bg-red-600 text-white py-2 px-4 rounded-full"
+        >
+          Book Now
+        </button>
       </section>
 
       {/* WhatsApp Floating Icon */}
       <a
-        href="https://wa.me/9911825047" // Replace with your WhatsApp number
+        href="https://wa.me/919911825047" // Replace with your WhatsApp number
         className="fixed bottom-4 right-4 p-4 rounded-full shadow-lg"
         target="_blank"
         rel="noopener noreferrer"
