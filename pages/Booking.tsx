@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image'; // Assuming you're using Next.js for Image component
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
+import './Booking.css';
 
 interface Room {
   id: string;
@@ -11,7 +12,7 @@ interface Room {
 }
 
 const Booking: React.FC = () => {
-  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [step, setStep] = useState<number>(1);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
@@ -19,8 +20,8 @@ const Booking: React.FC = () => {
   const [selectedDecorations, setSelectedDecorations] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDateChange = (date: Date | null) => {
-    setStartDate(date);
+  const handleDateChange = (date: Date | undefined) => {
+    setSelectedDate(date);
     setSelectedRoom(null); // Reset selected room when date changes
     setStep(2);
   };
@@ -50,9 +51,8 @@ const Booking: React.FC = () => {
   ];
 
   const rooms: Room[] = [
-    
     { id: 'room1', name: 'Room 1', description: 'A cozy room with a 150 inch screen.', imageUrl: '/Images/Room1.jpg' },
-    { id: 'room2', name: 'Room 2', description: 'A spacious room with comfortable seating.',imageUrl: '/Images/Room2.jpg'  },
+    { id: 'room2', name: 'Room 2', description: 'A spacious room with comfortable seating.', imageUrl: '/Images/Room2.jpg' },
     { id: 'room3', name: 'Room 3', description: 'A luxurious room with premium sound.', imageUrl: '/Images/Room3.jpg' },
   ];
 
@@ -65,20 +65,19 @@ const Booking: React.FC = () => {
   ];
 
   const decorations = [
-    { value: 'balloons', label: 'Balloons', rate: 100, image: 'path/to/balloons.jpg' },
-    { value: 'flowers', label: 'Flowers', rate: 150, image: 'path/to/flowers.jpg' },
-    { value: 'candles', label: 'Candles', rate: 200, image: 'path/to/candles.jpg' },
-    { value: 'fog', label: 'Fog', rate: 250, image: 'path/to/fog.jpg' },
+    { value: 'balloons', label: 'Balloons', rate: 100, image: '/Images/balloons.jpg' },
+    { value: 'flowers', label: 'Flowers', rate: 150, image: '/Images/flowers.jpeg' },
+    { value: 'candles', label: 'Candles', rate: 200, image: '/Images/candles.jpg' },
+    { value: 'fog', label: 'Fog', rate: 250, image: '/Images/smoke.jpg' },
   ];
 
   const renderCalendar = () => (
     <div className="flex justify-center items-center fixed top-4 left-0 right-0 z-50">
-      <DatePicker
-        selected={startDate}
-        onChange={handleDateChange}
-        className="p-2 border border-gray-300 rounded bg-black text-white"
-        calendarClassName="bg-black text-white"
-        dayClassName={() => 'bg-black text-white'}
+      <DayPicker
+        mode="single"
+        selected={selectedDate}
+        onSelect={handleDateChange}
+        className="bg-black text-white"
       />
     </div>
   );
@@ -89,12 +88,13 @@ const Booking: React.FC = () => {
   };
 
   const renderSlots = () => (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center px-4 md:px-8">
       <h2 className="text-xl font-bold mb-4 text-red-500">Choose a Time Slot</h2>
-      <div className="grid grid-cols-1 gap-2">
-        {slots.map((slot, index) => (
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {slots.map((slot) => (
           <button
-            key={index}
+            key={slot.time}
+            type="button"
             onClick={() => handleSlotSelection(slot.time)}
             className={`p-2 border rounded ${selectedSlot === slot.time ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'}`}
           >
@@ -103,14 +103,16 @@ const Booking: React.FC = () => {
         ))}
       </div>
       {error && <p className="text-red-500 mt-2">{error}</p>}
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap justify-center gap-2">
         <button
-          className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
+          type="button"
+          className="p-2 border rounded-full bg-black text-white hover:bg-red-200 mr-12"
           onClick={() => setStep(1)}
         >
           Back
         </button>
         <button
+          type="button"
           className="p-2 border rounded bg-white text-black hover:bg-gray-200"
           onClick={handleNextStep}
         >
@@ -121,16 +123,24 @@ const Booking: React.FC = () => {
   );
 
   const renderRooms = () => (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center px-4 md:px-8">
       <h2 className="text-xl font-bold mb-4 text-red-500">Choose a Room</h2>
       <div className="flex flex-wrap justify-center gap-4">
         {rooms.map((room) => (
           <div
-            key={room.id}
-            onClick={() => handleRoomSelection(room.id)} // Call handleRoomSelection onClick
-            className={`p-4 border rounded cursor-pointer ${selectedRoom === room.id ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'}`}
-            style={{ maxWidth: '300px' }} // Adjust max-width as needed
-          >
+          key={room.id}
+          onClick={() => handleRoomSelection(room.id)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              handleRoomSelection(room.id);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          className={`p-4 border rounded cursor-pointer ${selectedRoom === room.id ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'}`}
+          style={{ maxWidth: '300px' }}
+        >
+        
             <div className="flex items-center justify-center mb-2">
               {room.imageUrl && (
                 <Image src={room.imageUrl} alt={room.name} width={150} height={100} className="rounded-md" />
@@ -142,24 +152,25 @@ const Booking: React.FC = () => {
         ))}
       </div>
       {error && <p className="text-red-500 mt-2">{error}</p>}
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap justify-center gap-2">
         <button
+          type="button"
           className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
           onClick={() => setStep(2)}
         >
           Back
         </button>
         <button
+          type="button"
           className="p-2 border rounded bg-white text-black hover:bg-gray-200"
           onClick={handleNextStep}
-          disabled={!selectedRoom} // Disable button if no room is selected
+          disabled={!selectedRoom}
         >
           Next
         </button>
       </div>
     </div>
   );
-  
 
   const renderCelebrations = () => (
     <div className="flex flex-col justify-center items-center">
@@ -168,6 +179,7 @@ const Booking: React.FC = () => {
         {celebrations.map((celebration) => (
           <button
             key={celebration.value}
+            type="button"
             onClick={() => setSelectedCelebration(celebration.value)}
             className={`p-2 border rounded ${selectedCelebration === celebration.value ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'}`}
           >
@@ -177,12 +189,14 @@ const Booking: React.FC = () => {
       </div>
       <div className="mt-4">
         <button
+          type="button"
           className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
           onClick={() => setStep(3)}
         >
           Back
         </button>
         <button
+          type="button"
           className="p-2 border rounded bg-white text-black hover:bg-gray-200"
           onClick={() => setStep(5)}
         >
@@ -215,7 +229,13 @@ const Booking: React.FC = () => {
             />
             <label htmlFor={decoration.value} className="flex items-center">
               {decoration.image && (
-                <Image src={decoration.image} alt={decoration.label} className="w-12 h-12 object-cover mr-2" />
+                <Image 
+                  src={decoration.image} 
+                  alt={decoration.label} 
+                  width={100} 
+                  height={100} 
+                  className="w-12 h-12 object-cover mr-2" 
+                />
               )}
               <span>{decoration.label} - ₹{decoration.rate}</span>
             </label>
@@ -224,12 +244,14 @@ const Booking: React.FC = () => {
       </div>
       <div className="mt-4">
         <button
+          type="button"
           className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
           onClick={() => setStep(4)}
         >
           Back
         </button>
         <button
+          type="button"
           className="p-2 border rounded bg-white text-black hover:bg-gray-200"
           onClick={() => setStep(6)}
         >
@@ -242,19 +264,21 @@ const Booking: React.FC = () => {
   const renderSummary = () => (
     <div className="flex flex-col justify-center items-center">
       <h2 className="text-xl font-bold mb-4 text-red-500">Booking Summary</h2>
-      <p>Date: {startDate?.toLocaleDateString()}</p>
+      <p>Date: {selectedDate?.toLocaleDateString()}</p>
       <p>Time Slot: {selectedSlot}</p>
       <p>Room: {rooms.find(room => room.id === selectedRoom)?.name}</p>
       <p>Celebration Type: {selectedCelebration}</p>
       <p>Decorations: {selectedDecorations.join(', ')}</p>
       <div className="mt-4">
         <button
+          type="button"
           className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
           onClick={() => setStep(5)}
         >
           Back
         </button>
         <button
+          type="button"
           className="p-2 border rounded bg-white text-black hover:bg-gray-200"
           onClick={() => alert('Booking confirmed!')}
         >

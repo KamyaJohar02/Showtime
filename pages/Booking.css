@@ -1,0 +1,113 @@
+/* booking.css */
+
+.flex {
+  display: flex;
+}
+.items-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}
+.fixed {
+  position: fixed;
+}
+.top-4 {
+  top: 1rem;
+}
+.left-0 {
+  left: 0;
+}
+.right-0 {
+  right: 0;
+}
+.z-50 {
+  z-index: 50;
+}
+.bg-black {
+  background-color: #000;
+}
+.text-white {
+  color: #fff;
+}
+.text-red-500 {
+  color: #f56565;
+}
+.bg-red-500 {
+  background-color: #f56565;
+}
+.bg-red-600 {
+  background-color: #e53e3e;
+}
+.hover\:bg-red-600:hover {
+  background-color: #e53e3e;
+}
+.border {
+  border: 1px solid;
+}
+.rounded {
+  border-radius: 0.25rem;
+}
+.rounded-full {
+  border-radius: 9999px;
+}
+.p-2 {
+  padding: 0.5rem;
+}
+.p-4 {
+  padding: 1rem;
+}
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.mt-4 {
+  margin-top: 1rem;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
+.grid {
+  display: grid;
+}
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+.sm\:grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.md\:grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.lg\:grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.gap-2 {
+  gap: 0.5rem;
+}
+.gap-4 {
+  gap: 1rem;
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+.bg-white {
+  background-color: #fff;
+}
+.text-black {
+  color: #000;
+}
+.hover\:bg-gray-200:hover {
+  background-color: #edf2f7;
+}
+.w-12 {
+  width: 3rem;
+}
+.h-12 {
+  height: 3rem;
+}
+.object-cover {
+  object-fit: cover;
+}
+.max-w-xs {
+  max-width: 20rem;
+}
