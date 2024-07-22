@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Image from 'next/image'; // Assuming you're using Next.js for Image component
+import Image from 'next/image';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import './Booking.css';
@@ -9,7 +9,7 @@ interface Room {
   id: string;
   name: string;
   description: string;
-  imageUrl?: string; // Make imageUrl optional if it can be undefined
+  imageUrl?: string;
 }
 
 const Booking: React.FC = () => {
@@ -88,135 +88,82 @@ const Booking: React.FC = () => {
     </div>
   );
 
-
   const handleRoomSelection = (roomId: string) => {
     setSelectedRoom(roomId);
     setError(null);
   };
 
   const renderSlots = () => (
-    <div className="flex flex-col justify-center items-center px-4 md:px-8">
-      <h2 className="text-xl font-bold mb-4 text-red-500">Choose a Time Slot</h2>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <div className="section-container">
+      <h2 className="section-header">Choose a Time Slot</h2>
+      <div className="grid-container">
         {slots.map((slot) => (
           <button
             key={slot.time}
             type="button"
             onClick={() => handleSlotSelection(slot.time)}
-            className={`p-2 border rounded ${selectedSlot === slot.time ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'}`}
+            className={`slot-button ${selectedSlot === slot.time ? 'selected' : ''}`}
           >
             {slot.time}
           </button>
         ))}
       </div>
-      {error && <p className="text-red-500 mt-2">{error}</p>}
-      <div className="mt-4 flex flex-wrap justify-center gap-2">
-        <button
-          type="button"
-          className="p-2 border rounded-full bg-black text-white hover:bg-red-200 mr-12"
-          onClick={() => setStep(1)}
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          className="p-2 border rounded bg-white text-black hover:bg-gray-200"
-          onClick={handleNextStep}
-        >
-          Next
-        </button>
+      <div className="button-container">
+        <button type="button" className="slot-button" onClick={() => setStep(1)}>Back</button>
+        <button type="button" className="slot-button" onClick={handleNextStep}>Next</button>
       </div>
     </div>
   );
-
   const renderRooms = () => (
-    <div className="flex flex-col justify-center items-center px-4 md:px-8">
-      <h2 className="text-xl font-bold mb-4 text-red-500">Choose a Room</h2>
-      <div className="flex flex-wrap justify-center gap-4">
+    <div className="section-container">
+      <h2 className="section-header">Choose a Room</h2>
+      <div className="grid-container">
         {rooms.map((room) => (
           <div
-          key={room.id}
-          onClick={() => handleRoomSelection(room.id)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              handleRoomSelection(room.id);
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          className={`p-4 border rounded cursor-pointer ${selectedRoom === room.id ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'}`}
-          style={{ maxWidth: '300px' }}
-        >
-        
-            <div className="flex items-center justify-center mb-2">
-              {room.imageUrl && (
-                <Image src={room.imageUrl} alt={room.name} width={150} height={100} className="rounded-md" />
-              )}
-            </div>
-            <h3 className="font-bold text-center">{room.name}</h3>
-            <p className="text-center">{room.description}</p>
+            key={room.id}
+            onClick={() => handleRoomSelection(room.id)}
+            className={`room-button ${selectedRoom === room.id ? 'selected' : ''}`}
+          >
+            {room.imageUrl && (
+              <Image src={room.imageUrl} alt={room.name} width={150} height={100} className="rounded-md" />
+            )}
+            <h3 className="font-bold">{room.name}</h3>
+            <p>{room.description}</p>
           </div>
         ))}
       </div>
-      {error && <p className="text-red-500 mt-2">{error}</p>}
-      <div className="mt-4 flex flex-wrap justify-center gap-2">
-        <button
-          type="button"
-          className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
-          onClick={() => setStep(2)}
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          className="p-2 border rounded bg-white text-black hover:bg-gray-200"
-          onClick={handleNextStep}
-          disabled={!selectedRoom}
-        >
-          Next
-        </button>
+      <div className="button-container">
+        <button type="button" className="slot-button" onClick={() => setStep(2)}>Back</button>
+        <button type="button" className="slot-button" onClick={handleNextStep} disabled={!selectedRoom}>Next</button>
       </div>
     </div>
   );
 
   const renderCelebrations = () => (
-    <div className="flex flex-col justify-center items-center">
-      <h2 className="text-xl font-bold mb-4 text-red-500">Choose a Celebration Type</h2>
-      <div className="flex flex-col gap-4">
+    <div className="section-container">
+      <h2 className="section-header">Choose a Celebration Type</h2>
+      <div className="grid-container">
         {celebrations.map((celebration) => (
           <button
             key={celebration.value}
             type="button"
             onClick={() => setSelectedCelebration(celebration.value)}
-            className={`p-2 border rounded ${selectedCelebration === celebration.value ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'}`}
+            className={`celebration-button ${selectedCelebration === celebration.value ? 'selected' : ''}`}
           >
             {celebration.label}
           </button>
         ))}
       </div>
-      <div className="mt-4">
-        <button
-          type="button"
-          className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
-          onClick={() => setStep(3)}
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          className="p-2 border rounded bg-white text-black hover:bg-gray-200"
-          onClick={() => setStep(5)}
-        >
-          Next
-        </button>
+      <div className="button-container">
+        <button type="button" className="slot-button" onClick={() => setStep(3)}>Back</button>
+        <button type="button" className="slot-button" onClick={() => setStep(5)}>Next</button>
       </div>
     </div>
   );
-
   const renderDecorations = () => (
-    <div className="flex flex-col justify-center items-center ">
-      <h2 className="text-xl font-bold mb-4 text-red-500">Choose Decorations</h2>
-      <div className="decorations-container">
+    <div className="section-container">
+      <h2 className="section-header">Choose Decorations</h2>
+      <div className="grid-container">
         {decorations.map((decoration) => (
           <div key={decoration.value} className="decoration-item flex items-center">
             <input
@@ -249,27 +196,12 @@ const Booking: React.FC = () => {
           </div>
         ))}
       </div>
-      <div className="mt-4">
-        <button
-          type="button"
-          className="p-2 border rounded bg-white text-black hover:bg-gray-200 mr-2"
-          onClick={() => setStep(4)}
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          className="p-2 border rounded bg-white text-black hover:bg-gray-200"
-          onClick={() => setStep(6)}
-        >
-          Next
-        </button>
+      <div className="button-container">
+        <button type="button" className="slot-button" onClick={() => setStep(4)}>Back</button>
+        <button type="button" className="slot-button" onClick={() => setStep(6)}>Next</button>
       </div>
     </div>
-  );
-  
-
-
+  ); 
   const renderSummary = () => (
     <div className="booking-summary-container">
       <h2 className="booking-summary-title">Booking Summary</h2>
@@ -296,6 +228,7 @@ const Booking: React.FC = () => {
       </div>
     </div>
   );
+
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -317,14 +250,11 @@ const Booking: React.FC = () => {
 
   return (
     <>
-    
-    
-    <div className="min-h-screen flex flex-col justify-center items-center">
-      {renderStep()}
-    </div>
+      <div className="min-h-screen flex flex-col justify-center items-center">
+        {renderStep()}
+      </div>
     </>
   );
- 
 };
 
 export default Booking;

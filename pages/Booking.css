@@ -340,3 +340,65 @@ body {
 .mr-2 {
   margin-right: 0.5rem;
 }
+
+
+.section-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 800px; /* Adjust as needed */
+  margin: 0 auto;
+}
+
+.section-header {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.slot-button, .room-button, .celebration-button, .decoration-item {
+  padding: 0.5rem;
+  border: 1px solid var(--text-color);
+  border-radius: 0.25rem;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s;
+}
+
+.slot-button:hover, .room-button:hover, .celebration-button:hover, .decoration-item:hover {
+  background-color: var(--highlight-color);
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Add styles for selected state */
+.slot-button.selected, .room-button.selected, .celebration-button.selected, .decoration-item.selected {
+  background-color: var(--highlight-color); /* Darker red for selected */
+  color: var(--secondary-color); /* White text */
+}
+
+/* Ensure hover styles do not override selected styles */
+.slot-button:hover,
+.room-button:hover,
+.celebration-button:hover,
+.decoration-item:hover {
+  background-color: var(--highlight-color); /* Darker red for hover */
+  color: var(--secondary-color); /* White text */
+}
