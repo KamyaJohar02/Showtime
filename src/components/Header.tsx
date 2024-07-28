@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { Fragment, useState } from "react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -17,9 +17,9 @@ import Image from "next/image";
 
 const products = [
   {
-    name: "Book a Stay",
+    name: "Book theatre",
     description: "Get a better understanding of your traffic",
-    href: "#",
+    href: "/Booking",
     icon: HomeIcon,
   },
   {
@@ -42,7 +42,12 @@ const products = [
 // ];
 
 function Header() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleLoginClick = () => {
+    router.push("/Login"); // Navigate to the login page
+  };
 
   return (
     <header className="bg-[#000000]">
@@ -155,9 +160,9 @@ function Header() {
         </Popover.Group>
 
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <a href="#" className="text-sm font-semibold leading-6 text-white">
+          <button onClick={handleLoginClick} className="text-sm font-semibold leading-6 text-white">
             Log in <span aria-hidden="true">&rarr;</span>
-          </a>
+          </button>
         </div>
       </nav>
 
@@ -244,12 +249,12 @@ function Header() {
               </div>
 
               <div className="py-6">
-                <a
-                  href="#"
+                <button
+                  onClick={handleLoginClick}
                   className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-white hover:bg-blue-800"
                 >
                   Log In
-                </a>
+                </button>
               </div>
             </div>
           </div>
