@@ -2,7 +2,7 @@
 
 "use client"; // Ensure this component is a client component
 
-import { useRouter } from 'next/navigation'; // Import useRouter from next/router
+import { useRouter } from 'next/navigation'; 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { trending_data } from '../../Data/trending'; // Adjust path as necessary

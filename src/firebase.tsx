@@ -1,31 +1,34 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';  // Import Firebase Authentication
-import { getAnalytics, isSupported } from 'firebase/analytics';  // Import getAnalytics and isSupported
+// firebase.js or firebase.tsx
+import { initializeApp, getApp, getApps } from "firebase/app";
+import { getAuth, RecaptchaVerifier } from "firebase/auth";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
-// Your Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyANwps7w-uFOnHV6svZgHS4zLAoqPEUCi0",
-  authDomain: "showtime-6b025.firebaseapp.com",
-  projectId: "showtime-6b025",
-  storageBucket: "showtime-6b025.appspot.com",
-  messagingSenderId: "144845027569",
-  appId: "1:144845027569:web:a3963f12712b2862ad1150",
-  measurementId: "G-5T2TREQ7BP"
+  apiKey: "AIzaSyAin_wjDqzva9cZyAW1W89zmijcA3i1yHg",
+  authDomain: "kamya-6aec4.firebaseapp.com",
+  projectId: "kamya-6aec4",
+  storageBucket: "kamya-6aec4.appspot.com",
+  messagingSenderId: "538175709501",
+  appId: "1:538175709501:web:d1ed6e768d8c1396162554"
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);  // Initialize and export auth
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
 
-// Initialize Analytics only on the client side
-let analytics: any;
-
-if (typeof window !== 'undefined') {  // Ensure this code runs only in the browser
+let analytics;
+if (typeof window !== 'undefined') {
   isSupported().then((supported) => {
     if (supported) {
       analytics = getAnalytics(app);
     }
+  }).catch((error) => {
+    console.error('Analytics is not supported:', error);
   });
 }
 
-export { auth, analytics };
+// Optional: Function to set up ReCaptchaVerifier
+
+
+// Export Firebase services
+export { auth};
