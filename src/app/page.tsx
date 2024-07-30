@@ -1,3 +1,7 @@
+
+
+
+
 // src/app/page.tsx
 
 "use client"; // Ensure this component is a client component
@@ -6,6 +10,9 @@ import { useRouter } from 'next/navigation'; // Import useRouter from next/route
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { trending_data } from '../../Data/trending'; // Adjust path as necessary
+import Slider from "react-slick"; // Import react-slick for carousel
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 export default function Home() {
   const router = useRouter(); // Use router from Next.js
@@ -24,28 +31,42 @@ export default function Home() {
     router.push("/Booking"); // Navigate to booking page
   };
 
+  // Slider settings for trending carousel
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 3, // Show 3 slides at a time
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    arrows: true, // Enable arrows
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       {/* Trending Section */}
       <section className="mx-auto max-w-7xl mt-0 p-6 bg-white rounded-t-lg">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 py-5">
+        <Slider {...settings}>
           {trending_data.map((item) => (
-            <div key={item.id} className="space-y-1 cursor-pointer text-center">
-              <div className="w-24 h-24 rounded-full overflow-hidden mx-auto">
+            <div key={item.id} className="trending-item">
+              <div className="trending-image-container">
                 <Image
                   src={item.src} // Ensure the src is from a configured domain
                   alt={item.title}
-                  width={96}
-                  height={96}
-                  className="object-cover"
+                  layout="fill"
+                  objectFit="cover"
+                  className="trending-image"
                 />
               </div>
-              <p className="font-bold">{item.title}</p>
-              <p>{item.location}</p>
-              <p className="font-light text-sm">{item.description}</p>
+              <div className="trending-info">
+                <h3>{item.title}</h3>
+                <p>{item.location}</p>
+                <span>{item.description}</span>
+              </div>
             </div>
           ))}
-        </div>
+        </Slider>
       </section>
 
       <section className="max-w-7xl mx-auto p-6">
