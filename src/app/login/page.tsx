@@ -1,6 +1,7 @@
+"use client"
 import OtpLogin from '@/components/OtpLogin'
 import React from 'react'
-import './Login.css'
+
 
 function Login() {
   return (

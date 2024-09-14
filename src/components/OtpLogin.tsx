@@ -9,7 +9,7 @@ import "react-phone-input-2/lib/style.css";
 import { FaKey } from "react-icons/fa";
 import { CgSpinnerTwo } from "react-icons/cg";
 import { BsFillTelephoneFill } from "react-icons/bs";
-import '../../pages/Login.css'; // Import your updated CSS file
+
 
 const OtpLogin: React.FC = () => {
   const [otp, setOtp] = useState<string>("");

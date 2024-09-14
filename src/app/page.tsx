@@ -5,8 +5,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Trending from '../../Data/trending'; // Ensure correct import path
-import TopPage from '../../Data/toppage'; // Ensure correct import path
+import Trending from '@/components/trending'; // Ensure correct import path
+import TopPage from '@/components/toppage'; // Ensure correct import path
 
 export default function Home() {
   const router = useRouter();
@@ -23,7 +23,7 @@ export default function Home() {
   }, [totalSlides]);
 
   const handleBookNowClick = () => {
-    router.push('/Booking');
+    router.push('/booking');
   };
 
   return (
@@ -60,7 +60,7 @@ export default function Home() {
                 src={`/Images/${index}.webp`} // Verify these paths and file extensions
                 alt={`Carousel Image ${index}`}
                 layout="fill"
-                objectFit="cover"
+                style={{ objectFit: 'cover' }}
                 className="w-full h-full"
               />
             </div>
