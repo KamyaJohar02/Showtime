@@ -19,7 +19,7 @@ const products = [
   {
     name: "Book theatre",
     description: "Get a better understanding of your traffic",
-    href: "/Booking",
+    href: "/booking",
     icon: HomeIcon,
   },
   {
