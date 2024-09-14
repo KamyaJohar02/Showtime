@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, UserCredential } from "firebase/auth";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 
 import toast, { Toaster } from 'react-hot-toast';
@@ -9,7 +9,6 @@ import "react-phone-input-2/lib/style.css";
 import { FaKey } from "react-icons/fa";
 import { CgSpinnerTwo } from "react-icons/cg";
 import { BsFillTelephoneFill } from "react-icons/bs";
-
 
 const OtpLogin: React.FC = () => {
   const [otp, setOtp] = useState<string>("");
@@ -72,67 +71,73 @@ const OtpLogin: React.FC = () => {
   };
 
   return (
-    <section className="bg-emerald-500 flex flex-col items-center justify-center h-screen">
+    <section className="bg-black flex flex-col items-center justify-center h-screen p-4">
       <Toaster toastOptions={{ duration: 4000 }} />
       <div id="recaptcha-container"></div>
       {user ? (
-        <h2 className="text-center text-white font-bold text-2xl">
-          Login Success
-        </h2>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-center text-red-600 font-bold text-2xl">
+            Login Successful!
+          </h2>
+        </div>
       ) : (
-        <div className="w-full max-w-md p-4 flex flex-col gap-4 rounded-lg bg-white">
-          <h1 className="text-center text-black font-bold text-3xl mb-6">
+        <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+          <h1 className="text-center text-red-600 font-bold text-3xl mb-8">
             Welcome to <br /> ShowTime
           </h1>
           {showOTP ? (
             <>
-              <div className="bg-white text-emerald-500 w-fit mx-auto p-4 rounded-full">
-                <FaKey size={30} />
+              <div className="flex justify-center mb-4">
+                <div className="bg-red-600 text-white p-4 rounded-full shadow-md">
+                  <FaKey size={30} />
+                </div>
               </div>
               <label
                 htmlFor="otp"
-                className="font-bold text-2xl text-white text-center"
+                className="block text-center text-red-600 font-bold text-xl mb-4"
               >
                 Enter your OTP
               </label>
-              <div className="otp-container">
+              <div className="flex justify-center mb-4">
                 <OtpInput
                   value={otp}
                   onChange={setOtp}
                   numInputs={6}
-                  renderSeparator={<span>-</span>}
-                  inputStyle="otp-input"
+                  renderSeparator={<span className="text-red-600">-</span>}
+                  inputStyle="w-12 h-12 border border-gray-300 rounded-md text-center text-xl"
                   renderInput={(props) => <input {...props} />}
                 />
               </div>
               <button
                 onClick={onOtpVerify}
-                className="bg-emerald-600 w-full flex gap-1 items-center justify-center py-2.5 text-white rounded cursor-pointer"
+                className="bg-red-600 w-full flex gap-2 items-center justify-center py-2.5 text-white rounded-lg hover:bg-red-800 transition-colors"
               >
                 {loading && (
-                  <CgSpinnerTwo size={20} className="mt-1 animate-spin" />
+                  <CgSpinnerTwo size={20} className="animate-spin" />
                 )}
                 <span>Verify OTP</span>
               </button>
             </>
           ) : (
             <>
-              <div className="bg-white text-emerald-500 w-fit mx-auto p-4 rounded-full">
-                <BsFillTelephoneFill size={30} />
+              <div className="flex justify-center mb-4">
+                <div className="bg-red-800 text-white p-4 rounded-full shadow-md">
+                  <BsFillTelephoneFill size={30} />
+                </div>
               </div>
               <label
                 htmlFor=""
-                className="font-bold text-xl text-white text-center"
+                className="block text-center text-red-600 font-bold text-xl mb-4"
               >
                 Verify your phone number
               </label>
               <PhoneInput country={"in"} value={ph} onChange={setPh} />
               <button
                 onClick={onSignUp}
-                className="bg-emerald-600 w-full flex gap-1 items-center justify-center py-2.5 text-white rounded cursor-pointer"
+                className="bg-red-600 w-full flex gap-2 items-center justify-center py-2.5 text-white rounded-lg hover:bg-red-900 transition-colors mt-4"
               >
                 {loading && (
-                  <CgSpinnerTwo size={20} className="mt-1 animate-spin" />
+                  <CgSpinnerTwo size={20} className="animate-spin" />
                 )}
                 <span>Send code via SMS</span>
               </button>

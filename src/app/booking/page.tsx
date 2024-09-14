@@ -10,6 +10,14 @@ interface Room {
   name: string;
   description: string;
   imageUrl?: string;
+  rate: number; // Add rate property
+}
+
+interface Decoration {
+  value: string;
+  label: string;
+  rate: number;
+  image: string;
 }
 
 const Booking: React.FC = () => {
@@ -52,9 +60,9 @@ const Booking: React.FC = () => {
   ];
 
   const rooms: Room[] = [
-    { id: 'room1', name: 'Room 1', description: 'A cozy room with a 150 inch screen.', imageUrl: '/Images/Room1.jpg' },
-    { id: 'room2', name: 'Room 2', description: 'A spacious room with comfortable seating.', imageUrl: '/Images/Room2.jpg' },
-    { id: 'room3', name: 'Room 3', description: 'A luxurious room with premium sound.', imageUrl: '/Images/Room3.jpg' },
+    { id: 'room1', name: 'Room 1', description: 'A cozy room with a 150 inch screen.', imageUrl: '/Images/Room1.jpg', rate: 1400 },
+    { id: 'room2', name: 'Room 2', description: 'A spacious room with comfortable seating.', imageUrl: '/Images/Room2.jpg', rate: 1600 },
+    { id: 'room3', name: 'Room 3', description: 'A luxurious room with premium sound.', imageUrl: '/Images/Room3.jpg', rate: 1900 },
   ];
 
   const celebrations = [
@@ -65,12 +73,24 @@ const Booking: React.FC = () => {
     { value: 'party', label: 'Party' },
   ];
 
-  const decorations = [
+  const decorations: Decoration[] = [
     { value: 'balloons', label: 'Balloons', rate: 100, image: '/Images/balloons.jpg' },
     { value: 'flowers', label: 'Flowers', rate: 150, image: '/Images/flowers.jpeg' },
     { value: 'candles', label: 'Candles', rate: 200, image: '/Images/candles.jpg' },
     { value: 'fog', label: 'Fog', rate: 250, image: '/Images/smoke.jpg' },
   ];
+
+  const getRoomCost = () => {
+    const selectedRoomObj = rooms.find(room => room.id === selectedRoom);
+    return selectedRoomObj ? selectedRoomObj.rate : 0;
+  };
+
+  const getDecorationCost = () => {
+    return selectedDecorations.reduce((total, decorationValue) => {
+      const decoration = decorations.find(d => d.value === decorationValue);
+      return total + (decoration ? decoration.rate : 0);
+    }, 0);
+  };
 
   const renderCalendar = () => (
     <div className="flex justify-center items-center min-h-screen">
@@ -131,6 +151,7 @@ const Booking: React.FC = () => {
             )}
             <h3 className="font-bold mb-1">{room.name}</h3>
             <p>{room.description}</p>
+            <p>₹{room.rate}</p>
           </div>
         ))}
       </div>
@@ -158,7 +179,7 @@ const Booking: React.FC = () => {
       </div>
       <div className="flex gap-4">
         <button type="button" className="p-2 border rounded bg-gray-200" onClick={() => setStep(3)}>Back</button>
-        <button type="button" className="p-2 border rounded bg-red-500 text-white" onClick={() => setStep(5)}>Next</button>
+        <button type="button" className="p-2 border rounded bg-red-500 text-white" onClick={handleNextStep}>Next</button>
       </div>
     </div>
   );
@@ -168,67 +189,65 @@ const Booking: React.FC = () => {
       <h2 className="text-xl font-bold mb-4">Choose Decorations</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
         {decorations.map((decoration) => (
-          <div key={decoration.value} className="flex items-center p-4 border rounded-lg">
-            <input
-              type="checkbox"
-              id={decoration.value}
-              value={decoration.value}
-              checked={selectedDecorations.includes(decoration.value)}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSelectedDecorations((prev) =>
-                  prev.includes(value)
-                    ? prev.filter((d) => d !== value)
-                    : [...prev, value]
-                );
-              }}
-              className="mr-2"
-            />
-            <label htmlFor={decoration.value} className="flex items-center cursor-pointer">
-              {decoration.image && (
-                <Image src={decoration.image} alt={decoration.label} width={50} height={50} className="rounded-md mr-2" />
-              )}
-              <div>
-                <div className="font-bold">{decoration.label}</div>
-                <div>₹{decoration.rate}</div>
-              </div>
-            </label>
+          <div
+            key={decoration.value}
+            onClick={() => setSelectedDecorations((prev) =>
+              prev.includes(decoration.value) ? prev.filter(d => d !== decoration.value) : [...prev, decoration.value]
+            )}
+            className={`p-4 border rounded-lg cursor-pointer ${selectedDecorations.includes(decoration.value) ? 'bg-red-100' : 'bg-white'} text-center`}
+          >
+            <Image src={decoration.image} alt={decoration.label} width={100} height={100} className="rounded-md mb-2 object-cover" />
+            <h3 className="font-bold mb-1">{decoration.label}</h3>
+            <p>₹{decoration.rate}</p>
           </div>
         ))}
       </div>
       <div className="flex gap-4">
         <button type="button" className="p-2 border rounded bg-gray-200" onClick={() => setStep(4)}>Back</button>
-        <button type="button" className="p-2 border rounded bg-red-500 text-white" onClick={() => setStep(6)}>Next</button>
+        <button type="button" className="p-2 border rounded bg-red-500 text-white" onClick={handleNextStep}>Next</button>
       </div>
     </div>
   );
 
-  const renderSummary = () => (
-    <div className="flex flex-col items-center min-h-screen p-4">
-      <h2 className="text-xl font-bold mb-4">Booking Summary</h2>
-      <div className="bg-white p-4 border rounded-lg shadow-lg">
-        <p><strong>Date:</strong> {selectedDate?.toLocaleDateString()}</p>
-        <p><strong>Time Slot:</strong> {selectedSlot}</p>
-        <p><strong>Room:</strong> {rooms.find(room => room.id === selectedRoom)?.name}</p>
-        <p><strong>Celebration:</strong> {celebrations.find(c => c.value === selectedCelebration)?.label}</p>
-        <p><strong>Decorations:</strong> {selectedDecorations.map(dec => decorations.find(d => d.value === dec)?.label).join(', ')}</p>
+  const renderSummary = () => {
+    const roomCost = getRoomCost();
+    const decorationCost = getDecorationCost();
+    const totalAmount = roomCost + decorationCost;
+    const advancePayable = 1000; // Assuming 25% as advance
+    const balanceAmount = totalAmount - advancePayable;
+
+    return (
+      <div className="flex flex-col items-center min-h-screen p-4">
+        <h2 className="text-xl font-bold mb-4">Booking Summary</h2>
+        <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-md">
+          <p><strong>Date:</strong> {selectedDate?.toLocaleDateString()}</p>
+          <p><strong>Slot:</strong> {selectedSlot}</p>
+          <p><strong>Room:</strong> {rooms.find(room => room.id === selectedRoom)?.name}</p>
+          <p><strong>Celebration:</strong> {celebrations.find(c => c.value === selectedCelebration)?.label}</p>
+          <p><strong>Decorations:</strong> {selectedDecorations.map(d => decorations.find(dec => dec.value === d)?.label).join(', ')}</p>
+          <p><strong>Room Cost:</strong> ₹{roomCost}</p>
+          <p><strong>Decoration Cost:</strong> ₹{decorationCost}</p>
+          <p><strong>Total Amount:</strong> ₹{totalAmount}</p>
+          <p><strong>Advance Payable:</strong> ₹{advancePayable}</p>
+          <p><strong>Balance Amount:</strong> ₹{balanceAmount.toFixed(2)}</p>
+        </div>
+        <div className="flex gap-4 mt-4">
+          <button type="button" className="p-2 border rounded bg-gray-200" onClick={() => setStep(4)}>Back</button>
+          <button type="button" className="p-2 border rounded bg-red-500 text-white" >Continue to Pay</button>
+        </div>
       </div>
-      <div className="flex gap-4 mt-4">
-        <button type="button" className="p-2 border rounded bg-gray-200" onClick={() => setStep(5)}>Back</button>
-        <button type="button" className="p-2 border rounded bg-red-500 text-white">Confirm Booking</button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div>
-      {error && <p className="text-red-500 text-center">{error}</p>}
       {step === 1 && renderCalendar()}
       {step === 2 && renderSlots()}
       {step === 3 && renderRooms()}
       {step === 4 && renderCelebrations()}
       {step === 5 && renderDecorations()}
       {step === 6 && renderSummary()}
+      {error && <p className="text-red-500 text-center">{error}</p>}
     </div>
   );
 };
