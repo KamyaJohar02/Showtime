@@ -4,6 +4,9 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '@/firebaseConfig';
+
 
 interface Room {
   id: string;
@@ -28,6 +31,10 @@ const Booking: React.FC = () => {
   const [selectedCelebration, setSelectedCelebration] = useState<string | null>(null);
   const [selectedDecorations, setSelectedDecorations] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [name, setName] = useState<string>('');        // To store the user's name
+  const [phoneNumber, setPhoneNumber] = useState<string>('');  // To store the user's phone number
+  const [numPeople, setNumPeople] = useState<number>(1); // To store the number of people
+  const [email, setEmail] = useState<string>(''); // To store user's email 
 
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -208,13 +215,117 @@ const Booking: React.FC = () => {
       </div>
     </div>
   );
+  
+  const renderUserDetailsForm = () => (
+    <div className="flex flex-col items-center min-h-screen p-4">
+      <h2 className="text-xl font-bold mb-4">Enter Your Details</h2>
+  
+      {/* Name Input */}
+      <div className="mb-4 w-full">
+        <label className="block font-bold mb-2">Name:</label>
+        <input 
+          type="text" 
+          value={name} 
+          onChange={(e) => setName(e.target.value)} 
+          className="p-2 border rounded w-full" 
+          placeholder="Enter your name" 
+        />
+      </div>
+  
+      {/* Phone Number Input */}
+      <div className="mb-4 w-full">
+        <label className="block font-bold mb-2">Phone Number:</label>
+        <input 
+          type="tel" 
+          value={phoneNumber} 
+          onChange={(e) => setPhoneNumber(e.target.value)} 
+          className="p-2 border rounded w-full" 
+          placeholder="Enter your phone number" 
+        />
+      </div>
+  
+      {/* Email Input */}
+      <div className="mb-4 w-full">
+        <label className="block font-bold mb-2">Email:</label>
+        <input 
+          type="email" 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
+          className="p-2 border rounded w-full" 
+          placeholder="Enter your email" 
+        />
+      </div>
+  
+      {/* Number of People Input with Plus/Minus */}
+      <div className="mb-4 w-full">
+        <label className="block font-bold mb-2">Number of People:</label>
+        <div className="flex items-center">
+          <button 
+            type="button" 
+            onClick={() => setNumPeople(prev => Math.max(1, prev - 1))} 
+            className="p-2 bg-gray-300 rounded-l"
+          >-</button>
+          <input 
+            type="number" 
+            value={numPeople} 
+            onChange={(e) => setNumPeople(Math.max(1, Number(e.target.value)))} 
+            className="p-2 border w-16 text-center" 
+          />
+          <button 
+            type="button" 
+            onClick={() => setNumPeople(prev => prev + 1)} 
+            className="p-2 bg-gray-300 rounded-r"
+          >+</button>
+        </div>
+      </div>
+  
+      {/* Next Button */}
+      <button 
+        type="button" 
+        className="p-2 border rounded bg-red-500 text-white mt-4"
+        onClick={() => setStep(7)} // Move to the next step
+      >
+        Next
+      </button>
+    </div>
+  );
+  
 
   const renderSummary = () => {
+   
     const roomCost = getRoomCost();
     const decorationCost = getDecorationCost();
     const totalAmount = roomCost + decorationCost;
     const advancePayable = 1000; // Assuming 25% as advance
     const balanceAmount = totalAmount - advancePayable;
+
+    const bookingData = {
+      date: selectedDate?.toLocaleDateString(),
+      slot: selectedSlot,
+      room: rooms.find(room => room.id === selectedRoom)?.name,
+      celebration: celebrations.find(c => c.value === selectedCelebration)?.label,
+      decorations: selectedDecorations.map(d => decorations.find(dec => dec.value === d)?.label),
+      roomCost: roomCost,
+      decorationCost: decorationCost,
+      totalAmount: totalAmount,
+      advancePayable: advancePayable,
+      balanceAmount: balanceAmount,
+      name: name,
+      email: email,
+      phoneNumber: phoneNumber,
+      numPeople: numPeople
+    };
+    // Save booking data to Firestore
+  const handleSubmitBooking = async () => {
+    try {
+      const docRef = await addDoc(collection(db, 'bookings'), bookingData);
+      console.log('Booking summary added with ID:', docRef.id);
+      alert('Booking successfully submitted!');
+    } catch (e) {
+      console.error('Error adding booking summary:', e);
+      alert('Error submitting booking. Please try again.');
+    }
+  };
 
     return (
       <div className="flex flex-col items-center min-h-screen p-4">
@@ -230,10 +341,15 @@ const Booking: React.FC = () => {
           <p><strong>Total Amount:</strong> ₹{totalAmount}</p>
           <p><strong>Advance Payable:</strong> ₹{advancePayable}</p>
           <p><strong>Balance Amount:</strong> ₹{balanceAmount.toFixed(2)}</p>
+          {/* Add user details to the summary */}
+        <p><strong>Name:</strong> {name}</p>
+        <p><strong>Email:</strong> {email}</p>
+        <p><strong>Phone Number:</strong> {phoneNumber}</p>
+        <p><strong>Number of People:</strong> {numPeople}</p>
         </div>
         <div className="flex gap-4 mt-4">
           <button type="button" className="p-2 border rounded bg-gray-200" onClick={() => setStep(4)}>Back</button>
-          <button type="button" className="p-2 border rounded bg-red-500 text-white" >Continue to Pay</button>
+          <button type="button" className="p-2 border rounded bg-red-500 text-white"  onClick={handleSubmitBooking}>Submit Booking</button>
         </div>
       </div>
     );
@@ -241,12 +357,14 @@ const Booking: React.FC = () => {
 
   return (
     <div>
+     
       {step === 1 && renderCalendar()}
       {step === 2 && renderSlots()}
       {step === 3 && renderRooms()}
       {step === 4 && renderCelebrations()}
       {step === 5 && renderDecorations()}
-      {step === 6 && renderSummary()}
+      {step === 6 && renderUserDetailsForm()}
+      {step === 7 && renderSummary()}
       {error && <p className="text-red-500 text-center">{error}</p>}
     </div>
   );
