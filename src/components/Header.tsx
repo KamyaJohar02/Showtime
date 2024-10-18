@@ -46,7 +46,12 @@ function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLoginClick = () => {
-    router.push("/Login"); // Navigate to the login page
+    router.push("/login"); // Navigate to the login page
+  };
+
+  // Handle "My Bookings" click
+  const handleMyBookingsClick = () => {
+    router.push('/login'); // Always redirect to login
   };
 
   return (
@@ -147,8 +152,8 @@ function Header() {
             </Transition>
           </Popover>
 
-          <a href="#" className="text-sm font-semibold leading-6 text-white">
-           Our sevices 
+          <a href="/login" className="text-sm font-semibold leading-6 text-white onClick={handleMyBookingsClick}">
+         My Bookings
           </a>
           <a href="#" className="text-sm font-semibold leading-6 text-white">
            About Us
