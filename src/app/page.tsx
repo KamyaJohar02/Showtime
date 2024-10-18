@@ -7,13 +7,19 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Trending from '@/components/trending'; // Ensure correct import path
 import TopPage from '@/components/toppage'; // Ensure correct import path
+import RoomCards from '@/components/rooms'; // Ensure correct import path
 
 export default function Home() {
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [displayedText, setDisplayedText] = useState('');
+  const [letterIndex, setLetterIndex] = useState(0);
+
   const imagePaths = [5, 14, 3, 4, 13]; // Ensure these are correct image indices
   const totalSlides = imagePaths.length;
+  const textToDisplay = "What are you waiting for? Book now and indulge in the ultimate luxury experience, tailored just for you.";
 
+  // Carousel image switching logic
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % totalSlides);
@@ -22,30 +28,57 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [totalSlides]);
 
+  // Letter-by-letter text animation
+  useEffect(() => {
+    if (letterIndex < textToDisplay.length) {
+      const textInterval = setInterval(() => {
+        setDisplayedText((prev) => prev + textToDisplay[letterIndex]);
+        setLetterIndex((prev) => prev + 1);
+      }, 100); // Speed of text display
+
+      return () => clearInterval(textInterval);
+    } else {
+      const resetTimeout = setTimeout(() => {
+        setDisplayedText('');
+        setLetterIndex(0);
+      }, 5000); // Wait for 5 seconds before resetting
+
+      return () => clearTimeout(resetTimeout);
+    }
+  }, [letterIndex]);
+
   const handleBookNowClick = () => {
     router.push('/booking');
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between p-0">
       {/* Top Page Section */}
       <section className="w-full mb-10">
         <TopPage />
       </section>
 
+      {/* Rooms Section */}
+      <section className="mx-auto max-w-7xl mt-0 p-6 bg-white rounded-lg">
+        <RoomCards />
+      </section>
+
       {/* Trending Section */}
-      <section className="mx-auto max-w-7xl mt-0 p-6 bg-white rounded-t-lg">
+      <section className="mx-auto max-w-7xl mt-0 p-2 bg-white rounded-t-lg">
         <Trending />
       </section>
 
+      {/* Description Section */}
       <section className="max-w-7xl mx-auto p-6">
-        <h2 className="font-bold text-5xl">Where every life moment becomes an experience</h2>
-        <h3 className="font-bold text-xl py-5">
+        <h2 className="font-[Great Vibes] italic text-5xl text-gray-600 ">
+          Where every life moment becomes an experience
+        </h2>
+        <h3 className="font-[Great Vibes] italic text-2xl py-5 text-gray-600">
           Book your personal movie theatre for celebrating your life events and much more...
         </h3>
       </section>
 
-      {/* Carousel Section */}
+      {/* Carousel Section with Animated Text */}
       <section className="w-full relative">
         <div className="h-96 sm:h-screen w-full overflow-hidden relative bg-transparent">
           {imagePaths.map((index, slideIndex) => (
@@ -65,14 +98,21 @@ export default function Home() {
               />
             </div>
           ))}
+
+          {/* Updated Text Overlay with Padding and Centering Adjustments */}
+          <div className="absolute top-16 left-8 right-12 w-full h-1/2 flex items-start justify-start">
+            <h2 className="text-white text-4xl md:text-7xl font-bold text-left pl-2 pr-6 pt-4 leading-snug">
+              {displayedText}
+            </h2>
+          </div>
         </div>
       </section>
 
       {/* Book Now Button */}
-      <section className="flex mt-4 justify-end w-full px-6">
+      <section className="flex mt-0 justify-center w-full px-12 bg-red-800">
         <button
           onClick={handleBookNowClick}
-          className="bg-red-600 text-white py-2 px-4 rounded-full"
+          className="bg-red-800 text-white py-4 px-4 rounded-full"
         >
           Book Now
         </button>
@@ -81,7 +121,7 @@ export default function Home() {
       {/* WhatsApp Floating Icon */}
       <a
         href="https://wa.me/919911825047"
-        className="fixed bottom-4 right-4 p-4 rounded-full shadow-lg"
+        className="fixed bottom-4 right-4 p-4 rounded-full shadow-lg bg-white"
         target="_blank"
         rel="noopener noreferrer"
       >

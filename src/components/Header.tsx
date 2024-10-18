@@ -36,11 +36,6 @@ const products = [
   },
 ];
 
-// const callsToAction = [
-//   { name: "See Demo Booking", href: "#", icon: PlayCircleIcon },
-//   { name: "Contact Support", href: "#", icon: PhoneIcon },
-// ];
-
 function Header() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -66,7 +61,7 @@ function Header() {
             <Image
               className="h-12 w-auto"
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Showtime.svg/2560px-Showtime.svg.png"
-              alt=""
+              alt="Showtime Logo"
               width={150}
               height={50}
             />
@@ -132,36 +127,21 @@ function Header() {
                     </div>
                   ))}
                 </div>
-
-                {/* <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50">
-                  {callsToAction.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className="flex items-center justify-center gap-x-2.5 p-3 text-sm font-semibold leading-6 text-[#013B94] hover:bg-gray-100"
-                    >
-                      <item.icon
-                        className="h-5 w-5 flex-none text-[#013B94]"
-                        aria-hidden="true"
-                      />
-                      {item.name}
-                    </a>
-                  ))}
-                </div> */}
               </Popover.Panel>
             </Transition>
           </Popover>
-
           <a href="/login" className="text-sm font-semibold leading-6 text-white onClick={handleMyBookingsClick}">
-         My Bookings
-          </a>
-          <a href="#" className="text-sm font-semibold leading-6 text-white">
-           About Us
-          </a>
-          <a href="#" className="text-sm font-semibold leading-6 text-white">
-            Learn 
-          </a>
-          
+  My Bookings
+</a>
+<a href="#" className="text-sm font-semibold leading-6 text-white">
+  Our services
+</a>
+
+
+          {/* Add the Rooms link here */}
+          <Link href="/rooms" className="text-sm font-semibold leading-6 text-white">
+            Rooms
+          </Link>
         </Popover.Group>
 
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
