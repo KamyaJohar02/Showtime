@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Trending from '@/components/trending'; // Ensure correct import path
 import TopPage from '@/components/toppage'; // Ensure correct import path
 import RoomCards from '@/components/rooms'; // Ensure correct import path
+import Link from 'next/link';
 
 export default function Home() {
   const router = useRouter();
@@ -47,9 +48,7 @@ export default function Home() {
     }
   }, [letterIndex]);
 
-  const handleBookNowClick = () => {
-    router.push('/booking');
-  };
+  
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-0">
@@ -64,44 +63,42 @@ export default function Home() {
       </section>
 
       {/* Trending Section */}
-      <section className="mx-auto max-w-7xl mt-0 p-2 bg-white rounded-t-lg">
+      <section className="mx-auto max-w-7xl mt-0 p-6 bg-white rounded-lg">
         <Trending />
       </section>
 
       {/* Description Section */}
-      <section className="max-w-7xl mx-auto p-6">
-        <h2 className="font-[Great Vibes] italic text-5xl text-gray-600 ">
+      <section className="max-w-7xl mx-auto p-2">
+        <h2 className="text-6xl font-[Great Vibes] italic text-center text-gray-600 mb-5 mt-4 font-serif ">
           Where every life moment becomes an experience
         </h2>
-        <h3 className="font-[Great Vibes] italic text-2xl py-5 text-gray-600">
-          Book your personal movie theatre for celebrating your life events and much more...
-        </h3>
+        
       </section>
 
       {/* Carousel Section with Animated Text */}
       <section className="w-full relative">
-        <div className="h-96 sm:h-screen w-full overflow-hidden relative bg-transparent">
-          {imagePaths.map((index, slideIndex) => (
-            <div
-              key={index}
-              className={`absolute top-0 left-0 w-full h-full transition-transform duration-1000 ease-in-out ${
-                slideIndex === currentSlide ? 'translate-x-0' : 'translate-x-full'
-              }`}
-              style={{ transform: `translateX(${100 * (slideIndex - currentSlide)}%)` }}
-            >
-              <Image
-                src={`/Images/${index}.webp`} // Verify these paths and file extensions
-                alt={`Carousel Image ${index}`}
-                layout="fill"
-                style={{ objectFit: 'cover' }}
-                className="w-full h-full"
-              />
-            </div>
+  <div className="h-96 sm:h-screen w-full overflow-hidden relative bg-transparent">
+    {imagePaths.map((index, slideIndex) => (
+      <div
+        key={index}
+        className={`absolute top-0 left-0 w-full h-full transition-transform duration-1000 ease-in-out ${
+          slideIndex === currentSlide ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        style={{ transform: `translateX(${100 * (slideIndex - currentSlide)}%)` }}
+      >
+        <Image
+          src={`/Images/${index}.webp`} // Verify these paths and file extensions
+          alt={`Carousel Image ${index}`}
+          layout="fill"
+          style={{ objectFit: 'cover' }}
+          className="w-full h-full brightness-50"
+        />
+      </div>
           ))}
 
           {/* Updated Text Overlay with Padding and Centering Adjustments */}
           <div className="absolute top-16 left-8 right-12 w-full h-1/2 flex items-start justify-start">
-            <h2 className="text-white text-4xl md:text-7xl font-bold text-left pl-2 pr-6 pt-4 leading-snug">
+            <h2 className="text-yellow-400 text-7xl md:text-10xl font-[Great Vibes] italic text-left pl-2 pr-6 pt-4 leading-snug font-serif text-outline">
               {displayedText}
             </h2>
           </div>
@@ -110,13 +107,12 @@ export default function Home() {
 
       {/* Book Now Button */}
       <section className="flex mt-0 justify-center w-full px-12 bg-red-800">
-        <button
-          onClick={handleBookNowClick}
-          className="bg-red-800 text-white py-4 px-4 rounded-full"
-        >
-          Book Now
-        </button>
-      </section>
+  <Link href="/booking" passHref legacyBehavior>
+    <a className="bg-red-800 text-white py-4 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300 text-center">
+      Book Now
+    </a>
+  </Link>
+</section>
 
       {/* WhatsApp Floating Icon */}
       <a

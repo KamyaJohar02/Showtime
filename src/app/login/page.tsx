@@ -1,14 +1,6 @@
-"use client"
-import OtpLogin from '@/components/OtpLogin'
-import React from 'react'
+// src/login/page.tsx
+import LoginWrapper from './loginwrapper';
 
-
-function Login() {
-  return (
-    <div>
-        <OtpLogin />
-    </div>
-  )
+export default function Page() {
+  return <LoginWrapper />;
 }
-
-export default Login

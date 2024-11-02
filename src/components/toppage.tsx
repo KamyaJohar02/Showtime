@@ -3,41 +3,39 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const images = [
-  '/Images/c1.jpg', // Ensure the paths are correct
-  '/Images/3.webp',
-  '/Images/5.webp',
-]; // Array of images for the carousel
+  '/Images/c1.jpg', 
+  '/Images/car1_2.jpg',
+  '/Images/car1_4.jpg',
+];
 
-const textToDisplay = "Celebrate life’s special moments in style with Showtime"; // Updated text
+const textToDisplay = "Celebrate life’s special moments in style with Showtime"; 
 
 const TopPage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [letterIndex, setLetterIndex] = useState(0);
 
-  // Handle vertical image carousel transition
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % images.length);
-    }, 5000); // Change image every 5 seconds
+    }, 5000);
 
     return () => clearInterval(slideInterval);
-  }, []);
+  }, [images.length]);
 
-  // Handle letter-by-letter text display and reset after 5 seconds
   useEffect(() => {
     if (letterIndex < textToDisplay.length) {
       const textInterval = setInterval(() => {
         setDisplayedText((prev) => prev + textToDisplay[letterIndex]);
         setLetterIndex((prev) => prev + 1);
-      }, 150); // Slower letter change (150ms)
+      }, 150);
 
       return () => clearInterval(textInterval);
     } else {
       const resetTimeout = setTimeout(() => {
         setDisplayedText('');
         setLetterIndex(0);
-      }, 5000); // Pause for 5 seconds before restarting
+      }, 5000);
 
       return () => clearTimeout(resetTimeout);
     }
@@ -67,12 +65,12 @@ const TopPage: React.FC = () => {
       </div>
 
       {/* Text Overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-start bg-black bg-opacity-50 pt-20">
-        <h2 className="text-white text-6xl md:text-8xl font-serif font-bold text-center mb-6 h-1/2 flex items-center justify-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 p-4">
+        <h2 className="text-yellow-500 text-3xl sm:text-4xl md:text-3xl lg:text-7xl font-serif font-bold text-center mb-6 text-outline">
           {displayedText}
         </h2>
         <Link href="/booking">
-          <button className="bg-red-500 text-white py-3 px-8 rounded-full shadow-lg hover:bg-red-600 transition duration-300">
+          <button className="bg-red-500 text-white py-2 sm:py-3 px-6 sm:px-8 rounded-full shadow-lg hover:bg-red-600 transition duration-300 text-sm sm:text-base md:text-lg">
             Book Now
           </button>
         </Link>

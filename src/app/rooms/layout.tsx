@@ -8,7 +8,7 @@ interface RoomsProps {
 export default function RoomsLayout({ children }: RoomsProps) {
   return (
     <div>
-      <section className="p-6 bg-gray-50 min-h-screen"> {/* Added some basic padding and background */}
+      <section className="p-0 bg-gray-50 min-h-screen"> {/* Added some basic padding and background */}
         {children}
       </section>
     </div>

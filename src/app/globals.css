@@ -70,3 +70,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* globals.css or a specific CSS file */
+.text-outline {
+  text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;
+}
+

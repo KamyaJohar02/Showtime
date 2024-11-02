@@ -1,37 +1,35 @@
 "use client";
+import React, { Fragment, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from "next/link";
-import { Fragment, useState } from "react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import Link from 'next/link';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import {
   ChatBubbleLeftIcon,
   ChevronDownIcon,
   HomeIcon,
   PaperAirplaneIcon,
-  PhoneIcon,
-  PlayCircleIcon,
-} from "@heroicons/react/20/solid";
-import { Dialog, Disclosure, Popover, Transition } from "@headlessui/react";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
+} from '@heroicons/react/20/solid';
+import { Dialog, Disclosure, Popover, Transition } from '@headlessui/react';
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 const products = [
   {
-    name: "Book theatre",
-    description: "Get a better understanding of your traffic",
-    href: "/booking",
+    name: 'Book theatre',
+    description: 'Get a better understanding of your traffic',
+    href: '/booking',
     icon: HomeIcon,
   },
   {
-    name: "Book a Flight",
-    description: "Speak directly to your customers",
-    href: "#",
+    name: 'Book a Flight',
+    description: 'Speak directly to your customers',
+    href: '#',
     icon: PaperAirplaneIcon,
   },
   {
-    name: "Contact our Support Team",
-    description: "Your customers’ data will be safe and secure",
-    href: "#",
+    name: 'Contact our Support Team',
+    description: 'Your customers’ data will be safe and secure',
+    href: '#',
     icon: ChatBubbleLeftIcon,
   },
 ];
@@ -41,20 +39,19 @@ function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLoginClick = () => {
-    router.push("/login"); // Navigate to the login page
-  };
-
-  // Handle "My Bookings" click
-  const handleMyBookingsClick = () => {
-    router.push('/login'); // Always redirect to login
+    router.push('/login');
   };
 
   return (
-    <header className="bg-[#000000]">
-      <nav
-        className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
-        aria-label="Global"
-      >
+    <header
+      className="bg-cover bg-center"
+      style={{
+        backgroundImage: "url('/Images/headerbg2.jpg')", // Ensure the correct path to your image
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5">
             <span className="sr-only">Showtime</span>
@@ -71,7 +68,7 @@ function Header() {
         <div className="flex lg:hidden">
           <button
             type="button"
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-white"
+            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-black"
             onClick={() => setMobileMenuOpen(true)}
           >
             <span className="sr-only">Open main menu</span>
@@ -81,12 +78,9 @@ function Header() {
 
         <Popover.Group className="hidden lg:flex lg:gap-x-12">
           <Popover className="relative">
-            <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-white">
+            <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-black">
               Learn
-              <ChevronDownIcon
-                className="h-5 w-5 flex-none text-white"
-                aria-hidden="true"
-              />
+              <ChevronDownIcon className="h-5 w-5 flex-none text-black" aria-hidden="true" />
             </Popover.Button>
 
             <Transition
@@ -113,16 +107,11 @@ function Header() {
                       </div>
 
                       <div className="flex-auto">
-                        <a
-                          href={item.href}
-                          className="block font-semibold text-[#000000]"
-                        >
+                        <a href={item.href} className="block font-semibold text-[#000000]">
                           {item.name}
                           <span className="absolute inset-0" />
                         </a>
-                        <p className="mt-1 text-[#000000]">
-                          {item.description}
-                        </p>
+                        <p className="mt-1 text-[#000000]">{item.description}</p>
                       </div>
                     </div>
                   ))}
@@ -130,33 +119,30 @@ function Header() {
               </Popover.Panel>
             </Transition>
           </Popover>
-          <a href="/login" className="text-sm font-semibold leading-6 text-white onClick={handleMyBookingsClick}">
-  My Bookings
-</a>
-<a href="#" className="text-sm font-semibold leading-6 text-white">
-  Our services
-</a>
 
-
-          {/* Add the Rooms link here */}
-          <Link href="/rooms" className="text-sm font-semibold leading-6 text-white">
+          <Link href="/services" className="text-sm font-semibold leading-6 text-black">
+            Our services
+          </Link>
+          <a href="#" className="text-sm font-semibold leading-6 text-black">
+            About Us
+          </a>
+          <a href="#" className="text-sm font-semibold leading-6 text-black">
+            Learn
+          </a>
+          <Link href="/rooms" className="text-sm font-semibold leading-6 text-black">
             Rooms
           </Link>
         </Popover.Group>
 
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <button onClick={handleLoginClick} className="text-sm font-semibold leading-6 text-white">
+          <button onClick={handleLoginClick} className="text-sm font-semibold leading-6 text-black">
             Log in <span aria-hidden="true">&rarr;</span>
           </button>
         </div>
       </nav>
 
-      <Dialog
-        as="div"
-        className="lg:hidden"
-        open={mobileMenuOpen}
-        onClose={setMobileMenuOpen}
-      >
+      {/* Mobile Menu Dialog */}
+      <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
         <div className="fixed inset-0 z-10" />
 
         <Dialog.Panel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-[#013B94] px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
@@ -173,7 +159,7 @@ function Header() {
             </a>
             <button
               type="button"
-              className="-m-2.5 rounded-md p-2.5 text-white"
+              className="-m-2.5 rounded-md p-2.5 text-black"
               onClick={() => setMobileMenuOpen(false)}
             >
               <span className="sr-only">Close menu</span>
@@ -189,13 +175,7 @@ function Header() {
                     <>
                       <Disclosure.Button className="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-white hover:bg-blue-800">
                         Stays
-                        <ChevronDownIcon
-                          className={cn(
-                            open ? "rotate-180" : "",
-                            "h-5 w-5 flex-none"
-                          )}
-                          aria-hidden="true"
-                        />
+                        <ChevronDownIcon className={cn(open ? 'rotate-180' : '', 'h-5 w-5 flex-none')} aria-hidden="true" />
                       </Disclosure.Button>
                       <Disclosure.Panel className="mt-2 space-y-2">
                         {[...products].map((item) => (
@@ -203,7 +183,7 @@ function Header() {
                             key={item.name}
                             as="a"
                             href={item.href}
-                            className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-white hover:bg-blue-800"
+                            className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-black hover:bg-blue-800"
                           >
                             {item.name}
                           </Disclosure.Button>
@@ -212,31 +192,21 @@ function Header() {
                     </>
                   )}
                 </Disclosure>
-                <a
-                  href="#"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-blue-800"
-                >
+                <a href="#" className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-black hover:bg-blue-800">
                   Learn
                 </a>
-                <a
-                  href="#"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-blue-800"
-                >
+                <a href="#" className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-black hover:bg-blue-800">
                   About Us
                 </a>
-                <a
-                  href="#"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-blue-800"
-                >
-                 Our Services
+                <a href="#" className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-black hover:bg-blue-800">
+                  Our Services
                 </a>
-                
               </div>
 
               <div className="py-6">
                 <button
                   onClick={handleLoginClick}
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-white hover:bg-blue-800"
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-black hover:bg-blue-800"
                 >
                   Log In
                 </button>
@@ -250,3 +220,4 @@ function Header() {
 }
 
 export default Header;
+
