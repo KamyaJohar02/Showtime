@@ -8,7 +8,7 @@ const images = [
   '/Images/car1_4.jpg',
 ];
 
-const textToDisplay = "Celebrate life’s special moments in style with Showtime"; 
+const textToDisplay = "Celebrate your special moments in style with Showtime"; 
 
 const TopPage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -21,7 +21,7 @@ const TopPage: React.FC = () => {
     }, 5000);
 
     return () => clearInterval(slideInterval);
-  }, [images.length]);
+  }, []);
 
   useEffect(() => {
     if (letterIndex < textToDisplay.length) {

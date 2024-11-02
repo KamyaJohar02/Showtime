@@ -159,7 +159,7 @@ const LoginDesktop: React.FC = () => {
               </button>
 
               <p onClick={toggleForm} className="text-center text-sm text-gray-600 mt-4 cursor-pointer hover:text-red-600">
-                Don't have an account? Sign up
+                Do not have an account? Sign up
               </p>
             </>
           ) : (
@@ -226,7 +226,9 @@ const LoginDesktop: React.FC = () => {
           maxLength={1}
           value={digit}
           onChange={(e) => handleOtpChange(idx, e.target.value)}
-          ref={(el) => (otpRefs.current[idx] = el)}
+          ref={(el) => {
+            otpRefs.current[idx] = el!;
+          }}
           className={`w-full text-center py-2 border ${otpError ? "border-red-500" : "border-gray-300"} rounded focus:outline-none focus:ring-red-500`}
         />
       ))}
@@ -335,7 +337,9 @@ const LoginDesktop: React.FC = () => {
                         maxLength={1}
                         value={digit}
                         onChange={(e) => handleOtpChange(idx, e.target.value)}
-                        ref={(el) => (otpRefs.current[idx] = el)}
+                        ref={(el) => {
+                          otpRefs.current[idx] = el!;
+                        }}
                         className={`w-full text-center py-2 border ${otpVerified ? "border-gray-300" : "border-red-500"} rounded focus:outline-none focus:ring-red-500`}
                       />
                     ))}

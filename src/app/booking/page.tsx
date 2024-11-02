@@ -25,6 +25,7 @@ interface Decoration {
 }
 
 const Booking: React.FC = () => {
+  const router = useRouter();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [step, setStep] = useState<number>(1);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -60,7 +61,6 @@ const Booking: React.FC = () => {
 
 
 const renderRoomSelection = () => {
-  const router = useRouter();
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-4 sm:p-8">

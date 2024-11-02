@@ -25,6 +25,7 @@ const LoginMobile: React.FC = () => {
   const [otpError, setOtpError] = useState(false);
 
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  
 
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
@@ -147,7 +148,7 @@ const LoginMobile: React.FC = () => {
 
             <button className="w-full py-2 mt-4 bg-red-600 text-white rounded">Login</button>
             <p onClick={toggleForm} className="text-center text-sm text-gray-600 mt-4 cursor-pointer">
-              Don't have an account? <span className="text-red-600">Sign up</span>
+              Do not have an account? <span className="text-red-600">Sign up</span>
             </p>
           </>
         ) : (
@@ -194,7 +195,11 @@ const LoginMobile: React.FC = () => {
                     maxLength={1}
                     value={digit}
                     onChange={(e) => handleOtpChange(idx, e.target.value)}
-                    ref={(el) => (otpRefs.current[idx] = el)}
+                    ref={(el) => {
+                      otpRefs.current[idx] = el!;
+                    }}
+
+
                     className="w-full text-center py-2 border rounded focus:outline-none focus:ring-red-500"
                   />
                 ))}
@@ -273,7 +278,9 @@ const LoginMobile: React.FC = () => {
                       maxLength={1}
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
-                      ref={(el) => (otpRefs.current[idx] = el)}
+                      ref={(el) => {
+                        otpRefs.current[idx] = el!;
+                      }}
                       className="w-full text-center py-2 border rounded focus:outline-none focus:ring-red-500"
                     />
                   ))}
