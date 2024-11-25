@@ -7,12 +7,16 @@ import "react-datepicker/dist/react-datepicker.css";
 
 interface Booking {
   id: string;
-  userId: string;
+  name: string;
+  email: string;
+  mobile: string;
   room: string;
   date: string; // Date as a string in "YYYY-MM-DD" format
   timeSlot: string;
-  advanceAmount: string;
-  dueAmount: string;
+  decorations: string[]; // Array of decoration labels
+  cake: boolean;
+  advanceAmount: number;
+  dueAmount: number;
   status: string;
 }
 
@@ -30,10 +34,14 @@ const CompletedBookings: React.FC = () => {
         const fetchedDocuments = await fetchDocuments("bookings");
         const mappedBookings = fetchedDocuments.map((doc: any) => ({
           id: doc.id,
-          userId: doc.userId,
+          name: doc.name,
+          email: doc.email,
+          mobile: doc.mobile,
           room: doc.room,
           date: doc.date,
           timeSlot: doc.timeSlot,
+          decorations: doc.decorations || [],
+          cake: doc.cake,
           advanceAmount: doc.advanceAmount,
           dueAmount: doc.dueAmount,
           status: doc.status,
@@ -119,10 +127,14 @@ const CompletedBookings: React.FC = () => {
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-2">User ID</th>
+              <th className="border border-gray-300 p-2">Name</th>
+              <th className="border border-gray-300 p-2">Email</th>
+              <th className="border border-gray-300 p-2">Mobile</th>
               <th className="border border-gray-300 p-2">Room</th>
               <th className="border border-gray-300 p-2">Date</th>
               <th className="border border-gray-300 p-2">Time Slot</th>
+              <th className="border border-gray-300 p-2">Decorations</th>
+              <th className="border border-gray-300 p-2">Cake</th>
               <th className="border border-gray-300 p-2">Advance Amount</th>
               <th className="border border-gray-300 p-2">Due Amount</th>
               <th className="border border-gray-300 p-2">Status</th>
@@ -131,11 +143,19 @@ const CompletedBookings: React.FC = () => {
           </thead>
           <tbody>
             {filteredBookings.map((booking) => (
-              <tr key={booking.id}>
-                <td className="border border-gray-300 p-2">{booking.userId}</td>
+              <tr key={booking.id} className="hover:bg-gray-100">
+                <td className="border border-gray-300 p-2">{booking.name}</td>
+                <td className="border border-gray-300 p-2">{booking.email}</td>
+                <td className="border border-gray-300 p-2">{booking.mobile}</td>
                 <td className="border border-gray-300 p-2">{booking.room}</td>
                 <td className="border border-gray-300 p-2">{booking.date}</td>
                 <td className="border border-gray-300 p-2">{booking.timeSlot}</td>
+                <td className="border border-gray-300 p-2">
+                  {(booking.decorations || []).join(", ")}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  {booking.cake ? "Yes" : "No"}
+                </td>
                 <td className="border border-gray-300 p-2">₹{booking.advanceAmount}</td>
                 <td className="border border-gray-300 p-2">₹{booking.dueAmount}</td>
                 <td className="border border-gray-300 p-2">{booking.status}</td>

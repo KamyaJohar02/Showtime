@@ -7,19 +7,21 @@ import "react-datepicker/dist/react-datepicker.css";
 
 interface Booking {
   id: string;
-  userId: string;
-  room: string;
+  name: string;
+  email: string;
+  mobile: string;
+  room: string; // Room name from database
   date: string; // Date as a string in "YYYY-MM-DD" format
   timeSlot: string;
-  advanceAmount: string;
-  dueAmount: string;
+  decorations: string[]; // Array of decoration labels
+  cake: boolean;
+  advanceAmount: number;
+  dueAmount: number;
   status: string;
 }
 
 const ManageBookings: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [rooms, setRooms] = useState<string[]>([]); // For dropdown
-  const [timeSlots, setTimeSlots] = useState<string[]>([]); // For dropdown
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
@@ -30,28 +32,28 @@ const ManageBookings: React.FC = () => {
     const loadBookings = async () => {
       try {
         setLoading(true);
-        const fetchedBookings = await fetchDocuments("bookings");
+        const fetchedBookings = (await fetchDocuments("bookings")) as Booking[];
         const currentDate = new Date();
-
-        // Update status for bookings where the day after the booking date is passed
-        const updatedBookings = await Promise.all(
-          (fetchedBookings as Booking[]).map(async (booking) => {
-            const bookingDatePlusOne = new Date(booking.date);
-            bookingDatePlusOne.setDate(bookingDatePlusOne.getDate() + 1);
-
-            if (booking.status === "pending" && currentDate > bookingDatePlusOne) {
+  
+        // Process bookings and update status if necessary
+        const updatedPendingBookings = await Promise.all(
+          fetchedBookings.map(async (booking) => {
+            const bookingDate = new Date(booking.date);
+  
+            // If booking is pending and past its date, update status to "fulfilled"
+            if (booking.status === "pending" && bookingDate < currentDate) {
               await updateDocument("bookings", booking.id, { status: "fulfilled" });
-              return { ...booking, status: "fulfilled" };
+              return null; // Exclude from pending bookings
             }
-            return booking;
+  
+            // Include only pending bookings
+            return booking.status === "pending" ? booking : null;
           })
         );
-
-        // Filter out fulfilled bookings for display
-        const pendingBookings = updatedBookings.filter(
-          (booking) => booking.status === "pending"
-        );
-
+  
+        // Filter out null values (fulfilled bookings)
+        const pendingBookings = updatedPendingBookings.filter(Boolean) as Booking[];
+  
         setBookings(pendingBookings);
         setLoading(false);
       } catch (err) {
@@ -60,31 +62,11 @@ const ManageBookings: React.FC = () => {
         setLoading(false);
       }
     };
-
-    const loadRooms = async () => {
-      try {
-        const fetchedRooms = await fetchDocuments("rooms");
-        const roomNames = fetchedRooms.map((room: any) => room.name); // Adjust according to your schema
-        setRooms(roomNames);
-      } catch (err) {
-        console.error("Failed to load rooms:", err);
-      }
-    };
-
-    const loadTimeSlots = async () => {
-      try {
-        const fetchedTimeSlots = await fetchDocuments("timeSlots");
-        const slotTimes = fetchedTimeSlots.map((slot: any) => slot.time); // Adjust according to your schema
-        setTimeSlots(slotTimes);
-      } catch (err) {
-        console.error("Failed to load time slots:", err);
-      }
-    };
-
+  
     loadBookings();
-    loadRooms();
-    loadTimeSlots();
   }, []);
+    
+
 
   const handleDeleteBooking = async (id: string) => {
     const confirm = window.confirm("Are you sure you want to delete this booking?");
@@ -135,11 +117,40 @@ const ManageBookings: React.FC = () => {
       )
     : bookings;
 
+    const updateBookingStatuses = async () => {
+      const todayDate = new Date().toISOString().split("T")[0];
+    
+      // Prepare the updated bookings without overwriting the original state prematurely
+      const updatedBookings = bookings.map((booking) => {
+        if (booking.date < todayDate && booking.status === "pending") {
+          return { ...booking, status: "fulfilled" };
+        }
+        return booking;
+      });
+    
+      // Update the state only after mapping all bookings
+      setBookings(updatedBookings);
+    
+      // Save only the necessary status changes to the database
+      const bookingsToUpdate = updatedBookings.filter(
+        (booking) => booking.date < todayDate && booking.status === "fulfilled"
+      );
+    
+      try {
+        await Promise.all(
+          bookingsToUpdate.map(async (booking) => {
+            await updateDocument("bookings", booking.id, { status: "fulfilled" });
+          })
+        );
+      } catch (err) {
+        console.error("Failed to update booking statuses:", err);
+      }
+    };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Manage Bookings</h1>
 
-      {/* Date Picker for Filtering */}
       <div className="mb-4">
         <label htmlFor="filter-date" className="block text-lg font-medium mb-2">
           Filter by Date:
@@ -170,10 +181,14 @@ const ManageBookings: React.FC = () => {
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-2">User ID</th>
+              <th className="border border-gray-300 p-2">Name</th>
+              <th className="border border-gray-300 p-2">Email</th>
+              <th className="border border-gray-300 p-2">Mobile</th>
               <th className="border border-gray-300 p-2">Room</th>
               <th className="border border-gray-300 p-2">Date</th>
               <th className="border border-gray-300 p-2">Time Slot</th>
+              <th className="border border-gray-300 p-2">Decorations</th>
+              <th className="border border-gray-300 p-2">Cake</th>
               <th className="border border-gray-300 p-2">Advance Amount</th>
               <th className="border border-gray-300 p-2">Due Amount</th>
               <th className="border border-gray-300 p-2">Status</th>
@@ -185,49 +200,35 @@ const ManageBookings: React.FC = () => {
               <tr key={booking.id}>
                 {editingBooking && editingBooking.id === booking.id ? (
                   <>
+                    <td className="border border-gray-300 p-2">{booking.name}</td>
+                    <td className="border border-gray-300 p-2">{booking.email}</td>
+                    <td className="border border-gray-300 p-2">{booking.mobile}</td>
                     <td className="border border-gray-300 p-2">
                       <input
                         type="text"
-                        value={editedBooking?.userId || ""}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            userId: e.target.value,
-                          }))
-                        }
-                        className="w-full border rounded"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <select
                         value={editedBooking?.room || ""}
                         onChange={(e) =>
                           setEditedBooking((prev) => ({ ...prev, room: e.target.value }))
                         }
-                        className="w-full border rounded"
-                      >
-                        <option value="" disabled>
-                          Select Room
-                        </option>
-                        {rooms.map((room) => (
-                          <option key={room} value={room}>
-                            {room}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="date"
-                        value={editedBooking?.date || ""}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({ ...prev, date: e.target.value }))
-                        }
-                        className="w-full border rounded"
+                        className="p-2 border rounded w-full"
                       />
                     </td>
                     <td className="border border-gray-300 p-2">
-                      <select
+                      <DatePicker
+                        selected={new Date(editedBooking?.date || booking.date)}
+                        onChange={(date) =>
+                          setEditedBooking((prev) => ({
+                            ...prev,
+                            date: date?.toISOString().split("T")[0],
+                          }))
+                        }
+                        dateFormat="yyyy-MM-dd"
+                        className="p-2 border rounded w-full"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      <input
+                        type="text"
                         value={editedBooking?.timeSlot || ""}
                         onChange={(e) =>
                           setEditedBooking((prev) => ({
@@ -235,42 +236,58 @@ const ManageBookings: React.FC = () => {
                             timeSlot: e.target.value,
                           }))
                         }
-                        className="w-full border rounded"
-                      >
-                        <option value="" disabled>
-                          Select Time Slot
-                        </option>
-                        {timeSlots.map((slot) => (
-                          <option key={slot} value={slot}>
-                            {slot}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="text"
-                        value={editedBooking?.advanceAmount || ""}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            advanceAmount: e.target.value,
-                          }))
-                        }
-                        className="w-full border rounded"
+                        className="p-2 border rounded w-full"
                       />
                     </td>
                     <td className="border border-gray-300 p-2">
                       <input
                         type="text"
-                        value={editedBooking?.dueAmount || ""}
+                        value={(editedBooking?.decorations || []).join(", ")}
                         onChange={(e) =>
                           setEditedBooking((prev) => ({
                             ...prev,
-                            dueAmount: e.target.value,
+                            decorations: e.target.value.split(", "),
                           }))
                         }
-                        className="w-full border rounded"
+                        className="p-2 border rounded w-full"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      <input
+                        type="checkbox"
+                        checked={editedBooking?.cake || false}
+                        onChange={(e) =>
+                          setEditedBooking((prev) => ({
+                            ...prev,
+                            cake: e.target.checked,
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      <input
+                        type="number"
+                        value={editedBooking?.advanceAmount || 0}
+                        onChange={(e) =>
+                          setEditedBooking((prev) => ({
+                            ...prev,
+                            advanceAmount: Number(e.target.value),
+                          }))
+                        }
+                        className="p-2 border rounded w-full"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      <input
+                        type="number"
+                        value={editedBooking?.dueAmount || 0}
+                        onChange={(e) =>
+                          setEditedBooking((prev) => ({
+                            ...prev,
+                            dueAmount: Number(e.target.value),
+                          }))
+                        }
+                        className="p-2 border rounded w-full"
                       />
                     </td>
                     <td className="border border-gray-300 p-2">
@@ -279,22 +296,22 @@ const ManageBookings: React.FC = () => {
                         onChange={(e) =>
                           setEditedBooking((prev) => ({ ...prev, status: e.target.value }))
                         }
-                        className="w-full border rounded"
+                        className="p-2 border rounded w-full"
                       >
                         <option value="pending">Pending</option>
                         <option value="fulfilled">Fulfilled</option>
                       </select>
                     </td>
                     <td className="border border-gray-300 p-2">
-                      <button
+                    <button
                         onClick={handleSaveBooking}
-                        className="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600 mr-2"
+                        className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
                       >
                         Save
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600"
+                        className="bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600 ml-2"
                       >
                         Cancel
                       </button>
@@ -302,23 +319,31 @@ const ManageBookings: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <td className="border border-gray-300 p-2">{booking.userId}</td>
+                    <td className="border border-gray-300 p-2">{booking.name}</td>
+                    <td className="border border-gray-300 p-2">{booking.email}</td>
+                    <td className="border border-gray-300 p-2">{booking.mobile}</td>
                     <td className="border border-gray-300 p-2">{booking.room}</td>
                     <td className="border border-gray-300 p-2">{booking.date}</td>
                     <td className="border border-gray-300 p-2">{booking.timeSlot}</td>
+                    <td className="border border-gray-300 p-2">
+                      {(booking.decorations || []).join(", ")}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {booking.cake ? "Yes" : "No"}
+                    </td>
                     <td className="border border-gray-300 p-2">₹{booking.advanceAmount}</td>
                     <td className="border border-gray-300 p-2">₹{booking.dueAmount}</td>
                     <td className="border border-gray-300 p-2">{booking.status}</td>
                     <td className="border border-gray-300 p-2">
                       <button
                         onClick={() => handleEditBooking(booking)}
-                        className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 mr-2"
+                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeleteBooking(booking.id)}
-                        className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
                       >
                         Delete
                       </button>
