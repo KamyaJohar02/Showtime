@@ -18,6 +18,8 @@ interface Booking {
 
 const ManageBookings: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [rooms, setRooms] = useState<string[]>([]); // For dropdown
+  const [timeSlots, setTimeSlots] = useState<string[]>([]); // For dropdown
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
@@ -29,15 +31,59 @@ const ManageBookings: React.FC = () => {
       try {
         setLoading(true);
         const fetchedBookings = await fetchDocuments("bookings");
-        setBookings(fetchedBookings as Booking[]);
+        const currentDate = new Date();
+
+        // Update status for bookings where the day after the booking date is passed
+        const updatedBookings = await Promise.all(
+          (fetchedBookings as Booking[]).map(async (booking) => {
+            const bookingDatePlusOne = new Date(booking.date);
+            bookingDatePlusOne.setDate(bookingDatePlusOne.getDate() + 1);
+
+            if (booking.status === "pending" && currentDate > bookingDatePlusOne) {
+              await updateDocument("bookings", booking.id, { status: "fulfilled" });
+              return { ...booking, status: "fulfilled" };
+            }
+            return booking;
+          })
+        );
+
+        // Filter out fulfilled bookings for display
+        const pendingBookings = updatedBookings.filter(
+          (booking) => booking.status === "pending"
+        );
+
+        setBookings(pendingBookings);
         setLoading(false);
-      } catch (err: any) {
+      } catch (err) {
+        console.error("Failed to load bookings:", err);
         setError("Failed to load bookings.");
         setLoading(false);
       }
     };
 
+    const loadRooms = async () => {
+      try {
+        const fetchedRooms = await fetchDocuments("rooms");
+        const roomNames = fetchedRooms.map((room: any) => room.name); // Adjust according to your schema
+        setRooms(roomNames);
+      } catch (err) {
+        console.error("Failed to load rooms:", err);
+      }
+    };
+
+    const loadTimeSlots = async () => {
+      try {
+        const fetchedTimeSlots = await fetchDocuments("timeSlots");
+        const slotTimes = fetchedTimeSlots.map((slot: any) => slot.time); // Adjust according to your schema
+        setTimeSlots(slotTimes);
+      } catch (err) {
+        console.error("Failed to load time slots:", err);
+      }
+    };
+
     loadBookings();
+    loadRooms();
+    loadTimeSlots();
   }, []);
 
   const handleDeleteBooking = async (id: string) => {
@@ -47,7 +93,7 @@ const ManageBookings: React.FC = () => {
     try {
       await deleteDocument("bookings", id);
       setBookings((prev) => prev.filter((booking) => booking.id !== id));
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error deleting booking:", err);
       alert("Failed to delete booking.");
     }
@@ -70,7 +116,7 @@ const ManageBookings: React.FC = () => {
       );
       setEditingBooking(null);
       setEditedBooking(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error updating booking:", err);
       alert("Failed to update booking.");
     }
@@ -81,7 +127,6 @@ const ManageBookings: React.FC = () => {
     setEditedBooking(null);
   };
 
-  // Filter bookings by selected date
   const filteredBookings = selectedDate
     ? bookings.filter(
         (booking) =>
@@ -145,20 +190,31 @@ const ManageBookings: React.FC = () => {
                         type="text"
                         value={editedBooking?.userId || ""}
                         onChange={(e) =>
-                          setEditedBooking((prev) => ({ ...prev, userId: e.target.value }))
+                          setEditedBooking((prev) => ({
+                            ...prev,
+                            userId: e.target.value,
+                          }))
                         }
                         className="w-full border rounded"
                       />
                     </td>
                     <td className="border border-gray-300 p-2">
-                      <input
-                        type="text"
+                      <select
                         value={editedBooking?.room || ""}
                         onChange={(e) =>
                           setEditedBooking((prev) => ({ ...prev, room: e.target.value }))
                         }
                         className="w-full border rounded"
-                      />
+                      >
+                        <option value="" disabled>
+                          Select Room
+                        </option>
+                        {rooms.map((room) => (
+                          <option key={room} value={room}>
+                            {room}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="border border-gray-300 p-2">
                       <input
@@ -171,8 +227,7 @@ const ManageBookings: React.FC = () => {
                       />
                     </td>
                     <td className="border border-gray-300 p-2">
-                      <input
-                        type="text"
+                      <select
                         value={editedBooking?.timeSlot || ""}
                         onChange={(e) =>
                           setEditedBooking((prev) => ({
@@ -181,7 +236,16 @@ const ManageBookings: React.FC = () => {
                           }))
                         }
                         className="w-full border rounded"
-                      />
+                      >
+                        <option value="" disabled>
+                          Select Time Slot
+                        </option>
+                        {timeSlots.map((slot) => (
+                          <option key={slot} value={slot}>
+                            {slot}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="border border-gray-300 p-2">
                       <input
@@ -210,17 +274,16 @@ const ManageBookings: React.FC = () => {
                       />
                     </td>
                     <td className="border border-gray-300 p-2">
-                      <input
-                        type="text"
+                      <select
                         value={editedBooking?.status || ""}
                         onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            status: e.target.value,
-                          }))
+                          setEditedBooking((prev) => ({ ...prev, status: e.target.value }))
                         }
                         className="w-full border rounded"
-                      />
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="fulfilled">Fulfilled</option>
+                      </select>
                     </td>
                     <td className="border border-gray-300 p-2">
                       <button
