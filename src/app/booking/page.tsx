@@ -1,44 +1,46 @@
 "use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { DayPicker } from 'react-day-picker';
-import 'react-day-picker/dist/style.css';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '@/firebaseConfig';
-import { addDays } from 'date-fns';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+import { db } from "@/firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
 interface Room {
-  id: string;
+  roomId: string;
   name: string;
   description: string;
   imageUrl: string;
   rate: number;
+  availability: boolean;
 }
 
 interface Decoration {
-  value: string;
+  id: string;
   label: string;
   rate: number;
   image: string;
+  availability: boolean;
 }
 
 const Booking: React.FC = () => {
   const router = useRouter();
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [decorations, setDecorations] = useState<Decoration[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [step, setStep] = useState<number>(1);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [selectedDecorations, setSelectedDecorations] = useState<string[]>([]);
-  const [name, setName] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [name, setName] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [numPeople, setNumPeople] = useState<number>(1);
-  const [email, setEmail] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>("");
   const [addCake, setAddCake] = useState(false);
 
-  const rooms: Room[] = [
+  /*const rooms: Room[] = [
     { id: 'room1', name: 'Room 1', description: 'A cozy room with a 150-inch screen.', imageUrl: '/Images/Room1.jpg', rate: 1400 },
     { id: 'room2', name: 'Room 2', description: 'A spacious room with comfortable seating.', imageUrl: '/Images/Room2.jpg', rate: 1600 },
     { id: 'room3', name: 'Room 3', description: 'A luxurious room with premium sound.', imageUrl: '/Images/Room3.jpg', rate: 1900 },
@@ -49,7 +51,7 @@ const Booking: React.FC = () => {
     { value: 'flowers', label: 'Flowers', rate: 150, image: '/Images/flowers.jpeg' },
     { value: 'candles', label: 'Candles', rate: 200, image: '/Images/candles.jpg' },
     { value: 'fog', label: 'Fog', rate: 250, image: '/Images/smoke.jpg' },
-  ];
+  ];*/
 
   const slots = [
     '10:00 AM - 12:00 PM',
@@ -60,38 +62,84 @@ const Booking: React.FC = () => {
   ];
 
 
-const renderRoomSelection = () => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch rooms
+        const roomsCollection = collection(db, "rooms");
+        const roomDocs = await getDocs(roomsCollection);
+        const fetchedRooms = roomDocs.docs.map((doc) => ({
+          roomId: doc.id,
+          ...doc.data(),
+        })) as Room[];
+        setRooms(fetchedRooms);
 
-  return (
+        // Fetch decorations
+        const decorationsCollection = collection(db, "decorations");
+        const decorationDocs = await getDocs(decorationsCollection);
+        const fetchedDecorations = decorationDocs.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Decoration[];
+        setDecorations(fetchedDecorations);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const renderRoomSelection = () => (
     <div className="flex flex-col items-center min-h-screen bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-4 sm:p-8">
-      <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-800 font-serif mb-4 sm:mb-6 text-outline">Select a Room</h2>
+      <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-800 font-serif mb-4 sm:mb-6 text-outline">
+        Select a Room
+      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-8">
         {rooms.map((room) => (
           <div
-            key={room.id}
-            onClick={() => setSelectedRoom(room.id)}
-            className={`border p-6 rounded-lg cursor-pointer bg-opacity-70 bg-[#093024] transition-transform transform hover:scale-105 ${
-              selectedRoom === room.id ? 'border-4 border-red-500 shadow-lg' : 'border border-gray-300'
+            key={room.roomId}
+            onClick={() => room.availability && setSelectedRoom(room.roomId)}
+            className={`border p-6 rounded-lg bg-opacity-70 bg-[#093024] transition-transform transform hover:scale-105 ${
+              selectedRoom === room.roomId
+                ? "border-4 border-red-500 shadow-lg"
+                : room.availability
+                ? "cursor-pointer border border-gray-300"
+                : "cursor-not-allowed border border-gray-500 opacity-50"
             }`}
           >
-            <Image src={room.imageUrl} alt={room.name} width={500} height={300} className="rounded-md" />
-            <h3 className="text-2xl text-white font-bold text-center mt-4">{room.name}</h3>
-            <p className="text-lg text-gray-300 text-center mt-2">{room.description}</p>
-            <p className="text-lg text-red-400 text-center mt-2 font-bold">₹{room.rate}</p>
+            <Image
+              src={room.imageUrl}
+              alt={room.name}
+              width={500}
+              height={300}
+              className="rounded-md"
+            />
+            <h3 className="text-2xl text-white font-bold text-center mt-4">
+              {room.name}
+            </h3>
+            <p className="text-lg text-gray-300 text-center mt-2">
+              {room.description}
+            </p>
+            <p className="text-lg text-red-400 text-center mt-2 font-bold">
+              ₹{room.rate}
+            </p>
           </div>
         ))}
       </div>
-      
+
       {/* Navigation Buttons */}
       <div className="flex justify-center mt-6">
         <button
           className="bg-gray-300 text-black py-2 px-8 rounded"
-          onClick={() => router.push('/')} // Navigate to home page
+          onClick={() => router.push("/")}
         >
           Back
         </button>
         <button
-          className={`bg-red-500 text-white py-2 px-8 rounded ml-4 ${!selectedRoom ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`bg-red-500 text-white py-2 px-8 rounded ml-4 ${
+            !selectedRoom ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           onClick={() => setStep(2)}
           disabled={!selectedRoom}
         >
@@ -100,7 +148,6 @@ const renderRoomSelection = () => {
       </div>
     </div>
   );
-};
 
   
 
@@ -186,62 +233,69 @@ const renderTimeSlots = () => (
   
    
 
-  const renderDecorations = () => (
-    <div className="relative min-h-screen bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-8">
-      <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">Choose Decorations</h2>
-      
-      {/* Decorations Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-        {decorations.map((decoration) => (
-          <div
-            key={decoration.value}
-            onClick={() =>
-              setSelectedDecorations((prev) =>
-                prev.includes(decoration.value)
-                  ? prev.filter((d) => d !== decoration.value)
-                  : [...prev, decoration.value]
-              )
-            }
-            className={`flex flex-col items-center border p-4 rounded-lg cursor-pointer bg-opacity-70 bg-[#093024] text-white transition-all duration-200 transform hover:scale-105 ${
-              selectedDecorations.includes(decoration.value)
-                ? 'border-red-500 shadow-lg'
-                : 'border-gray-300'
-            }`}
-            style={{ height: '250px' }}
-          >
-            {/* Decoration Image */}
-            <Image
-              src={decoration.image}
-              alt={decoration.label}
-              width={80}
-              height={80}
-              className="rounded-md object-cover mb-4"
-            />
-            
-            {/* Decoration Details */}
-            <h3 className="text-xl font-bold text-center mb-1">{decoration.label}</h3>
-            <p className="text-lg font-semibold">₹{decoration.rate}</p>
-          </div>
-        ))}
-      </div>
-      
-      {/* Navigation Buttons */}
-      <div className="flex justify-center mt-6 space-x-4">
-        <button
-          className="bg-gray-300 text-black py-2 px-8 rounded"
-          onClick={() => setStep(3)}
+const renderDecorations = () => (
+  <div className="relative min-h-screen bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-8">
+    <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">
+      Choose Decorations
+    </h2>
+
+    {/* Decorations Grid */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+      {decorations.map((decoration) => (
+        <div
+          key={decoration.id}
+          onClick={() =>
+            decoration.availability &&
+            setSelectedDecorations((prev) =>
+              prev.includes(decoration.id)
+                ? prev.filter((d) => d !== decoration.id)
+                : [...prev, decoration.id]
+            )
+          }
+          className={`flex flex-col items-center border p-4 rounded-lg bg-opacity-70 bg-[#093024] text-white transition-all duration-200 transform hover:scale-105 ${
+            selectedDecorations.includes(decoration.id)
+              ? "border-red-500 shadow-lg"
+              : decoration.availability
+              ? "cursor-pointer border-gray-300"
+              : "cursor-not-allowed border-gray-500 opacity-50"
+          }`}
+          style={{ height: "250px" }}
         >
-          Back
-        </button>
-        <button
-          className="bg-red-500 text-white py-2 px-8 rounded"
-          onClick={() => setStep(5)}
-        >
-          Next
-        </button>
-      </div>
+          {/* Decoration Image */}
+          <Image
+            src={decoration.image}
+            alt={decoration.label}
+            width={80}
+            height={80}
+            className="rounded-md object-cover mb-4"
+          />
+
+          {/* Decoration Details */}
+          <h3 className="text-xl font-bold text-center mb-1">
+            {decoration.label}
+          </h3>
+          <p className="text-lg font-semibold">₹{decoration.rate}</p>
+        </div>
+      ))}
     </div>
-  );
+
+    {/* Navigation Buttons */}
+    <div className="flex justify-center mt-6 space-x-4">
+      <button
+        className="bg-gray-300 text-black py-2 px-8 rounded"
+        onClick={() => setStep(3)}
+      >
+        Back
+      </button>
+      <button
+        className="bg-red-500 text-white py-2 px-8 rounded"
+        onClick={() => setStep(5)}
+      >
+        Next
+      </button>
+    </div>
+  </div>
+);
   
 
   const renderUserDetailsForm = () => {
@@ -379,9 +433,9 @@ const renderTimeSlots = () => (
 
   const renderSummary = () => {
     // Calculate total amount
-    const roomCost = rooms.find((room) => room.id === selectedRoom)?.rate || 0;
+    const roomCost = rooms.find((room) => room.roomId === selectedRoom)?.rate || 0;
     const decorationCost = selectedDecorations.reduce((total, d) => {
-      const decoration = decorations.find((dec) => dec.value === d);
+      const decoration = decorations.find((dec) => dec.id === d);
       return total + (decoration ? decoration.rate : 0);
     }, 0);
     const cakeCost = addCake ? 500 : 0;
@@ -402,7 +456,7 @@ const renderTimeSlots = () => (
   
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Room:</p>
-            <p className="text-base">{rooms.find((room) => room.id === selectedRoom)?.name}</p>
+            <p className="text-base">{rooms.find((room) => room.roomId === selectedRoom)?.name}</p>
           </div>
   
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
@@ -417,7 +471,7 @@ const renderTimeSlots = () => (
   
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Decorations:</p>
-            <p className="text-base">{selectedDecorations.map((d) => decorations.find((dec) => dec.value === d)?.label).join(', ') || 'None'}</p>
+            <p className="text-base">{selectedDecorations.map((d) => decorations.find((dec) => dec.id === d)?.label).join(', ') || 'None'}</p>
           </div>
   
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
