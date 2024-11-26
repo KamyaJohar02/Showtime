@@ -15,6 +15,7 @@ interface Booking {
   timeSlot: string;
   decorations: string[]; // Array of decoration labels
   cake: boolean;
+  people: number;
   advanceAmount: number;
   dueAmount: number;
   status: string;
@@ -109,6 +110,7 @@ const TodayBookings: React.FC = () => {
               <th className="border border-gray-300 p-2">Name</th>
               <th className="border border-gray-300 p-2">Email</th>
               <th className="border border-gray-300 p-2">Mobile</th>
+              <th className="border border-gray-300 p-2">Guest Count</th>
               <th className="border border-gray-300 p-2">Room</th>
               <th className="border border-gray-300 p-2">Date</th>
               <th className="border border-gray-300 p-2">Time Slot</th>
@@ -128,6 +130,7 @@ const TodayBookings: React.FC = () => {
                     <td className="border border-gray-300 p-2">{booking.name}</td>
                     <td className="border border-gray-300 p-2">{booking.email}</td>
                     <td className="border border-gray-300 p-2">{booking.mobile}</td>
+                    <td className="border border-gray-300 p-2">{booking.people}</td>
                     <td className="border border-gray-300 p-2">
                       <input
                         type="text"
@@ -247,6 +250,7 @@ const TodayBookings: React.FC = () => {
                     <td className="border border-gray-300 p-2">{booking.name}</td>
                     <td className="border border-gray-300 p-2">{booking.email}</td>
                     <td className="border border-gray-300 p-2">{booking.mobile}</td>
+                    <td className="border border-gray-300 p-2">{booking.people}</td>
                                         <td className="border border-gray-300 p-2">{booking.room}</td>
                                         <td className="border border-gray-300 p-2">{booking.date}</td>
                                         <td className="border border-gray-300 p-2">{booking.timeSlot}</td>

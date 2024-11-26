@@ -41,79 +41,61 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-md">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-red-600 mb-6">Admin Panel</h2>
-          <nav className="space-y-4">
+      <aside className="w-40 bg-white shadow-md"> {/* Reduced width */}
+        <div className="p-2"> {/* Reduced padding */}
+          <h2 className="text-xl font-bold text-red-600 mb-6">Admin Panel</h2> {/* Smaller heading */}
+          <nav className="space-y-3"> {/* Reduced vertical spacing */}
             <button
               onClick={() => setActiveSection("dashboard")}
-              className={`block text-lg ${
-                activeSection === "dashboard" ? "text-red-600" : "text-gray-800"
-              } hover:text-red-600`}
+              className={`block text-sm ${activeSection === "dashboard" ? "text-red-600" : "text-gray-800"} hover:text-red-600`} /* Reduced text size */
             >
               Dashboard
             </button>
             <button
               onClick={() => setActiveSection("addBookings")}
-              className={`block text-lg ${
-                activeSection === "addBookings" ? "text-red-600" : "text-gray-800"
-              } hover:text-red-600`}
+              className={`block text-sm ${activeSection === "addBookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
             >
               Add Bookings
             </button>
             <button
               onClick={() => setActiveSection("todayBookings")}
-              className={`block text-lg ${
-                activeSection === "todayBookings" ? "text-red-600" : "text-gray-800"
-              } hover:text-red-600`}
+              className={`block text-sm ${activeSection === "todayBookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
             >
               Today's Bookings
             </button>
             <button
               onClick={() => setActiveSection("bookings")}
-              className={`block text-lg ${
-                activeSection === "bookings" ? "text-red-600" : "text-gray-800"
-              } hover:text-red-600`}
+              className={`block text-sm ${activeSection === "bookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
             >
               Manage Bookings
             </button>
             <button
               onClick={() => setActiveSection("completedBookings")}
-              className={`block text-lg ${
-                activeSection === "completedBookings" ? "text-red-600" : "text-gray-800"
-              } hover:text-red-600`}
+              className={`block text-sm ${activeSection === "completedBookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
             >
               Completed Bookings
             </button>
             <button
               onClick={() => setActiveSection("rooms")}
-              className={`block text-lg ${
-                activeSection === "rooms" ? "text-red-600" : "text-gray-800"
-              } hover:text-red-600`}
+              className={`block text-sm ${activeSection === "rooms" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
             >
               Manage Rooms
             </button>
             <button
               onClick={() => setActiveSection("dates")}
-              className={`block text-lg ${
-                activeSection === "dates" ? "text-red-600" : "text-gray-800"
-              } hover:text-red-600`}
+              className={`block text-sm ${activeSection === "dates" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
             >
               Manage Dates
             </button>
             <button
               onClick={() => setActiveSection("decorations")}
-              className={`block text-lg ${
-                activeSection === "decorations" ? "text-red-600" : "text-gray-800"
-              } hover:text-red-600`}
+              className={`block text-sm ${activeSection === "decorations" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
             >
               Manage Decorations
             </button>
             <button
               onClick={() => setActiveSection("timeSlots")}
-              className={`block text-lg ${
-                activeSection === "timeSlots" ? "text-red-600" : "text-gray-800"
-              } hover:text-red-600`}
+              className={`block text-sm ${activeSection === "timeSlots" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
             >
               Manage Time Slots
             </button>
@@ -122,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-8">{renderActiveSection()}</main>
+      <main className="flex-1 p-0">{renderActiveSection()}</main>
     </div>
   );
 }

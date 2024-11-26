@@ -23,6 +23,7 @@ const AddBooking: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [mobile, setMobile] = useState<string>("");
+    const [people, setPeople] = useState<number>(1);
 
     useEffect(() => {
         const loadRooms = async () => {
@@ -70,7 +71,8 @@ const AddBooking: React.FC = () => {
         const cakeCost = wantCake ? 500 : 0;
 
         setAdvanceAmount((roomRate + decorationRates + cakeCost).toString());
-    }, [selectedRoom, selectedDecorations, wantCake, rooms, decorations]);
+        setDueAmount((roomRate + decorationRates + cakeCost - Number(advanceAmount)).toString());
+    }, [selectedRoom, selectedDecorations, wantCake, rooms, decorations, advanceAmount]);
 
     const handleAddBooking = async () => {
         if (!name || !email || !mobile || !selectedRoom || !selectedDate || !selectedTimeSlot) {
@@ -100,6 +102,7 @@ const AddBooking: React.FC = () => {
             advanceAmount: Number(advanceAmount),
             dueAmount: Number(dueAmount),
             status,
+            people,
         };
 
         try {
@@ -116,6 +119,7 @@ const AddBooking: React.FC = () => {
             setAdvanceAmount("0");
             setDueAmount("0");
             setStatus("pending");
+            setPeople(1);
         } catch (err) {
             console.error("Error adding booking:", err);
             alert("Failed to add booking.");
@@ -135,53 +139,70 @@ const AddBooking: React.FC = () => {
     };
 
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold mb-6">Add Booking</h1>
+        <div className="p-4 max-w-screen-md mx-auto">
+            <h1 className="text-xl font-bold mb-4">Add Booking</h1>
 
-            <div className="mb-4">
-                <label htmlFor="name" className="block text-lg font-medium mb-2">
-                    Name
-                </label>
-                <input
-                    type="text"
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter Name"
-                    className="p-2 border rounded w-full"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label htmlFor="name" className="block text-sm font-medium mb-1">
+                        Name
+                    </label>
+                    <input
+                        type="text"
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Name"
+                        className="p-2 border rounded w-full"
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="email" className="block text-sm font-medium mb-1">
+                        Email
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email"
+                        className="p-2 border rounded w-full"
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="mobile" className="block text-sm font-medium mb-1">
+                        Mobile
+                    </label>
+                    <input
+                        type="text"
+                        id="mobile"
+                        value={mobile}
+                        onChange={(e) => setMobile(e.target.value)}
+                        placeholder="Mobile"
+                        className="p-2 border rounded w-full"
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="people" className="block text-sm font-medium mb-1">
+                        Guests
+                    </label>
+                    <input
+                        type="number"
+                        id="people"
+                        value={people}
+                        onChange={(e) => setPeople(Number(e.target.value))}
+                        placeholder="Guests"
+                        className="p-2 border rounded w-full"
+                        min={1}
+                    />
+                </div>
             </div>
 
             <div className="mb-4">
-                <label htmlFor="email" className="block text-lg font-medium mb-2">
-                    Email
-                </label>
-                <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter Email"
-                    className="p-2 border rounded w-full"
-                />
-            </div>
-
-            <div className="mb-4">
-                <label htmlFor="mobile" className="block text-lg font-medium mb-2">
-                    Mobile Number
-                </label>
-                <input
-                    type="text"
-                    id="mobile"
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
-                    placeholder="Enter Mobile Number"
-                    className="p-2 border rounded w-full"
-                />
-            </div>
-
-            <div className="mb-4">
-                <label htmlFor="room" className="block text-lg font-medium mb-2">
+                <label htmlFor="room" className="block text-sm font-medium mb-1">
                     Room
                 </label>
                 <select
@@ -191,7 +212,7 @@ const AddBooking: React.FC = () => {
                     className="p-2 border rounded w-full"
                 >
                     <option value="" disabled>
-                        Select a room
+                        Select Room
                     </option>
                     {rooms.map((room) => (
                         <option key={room.id} value={room.id}>
@@ -202,24 +223,22 @@ const AddBooking: React.FC = () => {
             </div>
 
             <div className="mb-4">
-                <label htmlFor="date" className="block text-lg font-medium mb-2">
+                <label htmlFor="date" className="block text-sm font-medium mb-1">
                     Date
                 </label>
                 <DatePicker
-  id="date"
-  selected={selectedDate}
-  onChange={(date) => setSelectedDate(date)}
-  dateFormat="yyyy-MM-dd"
-  placeholderText="Select a date"
-  className="p-2 border rounded w-full"
-  excludeDates={disabledDates}
-  showTimeSelect={false} // Ensure no time is involved
-  calendarStartDay={0} // Start week on Sunday
-/>
+                    id="date"
+                    selected={selectedDate}
+                    onChange={(date) => setSelectedDate(date)}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="Date"
+                    className="p-2 border rounded w-full"
+                    excludeDates={disabledDates}
+                />
             </div>
 
             <div className="mb-4">
-                <label htmlFor="timeSlot" className="block text-lg font-medium mb-2">
+                <label htmlFor="timeSlot" className="block text-sm font-medium mb-1">
                     Time Slot
                 </label>
                 <select
@@ -229,7 +248,7 @@ const AddBooking: React.FC = () => {
                     className="p-2 border rounded w-full"
                 >
                     <option value="" disabled>
-                        Select a time slot
+                        Select Time Slot
                     </option>
                     {timeSlots.map((slot) => (
                         <option key={slot.id} value={slot.time}>
@@ -240,7 +259,7 @@ const AddBooking: React.FC = () => {
             </div>
 
             <div className="mb-4">
-                <label htmlFor="decorations" className="block text-lg font-medium mb-2">
+                <label htmlFor="decorations" className="block text-sm font-medium mb-1">
                     Decorations
                 </label>
                 <select
@@ -256,11 +275,11 @@ const AddBooking: React.FC = () => {
                             value={decoration.id}
                             disabled={!decoration.availability}
                         >
-                            {decoration.label} - ₹{decoration.rate}
+                            {decoration.label}
                         </option>
                     ))}
                 </select>
-                    <div className="mt-2">
+                <div className="mt-2">
                     {selectedDecorations.map((id) => {
                         const decoration = decorations.find((decoration) => decoration.id === id);
                         return (
@@ -276,9 +295,9 @@ const AddBooking: React.FC = () => {
             </div>
 
             <div className="mb-4">
-                <label className="block text-lg font-medium mb-2">Do you want a Cake?</label>
-                <div>
-                    <label className="mr-4">
+                <label className="block text-sm font-medium mb-1">Want Cake?</label>
+                <div className="flex space-x-4">
+                    <label>
                         <input
                             type="radio"
                             name="cake"
@@ -301,51 +320,53 @@ const AddBooking: React.FC = () => {
                 </div>
             </div>
 
-            <div className="mb-4">
-                <label htmlFor="advanceAmount" className="block text-lg font-medium mb-2">
-                    Advance Amount
-                </label>
-                <input
-                    type="text"
-                    id="advanceAmount"
-                    value={advanceAmount}
-                    onChange={(e) => setAdvanceAmount(e.target.value)}
-                    className="p-2 border rounded w-full"
-                />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label htmlFor="advanceAmount" className="block text-sm font-medium mb-1">
+                        Advance
+                    </label>
+                    <input
+                        type="text"
+                        id="advanceAmount"
+                        value={advanceAmount}
+                        onChange={(e) => setAdvanceAmount(e.target.value)}
+                        className="p-2 border rounded w-full"
+                    />
+                </div>
 
-            <div className="mb-4">
-                <label htmlFor="dueAmount" className="block text-lg font-medium mb-2">
-                    Due Amount
-                </label>
-                <input
-                    type="text"
-                    id="dueAmount"
-                    value={dueAmount}
-                    onChange={(e) => setDueAmount(e.target.value)}
-                    className="p-2 border rounded w-full"
-                />
-            </div>
+                <div>
+                    <label htmlFor="dueAmount" className="block text-sm font-medium mb-1">
+                        Due
+                    </label>
+                    <input
+                        type="text"
+                        id="dueAmount"
+                        value={dueAmount}
+                        onChange={(e) => setDueAmount(e.target.value)}
+                        className="p-2 border rounded w-full"
+                    />
+                </div>
 
-            <div className="mb-4">
-                <label htmlFor="status" className="block text-lg font-medium mb-2">
-                    Status
-                </label>
-                <select
-                    id="status"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="p-2 border rounded w-full"
-                >
-                    <option value="pending">Pending</option>
-                    <option value="fulfilled">Fulfilled</option>
-                </select>
+                <div>
+                    <label htmlFor="status" className="block text-sm font-medium mb-1">
+                        Status
+                    </label>
+                    <select
+                        id="status"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        className="p-2 border rounded w-full"
+                    >
+                        <option value="pending">Pending</option>
+                        <option value="fulfilled">Fulfilled</option>
+                    </select>
+                </div>
             </div>
 
             <div>
                 <button
                     onClick={handleAddBooking}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                     Add Booking
                 </button>

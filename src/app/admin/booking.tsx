@@ -15,6 +15,7 @@ interface Booking {
   timeSlot: string;
   decorations: string[]; // Array of decoration labels
   cake: boolean;
+  people: number;
   advanceAmount: number;
   dueAmount: number;
   status: string;
@@ -184,9 +185,10 @@ const ManageBookings: React.FC = () => {
               <th className="border border-gray-300 p-2">Name</th>
               <th className="border border-gray-300 p-2">Email</th>
               <th className="border border-gray-300 p-2">Mobile</th>
+              <th className="border border-gray-300 p-2">Guest Count</th>
               <th className="border border-gray-300 p-2">Room</th>
               <th className="border border-gray-300 p-2">Date</th>
-              <th className="border border-gray-300 p-2">Time Slot</th>
+              <th className="border border-gray-300 p-2">Time Slot</th> 
               <th className="border border-gray-300 p-2">Decorations</th>
               <th className="border border-gray-300 p-2">Cake</th>
               <th className="border border-gray-300 p-2">Advance Amount</th>
@@ -203,6 +205,7 @@ const ManageBookings: React.FC = () => {
                     <td className="border border-gray-300 p-2">{booking.name}</td>
                     <td className="border border-gray-300 p-2">{booking.email}</td>
                     <td className="border border-gray-300 p-2">{booking.mobile}</td>
+                    <td className="border border-gray-300 p-2">{booking.people}</td>
                     <td className="border border-gray-300 p-2">
                       <input
                         type="text"
@@ -322,6 +325,7 @@ const ManageBookings: React.FC = () => {
                     <td className="border border-gray-300 p-2">{booking.name}</td>
                     <td className="border border-gray-300 p-2">{booking.email}</td>
                     <td className="border border-gray-300 p-2">{booking.mobile}</td>
+                    <td className="border border-gray-300 p-2">{booking.people}</td>
                     <td className="border border-gray-300 p-2">{booking.room}</td>
                     <td className="border border-gray-300 p-2">{booking.date}</td>
                     <td className="border border-gray-300 p-2">{booking.timeSlot}</td>

@@ -5,8 +5,10 @@ import Image from "next/image";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { db } from "@/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, addDoc } from "firebase/firestore"; 
 import { useRouter } from "next/navigation";
+
+
 
 interface Room {
   roomId: string;
@@ -25,6 +27,13 @@ interface Decoration {
   availability: boolean;
 }
 
+interface TimeSlot {
+  id: string;        // Unique identifier for the time slot
+  name: string;      // Name of the time slot (e.g., "Slot 1")
+  time: string;      // Time range (e.g., "10:00 AM - 12:00 PM")
+  availability: boolean; // Whether the time slot is available
+}
+
 const Booking: React.FC = () => {
   const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -39,6 +48,10 @@ const Booking: React.FC = () => {
   const [numPeople, setNumPeople] = useState<number>(1);
   const [email, setEmail] = useState<string>("");
   const [addCake, setAddCake] = useState(false);
+  const [disabledDates, setDisabledDates] = useState<Date[]>([]);
+  const [slots, setSlots] = useState<TimeSlot[]>([]);
+
+
 
   /*const rooms: Room[] = [
     { id: 'room1', name: 'Room 1', description: 'A cozy room with a 150-inch screen.', imageUrl: '/Images/Room1.jpg', rate: 1400 },
@@ -53,13 +66,13 @@ const Booking: React.FC = () => {
     { value: 'fog', label: 'Fog', rate: 250, image: '/Images/smoke.jpg' },
   ];*/
 
-  const slots = [
+  /*const slots = [
     '10:00 AM - 12:00 PM',
     '12:00 PM - 02:00 PM',
     '02:00 PM - 04:00 PM',
     '04:00 PM - 06:00 PM',
     '06:00 PM - 08:00 PM',
-  ];
+  ];*/
 
 
   useEffect(() => {
@@ -73,7 +86,7 @@ const Booking: React.FC = () => {
           ...doc.data(),
         })) as Room[];
         setRooms(fetchedRooms);
-
+  
         // Fetch decorations
         const decorationsCollection = collection(db, "decorations");
         const decorationDocs = await getDocs(decorationsCollection);
@@ -82,13 +95,31 @@ const Booking: React.FC = () => {
           ...doc.data(),
         })) as Decoration[];
         setDecorations(fetchedDecorations);
+  
+        // Fetch disabled dates
+        const disabledDatesCollection = collection(db, "disabledDates");
+        const disabledDateDocs = await getDocs(disabledDatesCollection);
+        const fetchedDisabledDates = disabledDateDocs.docs.map((doc) => new Date(doc.data().date));
+        setDisabledDates(fetchedDisabledDates);
+  
+        // Fetch time slots
+        const timeSlotsCollection = collection(db, "timeSlots");
+        const timeSlotDocs = await getDocs(timeSlotsCollection);
+        const fetchedTimeSlots = timeSlotDocs.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+          time: doc.data().time,
+          availability: doc.data().availability,
+        })) as TimeSlot[];
+        setSlots(fetchedTimeSlots);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
+  
     fetchData();
   }, []);
+  
 
   const renderRoomSelection = () => (
     <div className="flex flex-col items-center min-h-screen bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-4 sm:p-8">
@@ -163,18 +194,18 @@ const renderCalendar = () => {
       
       {/* Calendar Card */}
       <div className="bg-[#093024] bg-opacity-70 rounded-lg shadow-lg p-6 sm:p-8 md:p-10 lg:p-12 w-[80vw] sm:w-[60vw] md:w-[50vw] lg:w-[40vw] max-w-lg h-[50vh] sm:h-[60vh] md:h-[65vh] flex flex-col items-center">
-        <DayPicker
-          mode="single"
-          selected={selectedDate}
-          onSelect={(date) => setSelectedDate(date)}
-          disabled={{ before: today }} // Disable past dates
-          defaultMonth={today} // Start on current month
-          className="bg-[#093024] rounded-lg text-white w-full flex justify-center"
-          styles={{
-            caption: { textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold' }, // Font size for month and year
-            day: { justifyContent: 'center', fontSize: '1.1rem' }, // Font size for dates
-          }}
-        />
+      <DayPicker
+  mode="single"
+  selected={selectedDate}
+  onSelect={(date) => setSelectedDate(date)}
+  disabled={[...disabledDates, { before: today }]} // Include fetched dates
+  defaultMonth={today} // Start on current month
+  className="bg-[#093024] rounded-lg text-white w-full flex justify-center"
+  styles={{
+    caption: { textAlign: "center", fontSize: "1.5rem", fontWeight: "bold" },
+    day: { justifyContent: "center", fontSize: "1.1rem" },
+  }}
+/>
         
         {/* Navigation Buttons */}
         <div className="flex justify-center mt-6 space-x-4">
@@ -193,36 +224,38 @@ const renderTimeSlots = () => (
     <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">
       Select a Time Slot
     </h2>
-    
-    {/* Card Container */}
     <div className="bg-[#093024] bg-opacity-70 p-8 sm:p-10 rounded-lg shadow-lg w-[80vw] sm:w-[70vw] md:w-[50vw] lg:w-[45vw] max-w-xl h-auto flex flex-col items-center">
-      {/* Time Slots */}
       <div className="flex flex-col gap-4 w-full">
         {slots.map((slot) => (
           <div
-            key={slot}
-            className={`p-4 rounded-lg cursor-pointer text-center text-lg sm:text-xl md:text-2xl transition-transform duration-300 transform hover:scale-105 ${
-              selectedSlot === slot ? 'bg-red-500 text-white' : 'bg-[#0c3b2e] text-gray-300'
+            key={slot.id}
+            className={`p-4 rounded-lg text-center text-lg sm:text-xl md:text-2xl transition-transform duration-300 transform hover:scale-105 ${
+              selectedSlot === slot.id
+                ? "bg-red-500 text-white"
+                : slot.availability
+                ? "bg-[#0c3b2e] text-gray-300 cursor-pointer"
+                : "bg-gray-500 text-gray-700 cursor-not-allowed"
             }`}
-            onClick={() => setSelectedSlot(slot)}
+            onClick={() => slot.availability && setSelectedSlot(slot.id)}
           >
-            {slot}
+            {slot.time}
           </div>
         ))}
       </div>
     </div>
-    
-    {/* Navigation Buttons */}
     <div className="flex justify-center mt-6 space-x-4">
-      <button className="bg-gray-300 text-black py-2 px-6 sm:px-8 rounded" onClick={() => setStep(2)}>
+      <button
+        className="bg-gray-300 text-black py-2 px-6 sm:px-8 rounded"
+        onClick={() => setStep(2)}
+      >
         Back
       </button>
       <button
         className={`py-2 px-6 sm:px-8 rounded ${
-          selectedSlot ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          selectedSlot ? "bg-red-500 text-white" : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
         onClick={() => selectedSlot && setStep(4)}
-        disabled={!selectedSlot} // Disable button if no slot is selected
+        disabled={!selectedSlot}
       >
         Next
       </button>
@@ -429,6 +462,42 @@ const renderDecorations = () => (
     );
   };
   
+  const handleBookingSubmit = async () => {
+    try {
+      const bookingData = {
+        name,
+        mobile: phoneNumber,
+        email,
+        room: rooms.find((room) => room.roomId === selectedRoom)?.name || "",
+        date: selectedDate?.toISOString().split("T")[0],
+        status: "pending",
+        timeSlot: selectedSlot,
+        decorations: selectedDecorations.map((d) =>
+          decorations.find((dec) => dec.id === d)?.label
+        ),
+        wantCake: addCake,
+        advanceAmount: 500,
+        dueAmount:
+  (rooms.find((room) => room.roomId === selectedRoom)?.rate || 0) +
+  selectedDecorations.reduce((total, d) => {
+    const decoration = decorations.find((dec) => dec.id === d);
+    return total + (decoration ? decoration.rate : 0);
+  }, 0) +
+  (addCake ? 500 : 0) -
+  500,
+
+        people: numPeople,
+      };
+  
+      await addDoc(collection(db, "bookings"), bookingData);
+  
+      alert("Booking submitted successfully!");
+      router.push("/"); // Navigate to another page or reset the form
+    } catch (error) {
+      console.error("Error submitting booking:", error);
+      alert("Failed to submit booking. Please try again.");
+    }
+  };
   
 
   const renderSummary = () => {
@@ -445,40 +514,49 @@ const renderDecorations = () => (
   
     return (
       <div className="min-h-screen flex flex-col items-center bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-8">
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">Booking Summary</h2>
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">
+          Booking Summary
+        </h2>
         <div className="bg-[#093024] bg-opacity-70 text-black p-6 rounded-lg w-full max-w-md shadow-lg space-y-3">
-          
-          {/* Detail Box */}
+          {/* Detail Boxes */}
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Name:</p>
             <p className="text-base">{name}</p>
           </div>
-  
+          <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
+            <p className="font-semibold text-lg">Phone Number:</p>
+            <p className="text-base">{phoneNumber}</p>
+          </div>
+          <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
+            <p className="font-semibold text-lg">Email:</p>
+            <p className="text-base">{email}</p>
+          </div>
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Room:</p>
-            <p className="text-base">{rooms.find((room) => room.roomId === selectedRoom)?.name}</p>
+            <p className="text-base">
+              {rooms.find((room) => room.roomId === selectedRoom)?.name}
+            </p>
           </div>
-  
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Date:</p>
             <p className="text-base">{selectedDate?.toLocaleDateString()}</p>
           </div>
-  
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Time Slot:</p>
             <p className="text-base">{selectedSlot}</p>
           </div>
-  
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Decorations:</p>
-            <p className="text-base">{selectedDecorations.map((d) => decorations.find((dec) => dec.id === d)?.label).join(', ') || 'None'}</p>
+            <p className="text-base">
+              {selectedDecorations
+                .map((d) => decorations.find((dec) => dec.id === d)?.label)
+                .join(", ") || "None"}
+            </p>
           </div>
-  
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Cake:</p>
-            <p className="text-base">{addCake ? 'Yes' : 'No'}</p>
+            <p className="text-base">{addCake ? "Yes" : "No"}</p>
           </div>
-  
           {/* Total Amount, Advance, and Due */}
           <div className="bg-[#093024] bg-opacity-90 text-white px-4 py-4 rounded-lg shadow-md border-t-4 border-red-500">
             <p className="font-bold text-xl">Total Amount: ₹{totalAmount}</p>
@@ -486,19 +564,25 @@ const renderDecorations = () => (
             <p className="text-sm">Due: ₹{dueAmount}</p>
           </div>
         </div>
-  
         {/* Navigation Buttons */}
         <div className="flex justify-center mt-10 space-x-6">
-          <button className="bg-gray-300 text-black py-2 px-8 rounded-full shadow-md" onClick={() => setStep(5)}>
+          <button
+            className="bg-gray-300 text-black py-2 px-8 rounded-full shadow-md"
+            onClick={() => setStep(5)}
+          >
             Back
           </button>
-          <button className="bg-red-500 text-white py-2 px-8 rounded-full shadow-md" onClick={() => alert('Booking Submitted')}>
-            Submit and Pay
-          </button>
+          <button
+  className="bg-red-500 text-white py-2 px-8 rounded-full shadow-md"
+  onClick={handleBookingSubmit} // Call the function here
+>
+  Submit and Pay
+</button>
         </div>
       </div>
     );
   };
+  
   
   
 
