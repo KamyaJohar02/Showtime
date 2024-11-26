@@ -5,7 +5,7 @@ import Image from "next/image";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { db } from "@/firebaseConfig";
-import { collection, getDocs, addDoc } from "firebase/firestore"; 
+import { collection, getDocs, addDoc, query, where } from "firebase/firestore"; 
 import { useRouter } from "next/navigation";
 
 
@@ -31,7 +31,8 @@ interface TimeSlot {
   id: string;        // Unique identifier for the time slot
   name: string;      // Name of the time slot (e.g., "Slot 1")
   time: string;      // Time range (e.g., "10:00 AM - 12:00 PM")
-  availability: boolean; // Whether the time slot is available
+  availability: boolean;
+  isBooked?: boolean; // Whether the time slot is available
 }
 
 const Booking: React.FC = () => {
@@ -77,48 +78,94 @@ const Booking: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        // Fetch rooms
-        const roomsCollection = collection(db, "rooms");
-        const roomDocs = await getDocs(roomsCollection);
-        const fetchedRooms = roomDocs.docs.map((doc) => ({
-          roomId: doc.id,
-          ...doc.data(),
-        })) as Room[];
-        setRooms(fetchedRooms);
-  
-        // Fetch decorations
-        const decorationsCollection = collection(db, "decorations");
-        const decorationDocs = await getDocs(decorationsCollection);
-        const fetchedDecorations = decorationDocs.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Decoration[];
-        setDecorations(fetchedDecorations);
-  
-        // Fetch disabled dates
-        const disabledDatesCollection = collection(db, "disabledDates");
-        const disabledDateDocs = await getDocs(disabledDatesCollection);
-        const fetchedDisabledDates = disabledDateDocs.docs.map((doc) => new Date(doc.data().date));
-        setDisabledDates(fetchedDisabledDates);
-  
-        // Fetch time slots
-        const timeSlotsCollection = collection(db, "timeSlots");
-        const timeSlotDocs = await getDocs(timeSlotsCollection);
-        const fetchedTimeSlots = timeSlotDocs.docs.map((doc) => ({
-          id: doc.id,
-          name: doc.data().name,
-          time: doc.data().time,
-          availability: doc.data().availability,
-        })) as TimeSlot[];
-        setSlots(fetchedTimeSlots);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+        try {
+            // Fetch rooms
+            const roomsCollection = collection(db, "rooms");
+            const roomDocs = await getDocs(roomsCollection);
+            const fetchedRooms = roomDocs.docs.map((doc) => ({
+                roomId: doc.id,
+                ...doc.data(),
+            })) as Room[];
+            setRooms(fetchedRooms);
+
+            // Fetch decorations
+            const decorationsCollection = collection(db, "decorations");
+            const decorationDocs = await getDocs(decorationsCollection);
+            const fetchedDecorations = decorationDocs.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            })) as Decoration[];
+            setDecorations(fetchedDecorations);
+
+            // Fetch disabled dates
+            const disabledDatesCollection = collection(db, "disabledDates");
+            const disabledDateDocs = await getDocs(disabledDatesCollection);
+            const fetchedDisabledDates = disabledDateDocs.docs.map(
+                (doc) => new Date(doc.data().date)
+            );
+            setDisabledDates(fetchedDisabledDates);
+
+            // Fetch time slots
+            const timeSlotsCollection = collection(db, "timeSlots");
+            const timeSlotDocs = await getDocs(timeSlotsCollection);
+            const fetchedTimeSlots = timeSlotDocs.docs.map((doc) => ({
+                id: doc.id,
+                name: doc.data().name,
+                time: doc.data().time,
+                availability: doc.data().availability,
+            })) as TimeSlot[];
+
+            // Default slots without any booked information
+            if (!selectedRoom || !selectedDate) {
+                const defaultSlots = fetchedTimeSlots.map((slot) => ({
+                    ...slot,
+                    isBooked: false, // No slot is booked
+                }));
+                setSlots(defaultSlots);
+                return; // Exit early if room or date is not selected
+            }
+
+            // Format selected date to "YYYY-MM-DD"
+            const formattedDate = `${selectedDate.getFullYear()}-${String(
+                selectedDate.getMonth() + 1
+            ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+
+            // Query booked collection for selected room and date
+            const bookedQuery = query(
+                collection(db, "booked"),
+                where(
+                    "room",
+                    "==",
+                    rooms.find((room) => room.roomId === selectedRoom)?.name
+                ),
+                where("date", "==", formattedDate)
+            );
+            const bookedDocs = await getDocs(bookedQuery);
+
+            // Extract booked time slots
+            const bookedSlots = new Set(
+                bookedDocs.docs.map((doc) => doc.data().timeSlot)
+            );
+            console.log("Fetched Booked Slots:", Array.from(bookedSlots));
+            console.log("Fetched Time Slots:", fetchedTimeSlots);
+
+            // Update slots with the isBooked property based on the time field
+            const updatedSlots = fetchedTimeSlots.map((slot) => ({
+                ...slot,
+                isBooked: bookedSlots.has(slot.time), // Compare with the `time` field instead of `name`
+            }));
+            console.log("Updated Slots:", updatedSlots);
+            setSlots(updatedSlots); // Update state with modified slots
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
     };
-  
+
     fetchData();
-  }, []);
+}, [selectedRoom, selectedDate]); // Ensure dependencies are updated
+
+
+
   
 
   const renderRoomSelection = () => (
@@ -228,15 +275,15 @@ const renderTimeSlots = () => (
       <div className="flex flex-col gap-4 w-full">
         {slots.map((slot) => (
           <div
-            key={slot.id}
-            className={`p-4 rounded-lg text-center text-lg sm:text-xl md:text-2xl transition-transform duration-300 transform hover:scale-105 ${
-              selectedSlot === slot.id
-                ? "bg-red-500 text-white"
-                : slot.availability
-                ? "bg-[#0c3b2e] text-gray-300 cursor-pointer"
-                : "bg-gray-500 text-gray-700 cursor-not-allowed"
-            }`}
-            onClick={() => slot.availability && setSelectedSlot(slot.id)}
+          key={slot.id}
+          className={`p-4 rounded-lg text-center text-lg sm:text-xl md:text-2xl transition-transform duration-300 transform hover:scale-105 ${
+            selectedSlot === slot.time
+              ? "bg-red-500 text-white" // Highlight selected slot
+              : slot.isBooked
+              ? "bg-gray-500 text-gray-700 cursor-not-allowed" // Grey out booked slots
+              : "bg-[#0c3b2e] text-gray-300 cursor-pointer" // Default style
+          }`}
+            onClick={() => !slot.isBooked && setSelectedSlot(slot.time)}
           >
             {slot.time}
           </div>
@@ -464,12 +511,15 @@ const renderDecorations = () => (
   
   const handleBookingSubmit = async () => {
     try {
+      
       const bookingData = {
         name,
         mobile: phoneNumber,
         email,
         room: rooms.find((room) => room.roomId === selectedRoom)?.name || "",
-        date: selectedDate?.toISOString().split("T")[0],
+        date: selectedDate
+  ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`
+  : "",
         status: "pending",
         timeSlot: selectedSlot,
         decorations: selectedDecorations.map((d) =>
@@ -490,6 +540,14 @@ const renderDecorations = () => (
       };
   
       await addDoc(collection(db, "bookings"), bookingData);
+
+      // Add minimal data to the booked collection
+      const bookedData = {
+        room: bookingData.room,
+        date: bookingData.date,
+        timeSlot: bookingData.timeSlot,
+    };
+    await addDoc(collection(db, "booked"), bookedData);
   
       alert("Booking submitted successfully!");
       router.push("/"); // Navigate to another page or reset the form
@@ -538,9 +596,13 @@ const renderDecorations = () => (
             </p>
           </div>
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
-            <p className="font-semibold text-lg">Date:</p>
-            <p className="text-base">{selectedDate?.toLocaleDateString()}</p>
-          </div>
+  <p className="font-semibold text-lg">Date:</p>
+  <p className="text-base">
+  {selectedDate
+    ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`
+    : "Not Selected"}
+</p> {/* Display as "YYYY-MM-DD" */}
+</div>
           <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Time Slot:</p>
             <p className="text-base">{selectedSlot}</p>
