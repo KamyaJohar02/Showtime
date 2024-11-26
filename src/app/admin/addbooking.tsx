@@ -4,13 +4,12 @@ import { useState, useEffect } from "react";
 import { addDocument, fetchDocuments } from "@/lib/firestoreUtils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/firebaseConfig"; // Adjust the path to where your Firebase configuration is defined
 
 
 const AddBooking: React.FC = () => {
     const [rooms, setRooms] = useState<{ id: string; name: string; rate: number }[]>([]);
-    const [timeSlots, setTimeSlots] = useState<{ id: string; time: string }[]>([]);
     const [decorations, setDecorations] = useState<
         { id: string; label: string; rate: number; availability: boolean }[]
     >([]);
@@ -27,43 +26,122 @@ const AddBooking: React.FC = () => {
     const [email, setEmail] = useState<string>("");
     const [mobile, setMobile] = useState<string>("");
     const [people, setPeople] = useState<number>(1);
+    const [timeSlots, setTimeSlots] = useState<{ id: string; time: string; isBooked?: boolean }[]>([]);
+
 
     useEffect(() => {
         const loadRooms = async () => {
-            const fetchedRooms = await fetchDocuments("rooms");
-            setRooms(fetchedRooms.map((room: any) => ({ id: room.id, name: room.name, rate: room.rate })));
+            try {
+                const fetchedRooms = await fetchDocuments("rooms");
+                setRooms(
+                    fetchedRooms.map((room: any) => ({
+                        id: room.id,
+                        name: room.name,
+                        rate: room.rate,
+                    }))
+                );
+            } catch (error) {
+                console.error("Error loading rooms:", error);
+            }
         };
-
+        
+    
         const loadTimeSlots = async () => {
-            const fetchedTimeSlots = await fetchDocuments("timeSlots");
-            setTimeSlots(
-                fetchedTimeSlots.map((slot: any) => ({ id: slot.id, time: slot.time }))
-            );
+            try {
+                const fetchedTimeSlots = await fetchDocuments("timeSlots");
+                setTimeSlots(
+                    fetchedTimeSlots.map((slot: any) => ({
+                        id: slot.id,
+                        time: slot.time,
+                        isBooked: false, // Initialize `isBooked` as false
+                    }))
+                );
+            } catch (error) {
+                console.error("Error loading time slots:", error);
+            }
         };
-
+    
         const loadDecorations = async () => {
-            const fetchedDecorations = await fetchDocuments("decorations");
-            setDecorations(
-                fetchedDecorations.map((decoration: any) => ({
-                    id: decoration.id,
-                    label: decoration.label,
-                    rate: decoration.rate,
-                    availability: decoration.availability,
-                }))
-            );
+            try {
+                const fetchedDecorations = await fetchDocuments("decorations");
+                setDecorations(
+                    fetchedDecorations.map((decoration: any) => ({
+                        id: decoration.id,
+                        label: decoration.label,
+                        rate: decoration.rate,
+                        availability: decoration.availability,
+                    }))
+                );
+            } catch (error) {
+                console.error("Error loading decorations:", error);
+            }
         };
-
+    
         const loadDisabledDates = async () => {
-            const fetchedDates = await fetchDocuments("disabledDates");
-            const dates = fetchedDates.map((doc: any) => new Date(doc.date));
-            setDisabledDates(dates);
+            try {
+                const fetchedDates = await fetchDocuments("disabledDates");
+                const dates = fetchedDates.map((doc: any) => new Date(doc.date));
+                setDisabledDates(dates);
+            } catch (error) {
+                console.error("Error loading disabled dates:", error);
+            }
         };
-
+    
+        const fetchBookedSlots = async () => {
+            try {
+                if (!selectedRoom || !selectedDate) {
+                    // Reset slots to default if no room or date is selected
+                    setTimeSlots((prev) =>
+                        prev.map((slot) => ({
+                            ...slot,
+                            isBooked: false, // Reset isBooked to false
+                        }))
+                    );
+                    return;
+                }
+    
+                const formattedDate = selectedDate.toLocaleDateString("en-CA"); // Format date to "YYYY-MM-DD"
+                const roomName = rooms.find((room) => room.id === selectedRoom)?.name;
+    
+                if (!roomName) return;
+    
+                // Query booked collection for selected room and date
+                const bookedQuery = query(
+                    collection(db, "booked"),
+                    where("room", "==", roomName),
+                    where("date", "==", formattedDate)
+                );
+    
+                const bookedDocs = await getDocs(bookedQuery);
+    
+                // Extract booked time slots
+                const bookedSlots = new Set(
+                    bookedDocs.docs.map((doc) => doc.data().timeSlot)
+                );
+    
+                // Update time slots with isBooked property
+                setTimeSlots((prev) =>
+                    prev.map((slot) => ({
+                        ...slot,
+                        isBooked: bookedSlots.has(slot.time), // Compare with the time field
+                    }))
+                );
+            } catch (error) {
+                console.error("Error fetching booked slots:", error);
+            }
+        };
+    
+        // Load data on component mount
         loadRooms();
         loadTimeSlots();
         loadDecorations();
         loadDisabledDates();
-    }, []);
+    
+        // Update booked slots whenever room or date changes
+        fetchBookedSlots();
+    }, [selectedRoom, selectedDate]); // Ensure dependencies are updated
+    
+    
 
     useEffect(() => {
         const roomRate = rooms.find((room) => room.id === selectedRoom)?.rate || 0;
@@ -247,25 +325,30 @@ const AddBooking: React.FC = () => {
             </div>
 
             <div className="mb-4">
-                <label htmlFor="timeSlot" className="block text-sm font-medium mb-1">
-                    Time Slot
-                </label>
-                <select
-                    id="timeSlot"
-                    value={selectedTimeSlot || ""}
-                    onChange={(e) => setSelectedTimeSlot(e.target.value)}
-                    className="p-2 border rounded w-full"
-                >
-                    <option value="" disabled>
-                        Select Time Slot
-                    </option>
-                    {timeSlots.map((slot) => (
-                        <option key={slot.id} value={slot.time}>
-                            {slot.time}
-                        </option>
-                    ))}
-                </select>
-            </div>
+    <label htmlFor="timeSlot" className="block text-sm font-medium mb-1">
+        Time Slot
+    </label>
+    <div className="grid grid-cols-2 gap-4">
+        {timeSlots.map((slot) => (
+            <button
+                key={slot.id}
+                onClick={() => !slot.isBooked && setSelectedTimeSlot(slot.time)} // Only allow selection if not booked
+                disabled={slot.isBooked} // Disable the button if the slot is booked
+                className={`p-2 rounded border ${
+                    slot.isBooked
+                        ? "bg-gray-300 text-gray-600 cursor-not-allowed" // Grayed out for booked slots
+                        : selectedTimeSlot === slot.time
+                        ? "bg-blue-500 text-white" // Highlight for selected slot
+                        : "bg-white text-black hover:bg-blue-100" // Default style
+                }`}
+            >
+                {slot.time}
+            </button>
+        ))}
+    </div>
+</div>
+
+
 
             <div className="mb-4">
                 <label htmlFor="decorations" className="block text-sm font-medium mb-1">
