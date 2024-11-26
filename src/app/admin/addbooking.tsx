@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { addDocument, fetchDocuments } from "@/lib/firestoreUtils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "@/firebaseConfig"; // Adjust the path to where your Firebase configuration is defined
+
 
 const AddBooking: React.FC = () => {
     const [rooms, setRooms] = useState<{ id: string; name: string; rate: number }[]>([]);
@@ -104,9 +107,15 @@ const AddBooking: React.FC = () => {
             status,
             people,
         };
+        const bookedData = {
+            room: newBooking.room  , // Only the room name
+            date: newBooking.date, // The formatted date in "YYYY-MM-DD"
+            timeSlot: newBooking.timeSlot, // The selected time slot
+        };
 
         try {
             await addDocument("bookings", newBooking);
+            await addDoc(collection(db, "booked"), bookedData);
             alert("Booking added successfully!");
             setName("");
             setEmail("");
