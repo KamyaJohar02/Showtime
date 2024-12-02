@@ -61,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               onClick={() => setActiveSection("todayBookings")}
               className={`block text-sm ${activeSection === "todayBookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
             >
-              Today's Bookings
+              Todays Bookings
             </button>
             <button
               onClick={() => setActiveSection("bookings")}

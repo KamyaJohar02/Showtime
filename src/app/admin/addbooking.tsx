@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { addDocument, fetchDocuments } from "@/lib/firestoreUtils";
+import { addDocument, getAllDocuments } from "@/lib/firestoreUtils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
@@ -32,7 +32,7 @@ const AddBooking: React.FC = () => {
     useEffect(() => {
         const loadRooms = async () => {
             try {
-                const fetchedRooms = await fetchDocuments("rooms");
+                const fetchedRooms = await getAllDocuments("rooms");
                 setRooms(
                     fetchedRooms.map((room: any) => ({
                         id: room.id,
@@ -48,7 +48,7 @@ const AddBooking: React.FC = () => {
     
         const loadTimeSlots = async () => {
             try {
-                const fetchedTimeSlots = await fetchDocuments("timeSlots");
+                const fetchedTimeSlots = await getAllDocuments("timeSlots");
                 setTimeSlots(
                     fetchedTimeSlots.map((slot: any) => ({
                         id: slot.id,
@@ -63,7 +63,7 @@ const AddBooking: React.FC = () => {
     
         const loadDecorations = async () => {
             try {
-                const fetchedDecorations = await fetchDocuments("decorations");
+                const fetchedDecorations = await getAllDocuments("decorations");
                 setDecorations(
                     fetchedDecorations.map((decoration: any) => ({
                         id: decoration.id,
@@ -79,7 +79,7 @@ const AddBooking: React.FC = () => {
     
         const loadDisabledDates = async () => {
             try {
-                const fetchedDates = await fetchDocuments("disabledDates");
+                const fetchedDates = await getAllDocuments("disabledDates");
                 const dates = fetchedDates.map((doc: any) => new Date(doc.date));
                 setDisabledDates(dates);
             } catch (error) {
@@ -139,7 +139,7 @@ const AddBooking: React.FC = () => {
     
         // Update booked slots whenever room or date changes
         fetchBookedSlots();
-    }, [selectedRoom, selectedDate]); // Ensure dependencies are updated
+    }, [selectedRoom, selectedDate, rooms]); // Ensure dependencies are updated
     
     
 

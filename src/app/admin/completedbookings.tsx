@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchDocuments, deleteDocument } from "@/lib/firestoreUtils";
+import { getAllDocuments, deleteDocument } from "@/lib/firestoreUtils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -32,7 +32,7 @@ const CompletedBookings: React.FC = () => {
     const loadCompletedBookings = async () => {
       try {
         setLoading(true);
-        const fetchedDocuments = await fetchDocuments("bookings");
+        const fetchedDocuments = await getAllDocuments("bookings");
         const mappedBookings = fetchedDocuments.map((doc: any) => ({
           id: doc.id,
           name: doc.name,

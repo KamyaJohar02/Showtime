@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchDocuments, addDocument, deleteDocument } from "@/lib/firestoreUtils";
+import { getAllDocuments, addDocument, deleteDocument } from "@/lib/firestoreUtils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -15,7 +15,7 @@ const ManageDates: React.FC = () => {
     const loadDisabledDates = async () => {
       try {
         setLoading(true);
-        const fetchedDates = await fetchDocuments("disabledDates");
+        const fetchedDates = await getAllDocuments("disabledDates");
         const dates = fetchedDates.map((doc: any) => doc.date); // Use `YYYY-MM-DD` strings directly
         setDisabledDates(dates);
         setLoading(false);
@@ -50,7 +50,7 @@ const ManageDates: React.FC = () => {
   const handleEnableDate = async (date: string) => {
     try {
       // Delete date from Firestore
-      const fetchedDocuments = await fetchDocuments("disabledDates");
+      const fetchedDocuments = await getAllDocuments("disabledDates");
       const dateDoc = fetchedDocuments.find((doc: any) => doc.date === date);
       if (dateDoc?.id) await deleteDocument("disabledDates", dateDoc.id);
 

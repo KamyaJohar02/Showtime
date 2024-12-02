@@ -1,0 +1,41 @@
+[33m2dedf0c[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m HEAD@{0}: reset: moving to HEAD
+[33m2dedf0c[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m HEAD@{1}: reset: moving to HEAD
+[33m2dedf0c[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m HEAD@{2}: reset: moving to HEAD
+[33m2dedf0c[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m HEAD@{3}: pull: Fast-forward
+[33m75efdd9[m HEAD@{4}: pull origin master: Fast-forward
+[33m470b1ad[m HEAD@{5}: commit: integrated admin panel
+[33meac6e1f[m HEAD@{6}: commit: firebase config corrected
+[33m020b87b[m HEAD@{7}: pull origin master: Fast-forward
+[33mad6597c[m HEAD@{8}: reset: moving to HEAD
+[33mad6597c[m HEAD@{9}: pull: Fast-forward
+[33mfd29852[m HEAD@{10}: commit (merge): merge
+[33m53836ab[m HEAD@{11}: commit: Header.tsx
+[33mb682cfb[m HEAD@{12}: commit: steps completed
+[33mbf17073[m HEAD@{13}: commit: tailwind added
+[33m2f00b56[m HEAD@{14}: commit: tailwind started working here
+[33m37c4162[m HEAD@{15}: commit: Final pushed
+[33me829a4b[m HEAD@{16}: commit: Trending pushed
+[33mbf2d102[m HEAD@{17}: commit: Login Page
+[33mf7554d3[m HEAD@{18}: commit: Login page
+[33m2f088f6[m HEAD@{19}: commit: Login
+[33m692c673[m HEAD@{20}: commit: Flex adjusted in frontend
+[33m33da8a9[m HEAD@{21}: pull origin master: Fast-forward
+[33m6e6c6c5[m HEAD@{22}: reset: moving to 6e6c6c5f4a563405a2b63351dcf786870e40191b
+[33m6e6c6c5[m HEAD@{23}: checkout: moving from aryan to master
+[33m2442394[m[33m ([m[1;31morigin/aryan[m[33m, [m[1;32maryan[m[33m)[m HEAD@{24}: checkout: moving from master to aryan
+[33m6e6c6c5[m HEAD@{25}: pull --tags origin master: Fast-forward
+[33ma854d40[m HEAD@{26}: checkout: moving from kamya1 to master
+[33m4465230[m[33m ([m[1;32mkamya1[m[33m)[m HEAD@{27}: commit: base directory added
+[33m82757d2[m HEAD@{28}: commit: calendar.tsx removed
+[33m689a18b[m HEAD@{29}: commit: booking summary modified
+[33m5a25821[m HEAD@{30}: commit: booking_summary_modified
+[33ma854d40[m HEAD@{31}: checkout: moving from master to kamya1
+[33ma854d40[m HEAD@{32}: commit: Frontend
+[33m1a6d0e3[m HEAD@{33}: commit: Slot Booking
+[33mffb4dc0[m HEAD@{34}: commit: Slot Booking
+[33mae34a73[m HEAD@{35}: commit: Homepage
+[33m2840778[m HEAD@{36}: commit: Homepage
+[33m5bd4e50[m HEAD@{37}: Branch: renamed refs/heads/master to refs/heads/master
+[33m5bd4e50[m HEAD@{39}: commit: Homepage
+[33m126bb9f[m HEAD@{40}: commit: header
+[33m73c29cf[m HEAD@{41}: commit (initial): Initial commit from Create Next App

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchDocuments, deleteDocument, updateDocument } from "@/lib/firestoreUtils";
+import { getAllDocuments, deleteDocument, updateDocument } from "@/lib/firestoreUtils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -33,7 +33,7 @@ const ManageBookings: React.FC = () => {
     const loadBookings = async () => {
       try {
         setLoading(true);
-        const fetchedBookings = (await fetchDocuments("bookings")) as Booking[];
+        const fetchedBookings = (await getAllDocuments("bookings")) as Booking[];
         const currentDate = new Date();
   
         // Process bookings and update status if necessary

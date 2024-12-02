@@ -162,7 +162,7 @@ const Booking: React.FC = () => {
     };
 
     fetchData();
-}, [selectedRoom, selectedDate]); // Ensure dependencies are updated
+}, [selectedRoom, selectedDate, rooms]); // Ensure dependencies are updated
 
 
 

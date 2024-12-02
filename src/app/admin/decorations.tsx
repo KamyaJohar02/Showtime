@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchDocuments, toggleAvailability, updateDocument } from "@/lib/firestoreUtils";
+import { getAllDocuments, toggleAvailability, updateDocument } from "@/lib/firestoreUtils";
+import Image from "next/image";
 
 interface Decoration {
   id: string; // Firestore document ID (used as the key)
@@ -22,7 +23,7 @@ const ManageDecorations: React.FC = () => {
     const loadDecorations = async () => {
       try {
         setLoading(true);
-        const fetchedDocuments = await fetchDocuments("decorations"); // Fetch data
+        const fetchedDocuments = await getAllDocuments("decorations"); // Fetch data
         const mappedDecorations = fetchedDocuments.map((doc: any) => ({
           id: doc.id, // Map Firestore document ID to `id`
           label: doc.label,
@@ -136,7 +137,7 @@ const ManageDecorations: React.FC = () => {
                   )}
                 </td>
                 <td className="border border-gray-300 p-2">
-                  <img
+                  <Image
                     src={decoration.imageUrl}
                     alt={decoration.label}
                     className="h-16 w-16 object-cover rounded"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchDocuments, deleteDocument, updateDocument } from "@/lib/firestoreUtils";
+import { getAllDocuments, deleteDocument, updateDocument } from "@/lib/firestoreUtils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -32,7 +32,7 @@ const TodayBookings: React.FC = () => {
     const loadTodayBookings = async () => {
       try {
         setLoading(true);
-        const fetchedBookings = (await fetchDocuments("bookings")) as Booking[];
+        const fetchedBookings = (await getAllDocuments("bookings")) as Booking[];
         const todayDate = new Date().toLocaleDateString("en-CA"); // Ensures local timezone format "YYYY-MM-DD"
 
         // Filter bookings with today's date
@@ -95,10 +95,10 @@ const TodayBookings: React.FC = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Today's Bookings</h1>
+      <h1 className="text-2xl font-bold mb-6">Todays Bookings</h1>
 
       {loading ? (
-        <p>Loading today's bookings...</p>
+        <p>Loading todays bookings...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : todayBookings.length === 0 ? (
