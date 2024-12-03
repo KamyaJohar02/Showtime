@@ -15,6 +15,7 @@ import {
   where,
   getDocs,
   collection,
+  getDoc,
 } from "firebase/firestore";
 import { auth, db } from "@/firebaseConfig"; // Adjust the relative path as needed
 import { useRouter } from "next/navigation";
@@ -43,6 +44,28 @@ const LoginMobile: React.FC = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log("User logged in:", user);
+
+      const userRef = doc(db, "adminusers", user.uid); // Use the user's UID as the document ID
+    
+
+    const docSnap = await getDoc(userRef);
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      console.log("User data:", userData); // Log user data for debugging
+
+      if (userData?.role === "admin") {
+        console.log("Admin logged in");
+        router.push("/admin"); // Redirect to admin page
+        return;
+      } else {
+        console.log("Normal user logged in");
+        // Optionally, redirect to a different page or show a message
+      }
+    } else {
+      console.log("User not found in admin collection");
+      alert("User not found in admin collection.");
+    }
+
       router.push(redirectTo || "/myprofile"); // Redirect after successful login
     } catch (error) {
       if (error instanceof Error) {
