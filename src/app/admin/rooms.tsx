@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getAllDocuments, toggleAvailability, updateDocument } from "@/lib/firestoreUtils";
+import Image from "next/image";
 
 interface Room {
   roomId: string; // Updated from `id` to `roomId`
@@ -127,7 +128,7 @@ const ManageRooms: React.FC = () => {
                   {String(room.availability)} {/* Display the raw boolean value */}
                 </td>
                 <td className="border border-gray-300 p-2">
-                  <img
+                  <Image
                     src={room.imageUrl}
                     alt={room.name}
                     className="h-16 w-16 object-cover"
