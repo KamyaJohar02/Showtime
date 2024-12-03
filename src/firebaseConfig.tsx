@@ -1,10 +1,9 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+// Import necessary Firebase modules
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
+import { getAuth, Auth } from "firebase/auth";
+import { getFirestore, Firestore } from "firebase/firestore";
 
-
-// Your web app's Firebase configuration
+// Firebase configuration object (Replace these with your actual Firebase credentials)
 const firebaseConfig = {
   apiKey: "AIzaSyCFbESmsw2A0oxFOQKYK2AmhxJihGwAXiE",
   authDomain: "kamy-6c860.firebaseapp.com",
@@ -14,17 +13,25 @@ const firebaseConfig = {
   appId: "1:575194952999:web:45b1373b02bdef76ee2502",
 };
 
-// Initialize Firebase only if it hasn't been initialized already
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+// Initialize Firebase app (check if already initialized to avoid multiple instances)
+const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-// Add optional debug logging (useful during development)
+// Initialize Firebase services
+const auth: Auth = getAuth(app);
+const db: Firestore = getFirestore(app);
+
+// Optional: Add debug logging in development mode
 if (process.env.NODE_ENV === "development") {
-  console.log("Firebase has been initialized:", app.name);
+  console.log("Firebase initialized with app name:", app.name);
 }
 
-// Export individual Firebase services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Disable app verification for testing environments (Do NOT use in production)
+if (process.env.NODE_ENV === "development") {
+  auth.settings.appVerificationDisabledForTesting = true;
+}
 
-// Optionally, export the `app` itself if needed elsewhere
+// Export the initialized services for use in your application
+export { auth, db };
+
+// Optional: Export the Firebase app instance if needed
 export default app;

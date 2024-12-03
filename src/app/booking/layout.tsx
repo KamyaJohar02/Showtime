@@ -1,14 +1,17 @@
 import React from 'react';
+import AuthGuard from '@/components/ui/AuthGuard';
 
 // Define a type for the props that include children
-interface BookingProps {
+interface BookingLayoutProps {
   children: React.ReactNode;
 }
 
-export default function Booking({ children }: BookingProps) {
+export default function BookingLayout({ children }: BookingLayoutProps) {
   return (
-    <div>
-      <section>{children}</section>
-    </div>
+    <AuthGuard>
+      <div>
+        <section>{children}</section>
+      </div>
+    </AuthGuard>
   );
 }

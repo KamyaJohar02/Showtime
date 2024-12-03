@@ -7,6 +7,8 @@ import "react-day-picker/dist/style.css";
 import { db } from "@/firebaseConfig";
 import { collection, getDocs, addDoc, query, where } from "firebase/firestore"; 
 import { useRouter } from "next/navigation";
+import { useUser } from "@/components/context/UserContext"; // Use your AuthProvider
+import { doc, getDoc } from "firebase/firestore"; // For fetching user data from Firestore
 
 
 
@@ -51,6 +53,46 @@ const Booking: React.FC = () => {
   const [addCake, setAddCake] = useState(false);
   const [disabledDates, setDisabledDates] = useState<Date[]>([]);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
+  const { user } = useUser(); // Get the logged-in user from the AuthProvider
+  const [maxPeople, setMaxPeople] = useState<number>(12); // Default to the max limit
+  const [profile, setProfile] = useState({
+    name: "",
+    phoneNumber: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        try {
+          const userRef = doc(db, "users", user.uid); // Reference to the user's document
+          const userDoc = await getDoc(userRef); // Fetch the document from Firestore
+  
+          if (userDoc.exists()) {
+            const userData = userDoc.data(); // Extract user data
+            setName(userData.name || ""); // Populate `name` field
+            setEmail(userData.email || ""); // Populate `email` field
+            setPhoneNumber(userData.mobile || ""); // Populate `mobile` field
+          } else {
+            console.warn("User document does not exist in Firestore.");
+          }
+        } catch (error) {
+          console.error("Error fetching user profile from Firestore:", error);
+        }
+      }
+    };
+  
+    fetchUserProfile();
+  }, [user]);
+
+  useEffect(() => {
+    if (selectedRoom === "room1") setMaxPeople(5);
+    else if (selectedRoom === "room2") setMaxPeople(7);
+    else if (selectedRoom === "room3") setMaxPeople(12);
+    else setMaxPeople(12); // Default max
+  }, [selectedRoom]);
+  
+
 
 
 
@@ -381,17 +423,15 @@ const renderDecorations = () => (
   const renderUserDetailsForm = () => {
     const handleNextStep = () => {
       // Check for required fields and valid formats
-      if (!name || !/^[A-Za-z\s]+$/.test(name)) {
-        alert("Please enter a valid name");
+      if (!name || !/^[A-Za-z\s]+$/.test(name.trim())) {
+        alert("Please enter a valid name (alphabets and spaces only).");
         return;
       }
-      if (!phoneNumber || !/^\d+$/.test(phoneNumber)) {
-        alert("Please enter a valid phone number");
+      if (!phoneNumber || !/^\d{10}$/.test(phoneNumber.trim())) {
+        alert("Please enter a valid 10-digit phone number.");
         return;
       }
-      // Email validation to match specific domains
-      const emailRegex = /^[\w.-]+@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|icloud\.com|aol\.com|yandex\.com|protonmail\.com|mail\.com|zoho\.com|gmx\.com)$/i;
-      if (!email || !emailRegex.test(email)) {
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
         alert("Please enter a valid email address.");
         return;
       }
@@ -418,65 +458,82 @@ const renderDecorations = () => (
           {/* Full Name */}
           <div className="mb-4">
             <label className="block text-white text-lg mb-2">Full Name<span className="text-red-500">*</span></label>
-            <input 
-              type="text" 
-              value={name} 
-              onChange={(e) => /^[A-Za-z\s]*$/.test(e.target.value) && setName(e.target.value)}
-              className="w-full p-2 rounded text-black" 
-              placeholder="Enter your full name" 
-            />
+            <input
+            type="text"
+            value={name}
+            onChange={(e) =>
+              /^[A-Za-z\s]*$/.test(e.target.value) && setName(e.target.value)
+            }
+            className="w-full p-2 rounded text-black"
+            placeholder="Enter your full name"
+          />
           </div>
   
           {/* Phone Number */}
           <div className="mb-4">
             <label className="block text-white text-lg mb-2">Phone Number<span className="text-red-500">*</span></label>
-            <input 
-              type="tel" 
-              value={phoneNumber} 
-              onChange={(e) => /^\d*$/.test(e.target.value) && setPhoneNumber(e.target.value)}
-              className="w-full p-2 rounded text-black" 
-              placeholder="Enter your phone number" 
-            />
+            <input
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) =>
+              /^\d*$/.test(e.target.value) && setPhoneNumber(e.target.value)
+            }
+            className="w-full p-2 rounded text-black"
+            placeholder="Enter your phone number"
+          />
           </div>
   
           {/* Email */}
           <div className="mb-4">
             <label className="block text-white text-lg mb-2">Email ID<span className="text-red-500">*</span></label>
-            <input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              className="w-full p-2 rounded text-black" 
-              placeholder="Enter your email" 
-            />
+            <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 rounded text-black"
+            placeholder="Enter your email"
+          />
           </div>
   
           {/* Number of People with Counter */}
-          <div className="mb-4">
-            <label className="block text-white text-lg mb-2">Number of People for the Gathering<span className="text-red-500">*</span></label>
-            <div className="flex items-center">
-              <button 
-                type="button" 
-                onClick={() => setNumPeople(Math.max(1, numPeople - 1))} 
-                className="p-2 bg-gray-300 rounded-l"
-              >
-                -
-              </button>
-              <input 
-                type="text" 
-                value={numPeople} 
-                readOnly // Prevent manual typing
-                className="w-16 text-center p-2 border"
-              />
-              <button 
-                type="button" 
-                onClick={() => setNumPeople(numPeople + 1)} 
-                className="p-2 bg-gray-300 rounded-r"
-              >
-                +
-              </button>
-            </div>
-          </div>
+<div className="mb-4">
+  <label className="block text-white text-lg mb-2">
+    Number of People for the Gathering<span className="text-red-500">*</span>
+  </label>
+  <div className="flex items-center">
+    <button
+      type="button"
+      onClick={() => setNumPeople(Math.max(1, numPeople - 1))}
+      className="p-2 bg-gray-300 rounded-l"
+    >
+      -
+    </button>
+    <input
+      type="text"
+      value={numPeople}
+      readOnly // Prevent manual typing
+      className="w-16 text-center p-2 border"
+    />
+    <button
+      type="button"
+      onClick={() =>
+        setNumPeople((prev) =>
+          selectedRoom === "room1"
+            ? Math.min(5, prev + 1)
+            : selectedRoom === "room2"
+            ? Math.min(7, prev + 1)
+            : selectedRoom === "room3"
+            ? Math.min(12, prev + 1)
+            : prev
+        )
+      }
+      className="p-2 bg-gray-300 rounded-r"
+    >
+      +
+    </button>
+  </div>
+</div>
+
   
           {/* Add Cake Option */}
           <div className="flex items-center mt-4">
@@ -493,7 +550,10 @@ const renderDecorations = () => (
           <div className="flex justify-center mt-6 space-x-4">
             <button 
               className="bg-gray-300 text-black py-2 px-8 rounded" 
-              onClick={() => setStep(4)}
+              onClick={() => {
+                setNumPeople(1); // Reset the counter to 1 when the Back button is clicked
+                setStep(4); // Go back to the previous step
+              }}
             >
               Back
             </button>
