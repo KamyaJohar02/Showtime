@@ -140,6 +140,8 @@ const ManageDecorations: React.FC = () => {
                   <Image
                     src={decoration.imageUrl}
                     alt={decoration.label}
+                    width={64} // Set appropriate width
+  height={64} // Set appropriate height
                     className="h-16 w-16 object-cover rounded"
                   />
                 </td>

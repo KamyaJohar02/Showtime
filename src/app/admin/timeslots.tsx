@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchDocuments, toggleAvailability, updateDocument } from "@/lib/firestoreUtils";
+import { getAllDocuments, toggleAvailability, updateDocument } from "@/lib/firestoreUtils";
 
 interface Slot {
   slotId: string; // Firestore document ID
@@ -21,7 +21,7 @@ const ManageTimeSlots: React.FC = () => {
     const loadSlots = async () => {
       try {
         setLoading(true);
-        const fetchedDocuments = await fetchDocuments("timeSlots"); // Fetch data from the "timeSlots" collection
+        const fetchedDocuments = await getAllDocuments("timeSlots"); // Fetch data from the "timeSlots" collection
         const mappedSlots = fetchedDocuments.map((doc: any) => ({
           slotId: doc.id, // Use Firestore document ID as slotId
           name: doc.name, // Map slot name

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchDocuments, toggleAvailability, updateDocument } from "@/lib/firestoreUtils";
+import { getAllDocuments, toggleAvailability, updateDocument } from "@/lib/firestoreUtils";
 
 interface Room {
   roomId: string; // Updated from `id` to `roomId`
@@ -23,7 +23,7 @@ const ManageRooms: React.FC = () => {
     const loadRooms = async () => {
       try {
         setLoading(true);
-        const fetchedDocuments = await fetchDocuments("rooms"); // Fetch data
+        const fetchedDocuments = await getAllDocuments("rooms"); // Fetch data
         const mappedRooms = fetchedDocuments.map((doc: any) => ({
           roomId: doc.id, // Map `id` to `roomId`
           name: doc.name,
