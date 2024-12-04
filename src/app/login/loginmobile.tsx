@@ -31,35 +31,40 @@ const LoginMobile: React.FC = () => {
       ? formData.emailOrMobile
       : ""; // Check if it's an email
     const password = formData.password;
-
+  
     console.log("Login Email:", email); // Log email for debugging
     console.log("Login Password:", password); // Log password for debugging
-
+  
     if (!email) {
       alert("Please enter a valid email address.");
       return;
     }
-
+  
     try {
+      // Firebase Authentication
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log("User logged in:", user);
-
+  
+      // Check if the user is an admin
       const userRef = doc(db, "adminusers", user.uid); // Use the user's UID as the document ID
-    const docSnap = await getDoc(userRef);
-
-    if (docSnap.exists()) {
-      const userData = docSnap.data();
-      console.log("User data:", userData); // Log user data for debugging
-
-      if (userData?.role === "admin") {
-        console.log("Admin logged in");
-        router.push("/admin"); // Redirect to the admin page
-        return; // Ensure the function exits after admin redirection
+      const docSnap = await getDoc(userRef);
+  
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        console.log("User data:", userData); // Log user data for debugging
+  
+        if (userData?.role === "admin") {
+          console.log("Admin logged in");
+          router.push("/admin"); // Redirect to the admin page
+          return; // Exit the function for admin users
+        }
       }
-    } 
-
-      router.push(redirectTo || "/myprofile"); // Redirect after successful login
+  
+      // Handle redirection for regular users
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectTo = searchParams.get("redirect") || "/myprofile"; // Get redirect path or default to "/myprofile"
+      router.push(redirectTo); // Redirect to the appropriate path
     } catch (error) {
       if (error instanceof Error) {
         console.error("Login failed:", error.message);
@@ -70,6 +75,7 @@ const LoginMobile: React.FC = () => {
       }
     }
   };
+  
 
   const handleSignup = async () => {
     const { email, password, name, mobile } = formData;

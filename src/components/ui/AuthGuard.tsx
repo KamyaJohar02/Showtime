@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useUser } from "@/components/context/UserContext"; // Ensure this is your User Context provider
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useUser } from "@/components/context/UserContext"; // Replace with your actual context
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -10,23 +10,25 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const { user } = useUser(); // Get the user state from context
-  const searchParams = useSearchParams(); // To handle current query parameters
 
   useEffect(() => {
     if (!user) {
-      // Get the current path to redirect back after login
-      const currentPath = window.location.pathname;
-      const redirectQuery = `?redirect=${encodeURIComponent(currentPath)}`;
+      // Handle redirection for /admin
+      if (pathname === "/admin") {
+        router.push("/login"); // No redirect query parameter
+        return;
+      }
 
-      // Redirect to login page with redirect query parameter
-      router.push(`/login${redirectQuery}`);
+      // Handle redirection for other paths (e.g., /booking)
+      const redirectPath = encodeURIComponent(pathname);
+      router.push(`/login?redirect=${redirectPath}`);
     }
-  }, [user, router]);
+  }, [user, pathname, router]);
 
   if (!user) {
-    // Optional: Show a loading indicator while redirecting
-    return <div>Loading...</div>;
+    return <div>Loading...</div>; // Optional loading indicator
   }
 
   return <>{children}</>;

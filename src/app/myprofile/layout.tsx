@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { signOut } from "firebase/auth";
 import { auth, db } from "@/firebaseConfig"; // Adjust the import path as needed
 import { collection, query, where, getDocs } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
 interface Booking {
   id: string;
@@ -17,6 +18,7 @@ const MyProfileLayout = () => {
   const [userDetails, setUserDetails] = useState({ name: "", email: "", mobile: "" });
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -24,7 +26,6 @@ const MyProfileLayout = () => {
         const user = auth.currentUser;
 
         if (user) {
-          // Fetch user details from Firestore
           const userQuery = query(collection(db, "users"), where("email", "==", user.email));
           const userSnapshot = await getDocs(userQuery);
 
@@ -36,7 +37,6 @@ const MyProfileLayout = () => {
               mobile: userData.mobile,
             });
 
-            // Fetch bookings for the user
             const bookingsQuery = query(
               collection(db, "bookings"),
               where("mobile", "==", userData.mobile)
@@ -63,7 +63,11 @@ const MyProfileLayout = () => {
 
   const handleLogout = async () => {
     await signOut(auth);
-    window.location.href = "/"; // Redirect to home after logout
+    router.push("/"); // Redirect to home after logout
+  };
+
+  const handleHomeRedirect = () => {
+    router.push("/"); // Redirect to the main screen
   };
 
   if (loading) {
@@ -91,6 +95,12 @@ const MyProfileLayout = () => {
             }`}
           >
             My Bookings
+          </button>
+          <button
+            onClick={handleHomeRedirect}
+            className="block w-full text-left hover:bg-blue-600 p-2 rounded"
+          >
+            Home
           </button>
           <button
             onClick={handleLogout}
