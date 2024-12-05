@@ -108,9 +108,9 @@ export default function Home() {
       </section>
 
       {/* Book Now Button */}
-      <section className="flex mt-0 justify-center w-full px-12 bg-red-800">
+      <section className="flex mt-2 justify-center w-full px-12  bg-gray-100">
   <Link href="/booking" passHref legacyBehavior>
-    <a className="bg-red-800 text-white py-4 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300 text-center">
+    <a className="bg-red-600 text-white py-4 px-10 rounded-full  hover:bg-red-800 transition duration-300 text-center">
       Book Now
     </a>
   </Link>
@@ -120,7 +120,7 @@ export default function Home() {
 {/* Queries Section */}
 <section className="flex flex-col md:flex-row justify-between items-center w-full px-0 bg-gray-100 py-8">
   <div className="w-full md:w-1/2 px-6">
-    <h2 className="text-2xl font-bold text-gray-800 mb-4">
+    <h2 className="text-2xl font-bold text-red-600 mb-4">
       Have any Queries? Reach out and get a call back from Showtime!
     </h2>
     <form
@@ -205,7 +205,7 @@ export default function Home() {
       </div>
       <button
         type="submit"
-        className="bg-red-800 text-white py-2 px-4 rounded-full hover:bg-red-600 transition duration-300"
+        className="bg-red-600 text-white py-2 px-4 rounded-full hover:bg-red-800 transition duration-300"
       >
         Submit
       </button>
