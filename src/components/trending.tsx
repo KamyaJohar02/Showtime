@@ -18,7 +18,7 @@ const Trending: React.FC = () => {
             layout="responsive"
             width={1200} // Adjust width and height for desired aspect ratio
             height={400} // Reduced height for lower aspect ratio
-            objectFit="cover"
+            style={{ objectFit: 'cover' }}
             className="rounded-lg"
           />
         </div>

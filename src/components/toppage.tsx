@@ -56,7 +56,7 @@ const TopPage: React.FC = () => {
             <Image
               src={image}
               alt={`Carousel Image ${index}`}
-              layout="fill"
+              fill
               style={{ objectFit: 'cover' }}
               className="w-full h-full"
             />

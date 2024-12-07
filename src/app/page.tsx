@@ -91,7 +91,7 @@ export default function Home() {
         <Image
           src={`/Images/${index}.webp`} // Verify these paths and file extensions
           alt={`Carousel Image ${index}`}
-          layout="fill"
+          fill
           style={{ objectFit: 'cover' }}
           className="w-full h-full brightness-50"
         />

@@ -23,8 +23,12 @@ import { FirebaseError } from "firebase/app"; // Import FirebaseError for type c
 
 const LoginDesktop: React.FC = () => {
   const router = useRouter();
-  const searchParams = new URLSearchParams(window.location.search); // To get query parameters
-  const redirectTo = searchParams.get("redirect"); // Extract the redirect parameter
+   const redirectTo =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("redirect")
+      : null; // Ensure window is used only on the client side
+  // const searchParams = new URLSearchParams(window.location.search); // To get query parameters
+  // const redirectTo = searchParams.get("redirect"); // Extract the redirect parameter
 
   const [isLogin, setIsLogin] = useState(true);
   const [showResetPassword, setShowResetPassword] = useState(false);
@@ -51,6 +55,7 @@ const [phoneTouched, setPhoneTouched] = useState(false); // Add this line
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
 
   const toggleForm = () => {
     setIsLogin(!isLogin);

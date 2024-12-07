@@ -1,5 +1,5 @@
-// src/login/LoginWrapper.tsx
 "use client";
+export const dynamic = 'force-dynamic';
 
 import React, { useEffect, useState } from "react";
 import LoginDesktop from "./logindesktop";
@@ -13,10 +13,19 @@ const LoginWrapper: React.FC = () => {
       setIsMobileOrTablet(window.innerWidth <= 1280); // Adjusted breakpoint to 1280px for tablet
     };
 
-    handleResize(); // Initialize the state based on current window size
-    window.addEventListener("resize", handleResize); // Add event listener for resize
-    return () => window.removeEventListener("resize", handleResize); // Cleanup event listener on unmount
+    const debouncedResize = debounce(handleResize, 200); // Debounce to prevent rapid triggering
+    debouncedResize(); // Initialize the state based on current window size
+    window.addEventListener("resize", debouncedResize);
+    return () => window.removeEventListener("resize", debouncedResize);
   }, []);
+
+  function debounce(fn: Function, delay: number) {
+    let timer: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  }
 
   return isMobileOrTablet ? <LoginMobile /> : <LoginDesktop />;
 };
