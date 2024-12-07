@@ -22,11 +22,19 @@ interface Booking {
 }
 
 const CompletedBookings: React.FC = () => {
+  const [isClient, setIsClient] = useState(false);
   const [completedBookings, setCompletedBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  useEffect( () => {
+    setIsClient(true)
+  }, []
+
+  );
+ 
 
   useEffect(() => {
     const loadCompletedBookings = async () => {
@@ -65,7 +73,23 @@ const CompletedBookings: React.FC = () => {
     loadCompletedBookings();
   }, []);
 
+  // const handleDeleteBooking = async (id: string) => {
+  //   const confirm = window.confirm("Are you sure you want to delete this booking?");
+  //   if (!confirm) return;
+
+  //   try {
+  //     await deleteDocument("bookings", id);
+  //     setCompletedBookings((prev) => prev.filter((booking) => booking.id !== id));
+  //     setFilteredBookings((prev) => prev.filter((booking) => booking.id !== id));
+  //   } catch (err) {
+  //     console.error("Error deleting booking:", err);
+  //     alert("Failed to delete booking.");
+  //   }
+  // };
+
   const handleDeleteBooking = async (id: string) => {
+    if (!isClient) return; // Ensure this runs only on the client side.
+
     const confirm = window.confirm("Are you sure you want to delete this booking?");
     if (!confirm) return;
 

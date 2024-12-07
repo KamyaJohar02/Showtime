@@ -63,9 +63,10 @@ const RoomCards: React.FC = () => {
                     <Image
                       src={image}
                       alt={`${room.title} - image ${index + 1}`}
-                      layout="fill"
+                      
                       className="object-cover rounded-lg"
                       width={500}
+                      height={400}
                     />
                   </div>
                 ))}
