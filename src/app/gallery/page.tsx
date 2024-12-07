@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 const images = [
@@ -37,10 +38,12 @@ const GalleryPage = () => {
     <div className="min-h-screen flex flex-col items-center justify-start bg-gray-100">
       <h1 className="text-3xl font-bold text-red-600 mb-6">Gallery</h1>
       <div className="relative w-full max-w-4xl overflow-hidden rounded-lg shadow-lg">
-        <img
+        <Image
           src={images[currentIndex]}
           alt={`Slide ${currentIndex + 1}`}
           className="w-full object-cover"
+          width={500}
+          height={400}
         />
         {/* Navigation Controls */}
         <button
