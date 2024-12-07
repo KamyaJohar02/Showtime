@@ -132,6 +132,8 @@ const ManageRooms: React.FC = () => {
                     src={room.imageUrl}
                     alt={room.name}
                     className="h-16 w-16 object-cover"
+                    width={500}
+                    height={400}
                   />
                 </td>
                 <td className="border border-gray-300 p-2">
