@@ -1,32 +1,13 @@
 module.exports = {
-  distDir: 'build', // This will output the build to the 'build' folder
+  distDir: 'build',
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'upload.wikimedia.org',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.residentialsystems.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.ebayimg.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.squarespace-cdn.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cf.bstatic.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'fruitilicious.in',
-      },
+    domains: [
+      'upload.wikimedia.org',
+      'www.residentialsystems.com',
+      'i.ebayimg.com',
+      'images.squarespace-cdn.com',
+      'cf.bstatic.com',
+      'fruitilicious.in',
     ],
   },
-  
 };
