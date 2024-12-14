@@ -1,5 +1,5 @@
 module.exports = {
-  distDir: 'build',
+  
   images: {
     domains: [
       'upload.wikimedia.org',
