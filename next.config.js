@@ -1,5 +1,9 @@
-module.exports = {
-  
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  target: "serverless", // Use serverless target for Netlify
+  experimental: {
+    appDir: true, // Only if you're using the experimental `app` directory
+  },
   images: {
     domains: [
       'upload.wikimedia.org',
@@ -12,3 +16,5 @@ module.exports = {
   },
   reactStrictMode: true, // Properly aligned here
 };
+
+module.exports = nextConfig;
