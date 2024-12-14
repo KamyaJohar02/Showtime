@@ -10,4 +10,5 @@ module.exports = {
       'fruitilicious.in',
     ],
   },
+  reactStrictMode: true, // Properly aligned here
 };

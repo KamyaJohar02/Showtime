@@ -22,6 +22,7 @@ interface Room {
 }
 
 interface Decoration {
+  imageUrl: string ;
   id: string;
   label: string;
   rate: number;
@@ -96,18 +97,18 @@ const Booking: React.FC = () => {
 
 
 
-  /*const rooms: Room[] = [
-    { id: 'room1', name: 'Room 1', description: 'A cozy room with a 150-inch screen.', imageUrl: '/Images/Room1.jpg', rate: 1400 },
-    { id: 'room2', name: 'Room 2', description: 'A spacious room with comfortable seating.', imageUrl: '/Images/Room2.jpg', rate: 1600 },
-    { id: 'room3', name: 'Room 3', description: 'A luxurious room with premium sound.', imageUrl: '/Images/Room3.jpg', rate: 1900 },
-  ];
+  // /*const rooms: Room[] = [
+  //   { id: 'room1', name: 'Room 1', description: 'A cozy room with a 150-inch screen.', imageUrl: '/Images/Room1.jpg', rate: 1400 },
+  //   { id: 'room2', name: 'Room 2', description: 'A spacious room with comfortable seating.', imageUrl: '/Images/Room2.jpg', rate: 1600 },
+  //   { id: 'room3', name: 'Room 3', description: 'A luxurious room with premium sound.', imageUrl: '/Images/Room3.jpg', rate: 1900 },
+  // ];
 
-  const decorations: Decoration[] = [
-    { value: 'balloons', label: 'Balloons', rate: 100, image: '/Images/balloons.jpg' },
-    { value: 'flowers', label: 'Flowers', rate: 150, image: '/Images/flowers.jpeg' },
-    { value: 'candles', label: 'Candles', rate: 200, image: '/Images/candles.jpg' },
-    { value: 'fog', label: 'Fog', rate: 250, image: '/Images/smoke.jpg' },
-  ];*/
+  // const decorations: Decoration[] = [
+  //   { value: 'balloons', label: 'Balloons', rate: 100, image: '/Images/balloons.jpg' },
+  //   { value: 'flowers', label: 'Flowers', rate: 150, image: '/Images/flowers.jpeg' },
+  //   { value: 'candles', label: 'Candles', rate: 200, image: '/Images/candles.jpg' },
+  //   { value: 'fog', label: 'Fog', rate: 250, image: '/Images/smoke.jpg' },
+  // ];
 
   /*const slots = [
     '10:00 AM - 12:00 PM',
@@ -385,7 +386,7 @@ const renderDecorations = () => (
         >
           {/* Decoration Image */}
           <Image
-            src={decoration.image}
+            src={decoration.imageUrl}
             alt={decoration.label}
             width={80}
             height={80}
