@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  target: "serverless", // Use serverless target for Netlify
+  
   experimental: {
     appDir: true, // Only if you're using the experimental `app` directory
   },

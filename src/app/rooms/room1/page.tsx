@@ -5,15 +5,8 @@ import Link from 'next/link';
 
 const Room1Page: React.FC = () => {
   return (
-    <div
-      className="relative min-h-screen bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: "url('/Images/stone3.jpg')", // Background image for entire page
-      }}
-    >
+    <div className="relative min-h-screen bg-white">
       {/* Dark Overlay for Better Readability */}
-      <div className="absolute inset-0 bg-black opacity-60 z-0"></div>
-
       {/* Content Container */}
       <div className="relative z-10 flex flex-col items-center p-4 sm:p-6 lg:p-12 min-h-screen">
         {/* Room Image Container */}

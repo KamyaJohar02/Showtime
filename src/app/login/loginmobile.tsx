@@ -20,6 +20,7 @@ import {
 import { auth, db } from "@/firebaseConfig"; // Adjust the relative path as needed
 import { useRouter } from "next/navigation";
 import { FirebaseError } from "firebase/app"; // Import FirebaseError for type checking
+import { signInWithCustomToken } from "firebase/auth";
 
 const LoginMobile: React.FC = () => {
   const router = useRouter();
@@ -163,21 +164,68 @@ const LoginMobile: React.FC = () => {
   const [otpError, setOtpError] = useState(false);
   const [isEmail, setIsEmail] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
-  const [correctOtp] = useState("1234");
+  const [mobileExists, setMobileExists] = useState(false);
+  const [checkingMobile, setCheckingMobile] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
+const [checkingEmail, setCheckingEmail] = useState(false);
+const [loginMobileError, setLoginMobileError] = useState("");
+
+  
   const [nameTouched, setNameTouched] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [phoneTouched, setPhoneTouched] = useState(false); // Add this line
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setTimeout(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldown]);
+  
 
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
+  
     if (name === "emailOrMobile") {
       const isEmailNow = value.includes("@");
       setIsEmail(isEmailNow);
     }
+  
+    // Check for duplicate mobile number
+    if (name === "mobile" && value.length === 10) {
+      setCheckingMobile(true);
+      try {
+        const mobileQuery = query(collection(db, "users"), where("mobile", "==", value));
+        const snapshot = await getDocs(mobileQuery);
+        setMobileExists(!snapshot.empty);
+      } catch (err) {
+        console.error("Error checking mobile number:", err);
+        setMobileExists(false);
+      }
+      setCheckingMobile(false);
+    }
+  
+    // Check for duplicate email
+    if (name === "email") {
+      const emailValue = value.trim();
+      setCheckingEmail(true);
+      try {
+        const emailQuery = query(collection(db, "users"), where("email", "==", emailValue));
+        const snapshot = await getDocs(emailQuery);
+        setEmailExists(!snapshot.empty);
+      } catch (err) {
+        console.error("Error checking email:", err);
+        setEmailExists(false);
+      }
+      setCheckingEmail(false);
+    }
   };
+  
+  
 
 
 
@@ -197,19 +245,85 @@ const LoginMobile: React.FC = () => {
     setCooldown(0);
   };
 
-  const handleSendOtp = () => {
-    setOtpSent(true); // Set OTP as sent
-    setCooldown(30); // Start the cooldown timer
+  //const handleSendOtp = () => {
+   // setOtpSent(true); // Set OTP as sent
+   // setCooldown(30); // Start the cooldown timer
+  //};
+  const handleSendOtp = async () => {
+    setLoginMobileError(""); // Clear previous error
+  
+    try {
+      const userQuery = query(
+        collection(db, "users"),
+        where("mobile", "==", formData.emailOrMobile)
+      );
+      const snapshot = await getDocs(userQuery);
+  
+      if (snapshot.empty) {
+        setLoginMobileError("This phone number is not registered. Please sign up.");
+        return;
+      }
+  
+      const res = await fetch("/api/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: formData.emailOrMobile }),
+      });
+  
+      const data = await res.json();
+  
+      if (data.success) {
+        setOtpSent(true);
+        setCooldown(30);
+        alert("OTP sent successfully!");
+      } else {
+        setLoginMobileError(data.message || "Failed to send OTP");
+      }
+    } catch (err) {
+      console.error("Error sending OTP:", err);
+      setLoginMobileError("Something went wrong while sending OTP.");
+    }
   };
   
-  const handleResendOtp = () => {
+  
+  
+  
+ // const handleResendOtp = () => {
+   // setFormData((prev) => ({
+     // ...prev,
+    //  otp: ["", "", "", ""], // Reset OTP input fields
+   // }));
+  //  setOtpSent(true);
+  //  setCooldown(30); // Restart the cooldown timer
+  //};
+  const handleResendOtp = async () => {
     setFormData((prev) => ({
       ...prev,
-      otp: ["", "", "", ""], // Reset OTP input fields
+      otp: ["", "", "", ""],
     }));
-    setOtpSent(true);
-    setCooldown(30); // Restart the cooldown timer
+  
+    try {
+      const res = await fetch("/api/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: formData.emailOrMobile }),
+      });
+  
+      const data = await res.json();
+  
+      if (data.success) {
+        setOtpSent(true);
+        setCooldown(30);
+        alert("OTP resent successfully!");
+      } else {
+        alert(data.message || "Failed to resend OTP");
+      }
+    } catch (err) {
+      console.error("Error resending OTP:", err);
+      alert("Something went wrong while resending OTP.");
+    }
   };
+  
   
 
   const handleOtpChange = (idx: number, value: string) => {
@@ -234,16 +348,70 @@ const LoginMobile: React.FC = () => {
   };
   
 
-  const verifyOtp = () => {
-    const enteredOtp = formData.otp.join(""); // Concatenate the entered OTP
-    if (enteredOtp === correctOtp) {
-      setOtpVerified(true); // Mark as verified
-      setOtpError(false); // No error
-    } else {
-      setOtpVerified(false); // Not verified
-      setOtpError(true); // Error
+ // const verifyOtp = () => {
+//    const enteredOtp = formData.otp.join(""); // Concatenate the entered OTP
+  //  if (enteredOtp === correctOtp) {
+    //  setOtpVerified(true); // Mark as verified
+ //     setOtpError(false); // No error
+   // } else {
+    //  setOtpVerified(false); // Not verified
+    //  setOtpError(true); // Error
+    //}
+  //};
+
+const verifyOtp = async () => {
+  const enteredOtp = formData.otp.join("");
+
+  try {
+    const res = await fetch("/api/otp/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phone: formData.emailOrMobile,
+        code: enteredOtp,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      setOtpVerified(false);
+      setOtpError(true);
+      alert(data.message || "OTP verification failed.");
+      return;
     }
-  };
+
+    setOtpVerified(true);
+    setOtpError(false);
+    alert("OTP verified successfully!");
+
+    // 🔥 Now get Firebase custom token from your server
+    const tokenRes = await fetch("/api/auth/custom-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: formData.emailOrMobile }),
+    });
+
+    const tokenData = await tokenRes.json();
+
+    if (tokenData.token) {
+      // 🔐 Log the user in using Firebase
+      await signInWithCustomToken(auth, tokenData.token);
+      alert("Logged in successfully!");
+      router.push("/myprofile"); // redirect after login
+    } else {
+      alert("Token not received. Cannot log in.");
+    }
+
+  } catch (err) {
+    console.error("Error verifying OTP:", err);
+    setOtpVerified(false);
+    setOtpError(true);
+    alert("Something went wrong while verifying OTP.");
+  }
+};
+
+  
 
   const handleEmailPasswordReset = async () => {
     const { emailOrMobile } = formData;
@@ -328,25 +496,51 @@ const LoginMobile: React.FC = () => {
         }
       }}
       placeholder="Enter Mobile Number or Email"
-      className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-red-500 border-gray-300"
+      
       maxLength={50} // Allows long input for emails but only 10 digits for mobile numbers
+      className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-red-500 ${
+        loginMobileError ? "border-red-500" : "border-gray-300"
+      }`}
     />
+    {loginMobileError && (
+  <p className="text-sm text-red-500 mt-1">{loginMobileError}</p>
+)}
 
     {/* Show Send OTP Button for valid mobile numbers */}
-    {/^\d{10}$/.test(formData.emailOrMobile) && !isEmail && !otpSent && (
+    {/* Show Send/Resend OTP Button for valid mobile numbers */}
+{/^\d{10}$/.test(formData.emailOrMobile) && !isEmail && (
+  <>
+    {!otpSent && (
       <button
-        onClick={() => {
-          handleSendOtp();
-        }}
+        onClick={handleSendOtp}
         className={`w-full py-2 mt-4 rounded ${
           cooldown > 0
             ? "bg-gray-400 text-gray-200 cursor-not-allowed"
             : "bg-red-600 text-white hover:bg-red-700"
         }`}
+        disabled={cooldown > 0}
       >
-        {cooldown > 0 ? `Resend OTP (${cooldown}s)` : "Send OTP"}
+        {cooldown > 0 ? `Wait (${cooldown}s)` : "Send OTP"}
       </button>
     )}
+
+    {otpSent && cooldown === 0 && (
+      <button
+        onClick={handleResendOtp}
+        className="w-full py-2 mt-2 rounded bg-yellow-500 text-white hover:bg-yellow-600"
+      >
+        Resend OTP
+      </button>
+    )}
+
+    {otpSent && cooldown > 0 && (
+      <p className="text-center text-sm text-gray-600 mt-2">
+        You can resend OTP in {cooldown} seconds
+      </p>
+    )}
+  </>
+)}
+
 
     {/* Show OTP Fields if OTP is sent */}
     {otpSent && !isEmail && (
@@ -419,17 +613,20 @@ const LoginMobile: React.FC = () => {
     </p>
 
     {/* Login Button */}
-    <button
-      onClick={handleLogin}
-      disabled={!otpVerified && !isEmail} // Prevents the button from being clickable unless conditions are met
-      className={`w-full py-2 mt-4 rounded ${
-        otpVerified || isEmail
-          ? "bg-red-600 text-white hover:bg-red-700"
-          : "bg-gray-400 text-gray-200 cursor-not-allowed"
-      }`}
-    >
-      Login
-    </button>
+    {isEmail && (
+  <button
+    onClick={handleLogin}
+    disabled={!formData.password}
+    className={`w-full py-2 mt-4 rounded ${
+      formData.password
+        ? "bg-red-600 text-white hover:bg-red-700"
+        : "bg-gray-400 text-gray-200 cursor-not-allowed"
+    }`}
+  >
+    Login
+  </button>
+)}
+
 
     {/* Sign Up Button */}
     <p
@@ -474,9 +671,13 @@ const LoginMobile: React.FC = () => {
         : "border-gray-300"
     }`}
   />
-  {emailTouched && !formData.email.includes("@") && (
-    <p className="text-sm text-red-500 mt-1">Email must contain "@"</p>
-  )}
+ {emailTouched && !formData.email.includes("@") ? (
+  <p className="text-sm text-red-500 mt-1">Email must contain "@"</p>
+) : emailExists ? (
+  <p className="text-sm text-red-500 mt-1">
+    This email is already registered. Please use a different one.
+  </p>
+) : null}
 
   <input
     type="text"
@@ -497,9 +698,13 @@ const LoginMobile: React.FC = () => {
         : "border-gray-300"
     }`}
   />
-  {phoneTouched && formData.mobile.length !== 10 && (
-    <p className="text-sm text-red-500 mt-1">Phone number must be 10 digits long.</p>
-  )}
+  {phoneTouched && formData.mobile.length !== 10 ? (
+  <p className="text-sm text-red-500 mt-1">Phone number must be 10 digits long.</p>
+) : mobileExists ? (
+  <p className="text-sm text-red-500 mt-1">
+    This mobile number is already registered. Please use a different one.
+  </p>
+) : null}
 
   <div className="relative mt-4">
     <input
@@ -567,6 +772,8 @@ const LoginMobile: React.FC = () => {
       formData.email.trim() === "" ||
       !formData.email.includes("@") || // Email validation
       formData.mobile.length !== 10 || // Phone number validation
+      mobileExists ||
+      emailExists ||
       formData.password.length < 6 || // Password length validation
       formData.password !== formData.confirmPassword // Password match validation
     }

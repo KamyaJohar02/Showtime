@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -56,62 +58,51 @@ const services = [
 
 const ServicesPage: React.FC = () => {
   return (
-    <div
-      className="relative min-h-screen w-full p-6 sm:p-10 bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: "url('/Images/stone3.jpg')",
-      }}
-    >
-      {/* Dark Overlay for Readability */}
-      <div className="absolute inset-0 bg-black opacity-60 z-0"></div>
+    <div className="container mx-auto px-4">
+      {/* Heading */}
+      <h1 className="text-3xl font-bold text-red-600 mb-6 text-center">
+        Discover Our Services
+      </h1>
 
-      {/* Page Content */}
-      <div className="relative z-10 text-white">
-        {/* Heading */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">
-          Discover Our Services
-        </h1>
+      {/* Service Sections */}
+      {services.map((service, index) => (
+        <div
+          key={service.id}
+          className={`w-full max-w-4xl mx-auto flex flex-col md:flex-row ${
+            index % 2 !== 0 ? 'md:flex-row-reverse' : ''
+          } items-start mb-12 bg-white rounded-lg shadow-md overflow-hidden`}
+        >
+          {/* Service Image */}
+          <div className="md:w-1/2 mb-4 md:mb-0 flex justify-center items-center">
+            <Image
+              src={service.imageSrc}
+              alt={service.title}
+              width={350}
+              height={280}
+              className="rounded-lg object-cover w-full h-auto"
+            />
+          </div>
 
-        {/* Service Sections */}
-        {services.map((service, index) => (
-          <div
-            key={service.id}
-            className={`flex flex-col md:flex-row ${
-              index % 2 !== 0 ? 'md:flex-row-reverse' : ''
-            } items-start mb-10 sm:mb-12 bg-opacity-80 bg-[#093024] rounded-lg p-6 sm:p-8 md:p-10 max-w-5xl mx-auto`}
-          >
-            {/* Service Image */}
-            <div className="md:w-1/2 mb-4 md:mb-0 flex justify-center items-center">
-              <Image
-                src={service.imageSrc}
-                alt={service.title}
-                width={300}
-                height={1500}
-                className="rounded-lg object-cover"
-              />
-            </div>
+          {/* Service Info */}
+          <div className="md:w-1/2 p-6 sm:p-8 text-center md:text-left">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-4">
+              {service.title}
+            </h2>
+            <p className="text-sm sm:text-base text-gray-700 mb-6">
+              {service.description}
+            </p>
 
-            {/* Service Info */}
-            <div className="md:w-1/2 px-4 sm:px-6 md:px-10 flex flex-col text-center md:text-left">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 mt-2 sm:mt-3">
-                {service.title}
-              </h2>
-              <p className="text-sm sm:text-lg text-gray-300 mb-6">
-                {service.description}
-              </p>
-
-              {/* Book Now Button */}
-              <div className="flex justify-center md:justify-start">
-                <Link href="/booking">
-                  <button className="bg-red-500 text-white py-2 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300">
-                    Book Now
-                  </button>
-                </Link>
-              </div>
+            {/* Book Now Button */}
+            <div className="flex justify-center md:justify-start">
+              <Link href="/booking">
+                <button className="bg-red-500 text-white py-2 px-6 rounded-full shadow hover:bg-red-600 transition">
+                  Book Now
+                </button>
+              </Link>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
