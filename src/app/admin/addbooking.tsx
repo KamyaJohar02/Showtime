@@ -30,116 +30,83 @@ const AddBooking: React.FC = () => {
 
 
     useEffect(() => {
-        const loadRooms = async () => {
-            try {
-                const fetchedRooms = await getAllDocuments("rooms");
-                setRooms(
-                    fetchedRooms.map((room: any) => ({
-                        id: room.id,
-                        name: room.name,
-                        rate: room.rate,
-                    }))
-                );
-            } catch (error) {
-                console.error("Error loading rooms:", error);
-            }
+        const loadInitialData = async () => {
+          try {
+            // Load rooms
+            const fetchedRooms = await getAllDocuments("rooms");
+            const mappedRooms = fetchedRooms.map((room: any) => ({
+              id: room.id,
+              name: room.name,
+              rate: room.rate,
+            }));
+            setRooms(mappedRooms);
+      
+            // Load time slots and mark disabled ones as isBooked
+            const fetchedTimeSlots = await getAllDocuments("timeSlots");
+            const mappedSlots = fetchedTimeSlots.map((slot: any) => ({
+              id: slot.id,
+              time: slot.time,
+              isBooked: !slot.availability,
+            }));
+            setTimeSlots(mappedSlots);
+      
+            // Load decorations
+            const fetchedDecorations = await getAllDocuments("decorations");
+            setDecorations(
+              fetchedDecorations.map((decoration: any) => ({
+                id: decoration.id,
+                label: decoration.label,
+                rate: decoration.rate,
+                availability: decoration.availability,
+              }))
+            );
+      
+            // Load disabled dates
+            const fetchedDates = await getAllDocuments("disabledDates");
+            setDisabledDates(fetchedDates.map((doc: any) => new Date(doc.date)));
+      
+          } catch (error) {
+            console.error("Error loading initial data:", error);
+          }
         };
-        
-    
-        const loadTimeSlots = async () => {
-            try {
-                const fetchedTimeSlots = await getAllDocuments("timeSlots");
-                setTimeSlots(
-                    fetchedTimeSlots.map((slot: any) => ({
-                        id: slot.id,
-                        time: slot.time,
-                        isBooked: false, // Initialize `isBooked` as false
-                    }))
-                );
-            } catch (error) {
-                console.error("Error loading time slots:", error);
-            }
-        };
-    
-        const loadDecorations = async () => {
-            try {
-                const fetchedDecorations = await getAllDocuments("decorations");
-                setDecorations(
-                    fetchedDecorations.map((decoration: any) => ({
-                        id: decoration.id,
-                        label: decoration.label,
-                        rate: decoration.rate,
-                        availability: decoration.availability,
-                    }))
-                );
-            } catch (error) {
-                console.error("Error loading decorations:", error);
-            }
-        };
-    
-        const loadDisabledDates = async () => {
-            try {
-                const fetchedDates = await getAllDocuments("disabledDates");
-                const dates = fetchedDates.map((doc: any) => new Date(doc.date));
-                setDisabledDates(dates);
-            } catch (error) {
-                console.error("Error loading disabled dates:", error);
-            }
-        };
-    
+      
+        loadInitialData();
+      }, []); // Run only once on mount
+      
+      // Fetch booked slots when room or date changes
+      useEffect(() => {
         const fetchBookedSlots = async () => {
-            try {
-                if (!selectedRoom || !selectedDate) {
-                    // Reset slots to default if no room or date is selected
-                    setTimeSlots((prev) =>
-                        prev.map((slot) => ({
-                            ...slot,
-                            isBooked: false, // Reset isBooked to false
-                        }))
-                    );
-                    return;
-                }
-    
-                const formattedDate = selectedDate.toLocaleDateString("en-CA"); // Format date to "YYYY-MM-DD"
-                const roomName = rooms.find((room) => room.id === selectedRoom)?.name;
-    
-                if (!roomName) return;
-    
-                // Query booked collection for selected room and date
-                const bookedQuery = query(
-                    collection(db, "booked"),
-                    where("room", "==", roomName),
-                    where("date", "==", formattedDate)
-                );
-    
-                const bookedDocs = await getDocs(bookedQuery);
-    
-                // Extract booked time slots
-                const bookedSlots = new Set(
-                    bookedDocs.docs.map((doc) => doc.data().timeSlot)
-                );
-    
-                // Update time slots with isBooked property
-                setTimeSlots((prev) =>
-                    prev.map((slot) => ({
-                        ...slot,
-                        isBooked: bookedSlots.has(slot.time), // Compare with the time field
-                    }))
-                );
-            } catch (error) {
-                console.error("Error fetching booked slots:", error);
-            }
+          try {
+            if (!selectedRoom || !selectedDate) return;
+      
+            const formattedDate = selectedDate.toLocaleDateString("en-CA");
+            const roomName = rooms.find((room) => room.id === selectedRoom)?.name;
+      
+            if (!roomName) return;
+      
+            const bookedQuery = query(
+              collection(db, "booked"),
+              where("room", "==", roomName),
+              where("date", "==", formattedDate)
+            );
+            const bookedDocs = await getDocs(bookedQuery);
+            const bookedSlots = new Set(bookedDocs.docs.map((doc) => doc.data().timeSlot));
+      
+            setTimeSlots((prev) =>
+              prev.map((slot) => ({
+                ...slot,
+                isBooked: bookedSlots.has(slot.time) || slot.isBooked,
+
+              }))
+            );
+          } catch (error) {
+            console.error("Error fetching booked slots:", error);
+          }
         };
-    
-        // Load data on component mount
-        loadRooms();
-        loadTimeSlots();
-        loadDecorations();
-        loadDisabledDates();
-    
-        // Update booked slots whenever room or date changes
+      
         fetchBookedSlots();
-    }, [selectedRoom, selectedDate, rooms]); // Ensure dependencies are updated
+      }, [selectedRoom, selectedDate]);
+      
     
     
 

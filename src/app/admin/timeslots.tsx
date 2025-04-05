@@ -15,6 +15,7 @@ const ManageTimeSlots: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [editingSlot, setEditingSlot] = useState<Slot | null>(null);
+  
 
   // Fetch slots from Firestore
   useEffect(() => {

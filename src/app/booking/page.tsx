@@ -208,8 +208,8 @@ const Booking: React.FC = () => {
 
             // Update slots with the isBooked property based on the time field
             const updatedSlots = fetchedTimeSlots.map((slot) => ({
-                ...slot,
-                isBooked: bookedSlots.has(slot.time), // Compare with the `time` field instead of `name`
+              ...slot,
+              isBooked: bookedSlots.has(slot.time) || !slot.availability, // Disable if booked OR admin disabled
             }));
             console.log("Updated Slots:", updatedSlots);
             setSlots(updatedSlots); // Update state with modified slots
@@ -226,8 +226,9 @@ const Booking: React.FC = () => {
   
 
   const renderRoomSelection = () => (
-    <div className="flex flex-col items-center min-h-screen bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-4 sm:p-8">
-      <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-800 font-serif mb-4 sm:mb-6 text-outline">
+    <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
+
+      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
         Select a Room
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-8">
@@ -235,7 +236,7 @@ const Booking: React.FC = () => {
           <div
             key={room.roomId}
             onClick={() => room.availability && setSelectedRoom(room.roomId)}
-            className={`border p-6 rounded-lg bg-opacity-70 bg-[#093024] transition-transform transform hover:scale-105 ${
+            className={`border p-6 rounded-lg bg-[#892929] transition-transform transform hover:scale-105 ${
               selectedRoom === room.roomId
                 ? "border-4 border-red-500 shadow-lg"
                 : room.availability
@@ -256,7 +257,7 @@ const Booking: React.FC = () => {
             <p className="text-lg text-gray-300 text-center mt-2">
               {room.description}
             </p>
-            <p className="text-lg text-red-400 text-center mt-2 font-bold">
+            <p className="text-lg text-white text-center mt-2 font-bold">
               ₹{room.rate}
             </p>
           </div>
@@ -290,21 +291,22 @@ const renderCalendar = () => {
   const today = new Date();
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-4 sm:p-8">
+    <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
+
       {/* Title Above the Card */}
-      <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">
+      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
         Select a Date
       </h2>
       
       {/* Calendar Card */}
-      <div className="bg-[#093024] bg-opacity-70 rounded-lg shadow-lg p-6 sm:p-8 md:p-10 lg:p-12 w-[80vw] sm:w-[60vw] md:w-[50vw] lg:w-[40vw] max-w-lg h-[50vh] sm:h-[60vh] md:h-[65vh] flex flex-col items-center">
+      <div className="bg-[#e58484] rounded-lg shadow-lg p-6 sm:p-8 md:p-10 lg:p-12 w-[80vw] sm:w-[60vw] md:w-[50vw] lg:w-[40vw] max-w-lg h-[50vh] sm:h-[60vh] md:h-[65vh] flex flex-col items-center">
       <DayPicker
   mode="single"
   selected={selectedDate}
   onSelect={(date) => setSelectedDate(date)}
   disabled={[...disabledDates, { before: today }]} // Include fetched dates
   defaultMonth={today} // Start on current month
-  className="bg-[#093024] rounded-lg text-white w-full flex justify-center"
+  className="bg-[#962a2a] rounded-lg text-white w-full flex justify-center"
   styles={{
     caption: { textAlign: "center", fontSize: "1.5rem", fontWeight: "bold" },
     day: { justifyContent: "center", fontSize: "1.1rem" },
@@ -324,21 +326,22 @@ const renderCalendar = () => {
         
 
 const renderTimeSlots = () => (
-  <div className="flex flex-col items-center min-h-screen bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-6 sm:p-8">
-    <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">
+  <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
+
+      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
       Select a Time Slot
     </h2>
-    <div className="bg-[#093024] bg-opacity-70 p-8 sm:p-10 rounded-lg shadow-lg w-[80vw] sm:w-[70vw] md:w-[50vw] lg:w-[45vw] max-w-xl h-auto flex flex-col items-center">
+    <div className="bg-[#e58484] p-8 sm:p-10 rounded-lg shadow-lg w-[80vw] sm:w-[70vw] md:w-[50vw] lg:w-[45vw] max-w-xl h-auto flex flex-col items-center">
       <div className="flex flex-col gap-4 w-full">
         {slots.map((slot) => (
           <div
           key={slot.id}
           className={`p-4 rounded-lg text-center text-lg sm:text-xl md:text-2xl transition-transform duration-300 transform hover:scale-105 ${
             selectedSlot === slot.time
-              ? "bg-red-500 text-white" // Highlight selected slot
+              ? "bg-[#208b42] text-white" // Highlight selected slot
               : slot.isBooked
               ? "bg-gray-500 text-gray-700 cursor-not-allowed" // Grey out booked slots
-              : "bg-[#0c3b2e] text-gray-300 cursor-pointer" // Default style
+              : "bg-[#892929] text-gray-300 cursor-pointer" // Default style
           }`}
             onClick={() => !slot.isBooked && setSelectedSlot(slot.time)}
           >
@@ -348,12 +351,15 @@ const renderTimeSlots = () => (
       </div>
     </div>
     <div className="flex justify-center mt-6 space-x-4">
-      <button
-        className="bg-gray-300 text-black py-2 px-6 sm:px-8 rounded"
-        onClick={() => setStep(2)}
-      >
-        Back
-      </button>
+    <button
+  className="bg-gray-300 text-black py-2 px-6 sm:px-8 rounded"
+  onClick={() => {
+    setSelectedSlot(null); // Clear selected time slot
+    setStep(2); // Go back to calendar
+  }}
+>
+  Back
+</button>
       <button
         className={`py-2 px-6 sm:px-8 rounded ${
           selectedSlot ? "bg-red-500 text-white" : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -371,9 +377,10 @@ const renderTimeSlots = () => (
    
 
 const renderDecorations = () => (
-  <div className="relative min-h-screen bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-8">
-    <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">
-      Choose Decorations
+  <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
+
+      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
+      Select Decorations
     </h2>
 
     {/* Decorations Grid */}
@@ -389,7 +396,7 @@ const renderDecorations = () => (
                 : [...prev, decoration.id]
             )
           }
-          className={`flex flex-col items-center border p-4 rounded-lg bg-opacity-70 bg-[#093024] text-white transition-all duration-200 transform hover:scale-105 ${
+          className={`flex flex-col items-center border p-4 rounded-lg  bg-[#822a2a] text-white transition-all duration-200 transform hover:scale-105 ${
             selectedDecorations.includes(decoration.id)
               ? "border-red-500 shadow-lg"
               : decoration.availability
@@ -478,11 +485,13 @@ const renderDecorations = () => (
     
   
     return (
-      <div className="flex flex-col items-center min-h-screen bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-8">
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">Enter Your Details</h2>
+      <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
+
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
+              Enter Your Details</h2>
   
         {/* Form Container */}
-        <div className="bg-[#093024] bg-opacity-70 p-8 sm:p-10 rounded-lg shadow-lg w-[80vw] sm:w-[60vw] md:w-[50vw] lg:w-[40vw] max-w-md">
+        <div className="bg-[#822a2a]  p-8 sm:p-10 rounded-lg shadow-lg w-[80vw] sm:w-[60vw] md:w-[50vw] lg:w-[40vw] max-w-md">
           
           {/* Full Name */}
           <div className="mb-4">
@@ -660,31 +669,32 @@ const renderDecorations = () => (
     const dueAmount = totalAmount - advanceAmount;
   
     return (
-      <div className="min-h-screen flex flex-col items-center bg-[url('/Images/stone3.jpg')] bg-cover bg-center p-8">
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-[Great Vibes] italic text-center text-green-900 font-serif mb-4 sm:mb-6 text-outline">
-          Booking Summary
+      <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
+
+      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
+      Booking Summary
         </h2>
-        <div className="bg-[#093024] bg-opacity-70 text-black p-6 rounded-lg w-full max-w-md shadow-lg space-y-3">
+        <div className="bg-[#e58484]  text-black p-6 rounded-lg w-full max-w-md shadow-lg space-y-3">
           {/* Detail Boxes */}
-          <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
+          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Name:</p>
             <p className="text-base">{name}</p>
           </div>
-          <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
+          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Phone Number:</p>
             <p className="text-base">{phoneNumber}</p>
           </div>
-          <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
+          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Email:</p>
             <p className="text-base">{email}</p>
           </div>
-          <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
+          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Room:</p>
             <p className="text-base">
               {rooms.find((room) => room.roomId === selectedRoom)?.name}
             </p>
           </div>
-          <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
+          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
   <p className="font-semibold text-lg">Date:</p>
   <p className="text-base">
   {selectedDate
@@ -692,11 +702,11 @@ const renderDecorations = () => (
     : "Not Selected"}
 </p> {/* Display as "YYYY-MM-DD" */}
 </div>
-          <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
+          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Time Slot:</p>
             <p className="text-base">{selectedSlot}</p>
           </div>
-          <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
+          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Decorations:</p>
             <p className="text-base">
               {selectedDecorations
@@ -704,12 +714,12 @@ const renderDecorations = () => (
                 .join(", ") || "None"}
             </p>
           </div>
-          <div className="bg-[#093024] bg-opacity-80 text-white px-4 py-2 rounded-lg shadow-sm">
+          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
             <p className="font-semibold text-lg">Cake:</p>
             <p className="text-base">{addCake ? "Yes" : "No"}</p>
           </div>
           {/* Total Amount, Advance, and Due */}
-          <div className="bg-[#093024] bg-opacity-90 text-white px-4 py-4 rounded-lg shadow-md border-t-4 border-red-500">
+          <div className="bg-[#822a2a] text-white px-4 py-4 rounded-lg shadow-md border-t-4 border-red-500">
             <p className="font-bold text-xl">Total Amount: ₹{totalAmount}</p>
             <p className="text-sm mt-1">Advance: ₹{advanceAmount}</p>
             <p className="text-sm">Due: ₹{dueAmount}</p>
