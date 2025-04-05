@@ -8,6 +8,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  signInWithCustomToken,
 } from "firebase/auth";
 import {
   doc,
@@ -31,30 +32,101 @@ const LoginDesktop: React.FC = () => {
   // const redirectTo = searchParams.get("redirect"); // Extract the redirect parameter
 
   const [isLogin, setIsLogin] = useState(true);
-  const [showResetPassword, setShowResetPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    mobile: "",
-    password: "",
-    confirmPassword: "",
-    otp: ["", "", "", ""],
-    emailOrMobile: "",
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const [correctOtp] = useState("1234");
-  const [emailTouched, setEmailTouched] = useState(false);
+const [showResetPassword, setShowResetPassword] = useState(false);
+const [formData, setFormData] = useState({
+  name: "",
+  email: "",
+  mobile: "",
+  password: "",
+  confirmPassword: "",
+  otp: ["", "", "", ""],
+  emailOrMobile: "",
+});
+const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const [otpSent, setOtpSent] = useState(false);
+const [cooldown, setCooldown] = useState(0);
+const [otpVerified, setOtpVerified] = useState(false);
+const [otpError, setOtpError] = useState(false);
+const [loginMobileError, setLoginMobileError] = useState("");
+const [emailTouched, setEmailTouched] = useState(false);
 const [nameTouched, setNameTouched] = useState(false);
-const [phoneTouched, setPhoneTouched] = useState(false); // Add this line
+const [phoneTouched, setPhoneTouched] = useState(false);
+const [mobileExists, setMobileExists] = useState(false);
+const [checkingMobile, setCheckingMobile] = useState(false);
+const [emailExists, setEmailExists] = useState(false);
+const [checkingEmail, setCheckingEmail] = useState(false);
+const [isEmail, setIsEmail] = useState(false);
+const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+
+useEffect(() => {
+  let timer: NodeJS.Timeout;
+  if (cooldown > 0) {
+    timer = setTimeout(() => setCooldown((prev) => prev - 1), 1000);
+  }
+  return () => clearTimeout(timer);
+}, [cooldown]);
+
+
+const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({ ...prev, [name]: value }));
+
+  if (name === "emailOrMobile") {
+    setIsEmail(value.includes("@"));
+  }
+
+  if (name === "mobile") {
+    setFormData((prev) => ({ ...prev, mobile: value }));
+  
+    // Only check when it's exactly 10 digits
+    if (/^\d{10}$/.test(value)) {
+      setCheckingMobile(true);
+      try {
+        const mobileQuery = query(collection(db, "users"), where("mobile", "==", value));
+        const snapshot = await getDocs(mobileQuery);
+        setMobileExists(!snapshot.empty);
+      } catch (error) {
+        console.error("Error checking mobile number:", error);
+        setMobileExists(false);
+      }
+      setCheckingMobile(false);
+    } else {
+      setMobileExists(false); // Reset error if invalid format
+    }
+  }
+  
+  if (name === "email") {
+    setFormData((prev) => ({ ...prev, email: value }));
+  
+    // Check only if email contains "@" and is not empty
+    if (value.trim() !== "" && value.includes("@")) {
+      setCheckingEmail(true);
+      try {
+        const emailQuery = query(collection(db, "users"), where("email", "==", value.trim()));
+        const snapshot = await getDocs(emailQuery);
+        setEmailExists(!snapshot.empty);
+      } catch (error) {
+        console.error("Error checking email:", error);
+        setEmailExists(false);
+      }
+      setCheckingEmail(false);
+    } else {
+      setEmailExists(false); // Reset error if not a valid email format
+    }
+  }
+  
+};
+
+const handleOtpChange = (idx: number, value: string) => {
+  if (/\D/.test(value)) return;
+  const updatedOtp = [...formData.otp];
+  updatedOtp[idx] = value;
+  setFormData({ ...formData, otp: updatedOtp });
+  if (value && idx < otpRefs.current.length - 1) otpRefs.current[idx + 1]?.focus();
+  else if (!value && idx > 0) otpRefs.current[idx - 1]?.focus();
+};
 
 
   const toggleForm = () => {
@@ -111,16 +183,35 @@ const [phoneTouched, setPhoneTouched] = useState(false); // Add this line
 
   const handleSignup = async () => {
     const { email, password, name, mobile } = formData;
-
+  
     try {
       if (!email || !password || !name || !mobile) {
         alert("Please fill all the fields");
         return;
       }
-
+  
+      // 🔍 Check if email already exists in Firestore
+      const emailQuery = query(collection(db, "users"), where("email", "==", email));
+      const emailSnapshot = await getDocs(emailQuery);
+      if (!emailSnapshot.empty) {
+        alert("This email is already registered. Please use a different email.");
+        return;
+      }
+  
+      // 🔍 Check if mobile already exists in Firestore
+      const mobileQuery = query(collection(db, "users"), where("mobile", "==", mobile));
+      const mobileSnapshot = await getDocs(mobileQuery);
+      if (!mobileSnapshot.empty) {
+        alert("This mobile number is already registered. Please use a different number.");
+        return;
+      }
+  
+      // ✅ Create new Firebase Auth user
+      
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-
+  
+      // ✅ Save user data in Firestore
       await setDoc(doc(db, "users", user.uid), {
         name,
         email,
@@ -128,7 +219,7 @@ const [phoneTouched, setPhoneTouched] = useState(false); // Add this line
         role: "user",
         createdAt: new Date(),
       });
-
+  
       alert("Signup successful! Redirecting to login page...");
       setFormData({
         name: "",
@@ -141,6 +232,9 @@ const [phoneTouched, setPhoneTouched] = useState(false); // Add this line
       });
       router.push("/");
     } catch (error) {
+    
+      console.log("Signup data:", { name, email, password, mobile });
+  
       if (error instanceof FirebaseError) {
         switch (error.code) {
           case "auth/email-already-in-use":
@@ -160,6 +254,8 @@ const [phoneTouched, setPhoneTouched] = useState(false); // Add this line
       }
     }
   };
+  
+  
 
   const handleEmailPasswordReset = async () => {
     const { emailOrMobile } = formData;
@@ -210,54 +306,73 @@ const [phoneTouched, setPhoneTouched] = useState(false); // Add this line
           </h2>
 
           {isLogin ? (
-            <>
-              <input
-                type="text"
-                name="emailOrMobile"
-                value={formData.emailOrMobile}
-                onChange={handleInputChange}
-                placeholder="Enter Mobile Number or Email"
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-red-500 border-gray-300"
-              />
-              {formData.emailOrMobile.includes("@") && (
-                <div className="relative mt-4">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    placeholder="Password"
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-red-500"
-                  />
-                  <span
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
-                  >
-                    {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-                  </span>
-                </div>
-              )}
-              <p
-                onClick={() => setShowResetPassword(true)}
-                className="text-right text-sm text-red-600 cursor-pointer"
-              >
-                Forgot Password?
-              </p>
-              <button
-                onClick={handleLogin}
-                className="w-full bg-red-600 text-white py-2 mt-4 rounded"
-              >
-                Login
-              </button>
-              <p
-                onClick={toggleForm}
-                className="text-center text-sm text-gray-600 mt-4 cursor-pointer"
-              >
-                Don't have an account?{" "}
-                <span className="text-red-600">Sign Up</span>
-              </p>
-            </>
-          ) : (
+  <>
+    <input
+  type="text"
+  name="emailOrMobile"
+  value={formData.emailOrMobile}
+  onChange={handleInputChange}
+  placeholder="Enter Mobile Number or Email"
+  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-red-500 border-gray-300"
+/>
+
+{/* Password Login (Email) */}
+{formData.emailOrMobile.includes("@") && (
+  <>
+    <div className="relative mt-4">
+      <input
+        type={showPassword ? "text" : "password"}
+        name="password"
+        value={formData.password}
+        onChange={handleInputChange}
+        placeholder="Password"
+        className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-red-500"
+      />
+      <span
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
+      >
+        {showPassword ? (
+          <EyeSlashIcon className="h-5 w-5" />
+        ) : (
+          <EyeIcon className="h-5 w-5" />
+        )}
+      </span>
+    </div>
+
+    {/* ✅ Add this back here */}
+    <p
+      onClick={() => setShowResetPassword(true)}
+      className="text-right text-sm text-red-600 cursor-pointer mt-2"
+    >
+      Forgot Password?
+    </p>
+    <button
+  onClick={handleLogin}
+  className="w-full bg-red-600 text-white py-2 mt-4 rounded"
+>
+  Login
+</button>
+
+  </>
+)}
+
+
+{/* OTP Login (Mobile) */}
+
+
+
+   
+    
+    <p
+      onClick={toggleForm}
+      className="text-center text-sm text-gray-600 mt-4 cursor-pointer"
+    >
+      Don't have an account? <span className="text-red-600">Sign Up</span>
+    </p>
+  </>
+) : (
+
             <>
   <input
     type="text"
@@ -278,45 +393,57 @@ const [phoneTouched, setPhoneTouched] = useState(false); // Add this line
     <p className="text-sm text-red-500 mt-1">Name must contain only alphabets.</p>
   )}
 
-  <input
-    type="email"
-    name="email"
-    value={formData.email}
-    onChange={handleInputChange}
-    onBlur={() => setEmailTouched(true)}
-    placeholder="Email"
-    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-red-500 ${
-      emailTouched && !formData.email.includes("@")
-        ? "border-red-500"
-        : "border-gray-300"
-    }`}
-  />
-  {emailTouched && !formData.email.includes("@") && (
-    <p className="text-sm text-red-500 mt-1">Email must contain "@"</p>
-  )}
+<input
+  type="email"
+  name="email"
+  value={formData.email}
+  onChange={handleInputChange}
+  onBlur={() => setEmailTouched(true)}
+  placeholder="Email"
+  className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-red-500 ${
+    emailTouched && (!formData.email.includes("@") || emailExists)
+      ? "border-red-500"
+      : "border-gray-300"
+  }`}
+/>
+{emailTouched && !formData.email.includes("@") && (
+  <p className="text-sm text-red-500 mt-1">Email must contain "@"</p>
+)}
+{emailExists && (
+  <p className="text-sm text-red-500 mt-1">
+    This email is already registered. Please use a different one.
+  </p>
+)}
 
-  <input
-    type="text"
-    name="mobile"
-    value={formData.mobile}
-    onChange={(e) => {
-      const value = e.target.value;
-      if (/^\d{0,10}$/.test(value)) {
-        handleInputChange(e);
-        setPhoneTouched(true);
-      }
-    }}
-    onBlur={() => setPhoneTouched(true)}
-    placeholder="Phone Number"
-    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-red-500 ${
-      phoneTouched && formData.mobile.length !== 10
-        ? "border-red-500"
-        : "border-gray-300"
-    }`}
-  />
-  {phoneTouched && formData.mobile.length !== 10 && (
-    <p className="text-sm text-red-500 mt-1">Phone number must be 10 digits long.</p>
-  )}
+
+<input
+  type="text"
+  name="mobile"
+  value={formData.mobile}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^\d{0,10}$/.test(value)) {
+      handleInputChange(e);
+      setPhoneTouched(true);
+    }
+  }}
+  onBlur={() => setPhoneTouched(true)}
+  placeholder="Phone Number"
+  className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-red-500 ${
+    phoneTouched && (formData.mobile.length !== 10 || mobileExists)
+      ? "border-red-500"
+      : "border-gray-300"
+  }`}
+/>
+{phoneTouched && formData.mobile.length !== 10 && (
+  <p className="text-sm text-red-500 mt-1">Phone number must be 10 digits long.</p>
+)}
+{mobileExists && (
+  <p className="text-sm text-red-500 mt-1">
+    This mobile number is already registered. Please use a different one.
+  </p>
+)}
+
 
   <div className="relative mt-4">
     <input
