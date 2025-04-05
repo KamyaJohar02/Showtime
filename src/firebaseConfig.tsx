@@ -1,6 +1,6 @@
 // Import necessary Firebase modules
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { getAuth, Auth } from "firebase/auth";
+import { getAuth, Auth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 
 // Firebase configuration object (Replace these with your actual Firebase credentials)
@@ -19,6 +19,14 @@ const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseCon
 // Initialize Firebase services
 const auth: Auth = getAuth(app);
 const db: Firestore = getFirestore(app);
+
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("✅ Firebase auth persistence set to LOCAL.");
+  })
+  .catch((error) => {
+    console.error("❌ Error setting persistence:", error);
+  });
 
 // Optional: Add debug logging in development mode
 if (process.env.NODE_ENV === "development") {

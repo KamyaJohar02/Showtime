@@ -61,6 +61,20 @@ const Booking: React.FC = () => {
     phoneNumber: "",
     email: "",
   });
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const urlStep = parseInt(searchParams.get("step") || "1");
+    setStep(urlStep);
+  
+    const savedRoom = localStorage.getItem("selectedRoom");
+    const savedSlot = localStorage.getItem("selectedSlot");
+    const savedDecorations = localStorage.getItem("selectedDecorations");
+  
+    if (savedRoom) setSelectedRoom(savedRoom);
+    if (savedSlot) setSelectedSlot(savedSlot);
+    if (savedDecorations) setSelectedDecorations(JSON.parse(savedDecorations));
+  }, []);
+  
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -411,11 +425,25 @@ const renderDecorations = () => (
         Back
       </button>
       <button
-        className="bg-red-500 text-white py-2 px-8 rounded"
-        onClick={() => setStep(5)}
-      >
-        Next
-      </button>
+  className="bg-red-500 text-white py-2 px-8 rounded"
+  onClick={() => {
+    // Save current selections to localStorage
+    localStorage.setItem("selectedRoom", selectedRoom || "");
+    localStorage.setItem("selectedSlot", selectedSlot || "");
+    localStorage.setItem("selectedDecorations", JSON.stringify(selectedDecorations));
+
+    // Redirect to login if user not logged in
+    if (!user) {
+      const redirectUrl = encodeURIComponent("/booking?step=5");
+      router.push(`/login?redirect=${redirectUrl}`);
+    } else {
+      setStep(5);
+    }
+  }}
+>
+  Next
+</button>
+
     </div>
   </div>
 );
