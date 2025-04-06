@@ -119,15 +119,90 @@ const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   
 };
 
-const handleOtpChange = (idx: number, value: string) => {
-  if (/\D/.test(value)) return;
-  const updatedOtp = [...formData.otp];
-  updatedOtp[idx] = value;
-  setFormData({ ...formData, otp: updatedOtp });
-  if (value && idx < otpRefs.current.length - 1) otpRefs.current[idx + 1]?.focus();
-  else if (!value && idx > 0) otpRefs.current[idx - 1]?.focus();
-};
 
+
+const handleSendOtp = async () => {
+    setLoginMobileError(""); // Clear previous error
+  
+    try {
+      const userQuery = query(
+        collection(db, "users"),
+        where("mobile", "==", formData.emailOrMobile)
+      );
+      const snapshot = await getDocs(userQuery);
+  
+      if (snapshot.empty) {
+        setLoginMobileError("This phone number is not registered. Please sign up.");
+        return;
+      }
+  
+      const res = await fetch("/api/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: formData.emailOrMobile }),
+      });
+  
+      const data = await res.json();
+  
+      if (data.success) {
+        setOtpSent(true);
+        setCooldown(30);
+        alert("OTP sent successfully!");
+      } else {
+        setLoginMobileError(data.message || "Failed to send OTP");
+      }
+    } catch (err) {
+      console.error("Error sending OTP:", err);
+      setLoginMobileError("Something went wrong while sending OTP.");
+    }
+  }; 
+  const handleResendOtp = async () => {
+    setFormData((prev) => ({
+      ...prev,
+      otp: ["", "", "", ""],
+    }));
+  
+    try {
+      const res = await fetch("/api/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: formData.emailOrMobile }),
+      });
+  
+      const data = await res.json();
+  
+      if (data.success) {
+        setOtpSent(true);
+        setCooldown(30);
+        alert("OTP resent successfully!");
+      } else {
+        alert(data.message || "Failed to resend OTP");
+      }
+    } catch (err) {
+      console.error("Error resending OTP:", err);
+      alert("Something went wrong while resending OTP.");
+    }
+  };
+  const handleOtpChange = (idx: number, value: string) => {
+    if (/\D/.test(value)) return; // Ignore non-numeric input
+  
+    const updatedOtp = [...formData.otp];
+    updatedOtp[idx] = value;
+  
+    setFormData({ ...formData, otp: updatedOtp });
+  
+    if (value) {
+      // Move to the next input if value is entered
+      if (idx < otpRefs.current.length - 1) {
+        otpRefs.current[idx + 1]?.focus();
+      }
+    } else {
+      // Move to the previous input if value is deleted
+      if (idx > 0) {
+        otpRefs.current[idx - 1]?.focus();
+      }
+    }
+  };
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
@@ -255,7 +330,57 @@ const handleOtpChange = (idx: number, value: string) => {
     }
   };
   
+  const verifyOtp = async () => {
+    const enteredOtp = formData.otp.join("");
   
+    try {
+      const res = await fetch("/api/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: formData.emailOrMobile,
+          code: enteredOtp,
+        }),
+      });
+  
+      const data = await res.json();
+  
+      if (!data.success) {
+        setOtpVerified(false);
+        setOtpError(true);
+        alert(data.message || "OTP verification failed.");
+        return;
+      }
+  
+      setOtpVerified(true);
+      setOtpError(false);
+      alert("OTP verified successfully!");
+  
+      // 🔥 Now get Firebase custom token from your server
+      const tokenRes = await fetch("/api/auth/custom-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: formData.emailOrMobile }),
+      });
+  
+      const tokenData = await tokenRes.json();
+  
+      if (tokenData.token) {
+        // 🔐 Log the user in using Firebase
+        await signInWithCustomToken(auth, tokenData.token);
+        alert("Logged in successfully!");
+        router.push("/myprofile"); // redirect after login
+      } else {
+        alert("Token not received. Cannot log in.");
+      }
+  
+    } catch (err) {
+      console.error("Error verifying OTP:", err);
+      setOtpVerified(false);
+      setOtpError(true);
+      alert("Something went wrong while verifying OTP.");
+    }
+  };
 
   const handleEmailPasswordReset = async () => {
     const { emailOrMobile } = formData;
@@ -339,6 +464,7 @@ const handleOtpChange = (idx: number, value: string) => {
         )}
       </span>
     </div>
+    
 
     {/* ✅ Add this back here */}
     <p
@@ -359,6 +485,69 @@ const handleOtpChange = (idx: number, value: string) => {
 
 
 {/* OTP Login (Mobile) */}
+{/* OTP Login (Mobile) */}
+{!formData.emailOrMobile.includes("@") &&
+  formData.emailOrMobile.length === 10 && (
+    <>
+      {!otpSent && (
+      <button
+        onClick={handleSendOtp}
+        className={`w-full py-2 mt-4 rounded ${
+          cooldown > 0
+            ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+            : "bg-red-600 text-white hover:bg-red-700"
+        }`}
+        disabled={cooldown > 0}
+      >
+        {cooldown > 0 ? `Wait (${cooldown}s)` : "Send OTP"}
+      </button>
+    )}
+
+    {otpSent && cooldown === 0 && (
+      <button
+        onClick={handleResendOtp}
+        className="w-full py-2 mt-2 rounded bg-yellow-500 text-white hover:bg-yellow-600"
+      >
+        Resend OTP
+      </button>
+    )}
+
+    {otpSent && (
+      <div className="grid grid-cols-4 gap-2 mt-4">
+        {formData.otp.map((digit, idx) => (
+          <input
+            key={idx}
+            type="text"
+            maxLength={1}
+            value={digit}
+            onChange={(e) => handleOtpChange(idx, e.target.value)}
+            ref={(el) => {
+              otpRefs.current[idx] = el;
+            }}
+            className={`w-full text-center py-2 border rounded focus:outline-none focus:ring-red-500 ${
+              otpError
+                ? "border-red-500"
+                : otpVerified
+                ? "border-green-500"
+                : "border-gray-300"
+            }`}
+          />
+        ))}
+
+        <button
+          onClick={verifyOtp}
+          className={`w-full py-2 mt-4 rounded ${
+            otpVerified
+              ? "bg-green-600 text-white"
+              : "bg-red-600 text-white hover:bg-red-700"
+          }`}
+        >
+          Verify OTP
+        </button>
+      </div>
+    )}
+    </>
+  )}
 
 
 
