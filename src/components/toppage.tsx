@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,9 +11,9 @@ const dancingScript = Dancing_Script({
 });
 
 const images = [
-  '/Images/c1.jpg',
+  '/Images/photo1.png',
+  '/Images/photo2.png',
   '/Images/car1_2.jpg',
-  '/Images/car1_4.jpg',
 ];
 
 const textToDisplay = "Celebrate your special moments in style with Showtime";
@@ -21,6 +23,7 @@ const TopPage: React.FC = () => {
   const [displayedText, setDisplayedText] = useState('');
   const [letterIndex, setLetterIndex] = useState(0);
 
+  // Auto-slide image carousel
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % images.length);
@@ -28,6 +31,7 @@ const TopPage: React.FC = () => {
     return () => clearInterval(slideInterval);
   }, []);
 
+  // Typewriter effect for text
   useEffect(() => {
     if (letterIndex < textToDisplay.length) {
       const textInterval = setInterval(() => {
@@ -55,17 +59,16 @@ const TopPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 🎥 Main Section */}
-      <div className="relative w-full h-screen overflow-hidden mt-0">
-        {/* Vertical Image Carousel */}
+      {/* 🎥 Image Carousel Section */}
+      <div className="relative w-full h-[700px] overflow-hidden mt-0">
+        {/* Image Slides */}
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           {images.map((image, index) => (
             <div
               key={index}
-              className={`absolute top-0 left-0 w-full h-full transition-transform duration-1000 ease-in-out ${
-                index === currentSlide ? 'translate-y-0' : 'translate-y-full'
+              className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+                index === currentSlide ? 'opacity-100' : 'opacity-0'
               }`}
-              style={{ transform: `translateY(${100 * (index - currentSlide)}%)` }}
             >
               <Image
                 src={image}
@@ -78,15 +81,15 @@ const TopPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Text Overlay */}
+        {/* Overlay Text + Button */}
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 p-4">
-          <h2 className={`${dancingScript.className} text-yellow-500 text-3xl sm:text-4xl md:text-3xl lg:text-7xl font-bold text-center mb-6`}>
+          <h2 className={`${dancingScript.className} text-yellow-500 text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold text-center mb-6`}>
             {displayedText}
           </h2>
           <Link href="/booking">
-            <button className="bg-red-500 text-white py-2 sm:py-3 px-6 sm:px-8 rounded-full shadow-lg hover:bg-red-600 transition duration-300 text-sm sm:text-base md:text-lg">
+            <span className="bg-red-500 text-white py-2 sm:py-3 px-6 sm:px-8 rounded-full shadow-lg hover:bg-red-600 transition duration-300 text-sm sm:text-base md:text-lg cursor-pointer">
               Book Now
-            </button>
+            </span>
           </Link>
         </div>
       </div>

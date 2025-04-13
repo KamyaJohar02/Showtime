@@ -35,7 +35,8 @@ const RoomsPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4">
       {/* Heading */}
-      <h1 className="text-3xl font-bold text-red-600 mb-6 text-center">        Explore Our Rooms
+      <h1 className="text-3xl font-bold text-red-600 mb-6 text-center">
+        Explore Our Rooms
       </h1>
 
       {/* Room Sections */}
@@ -68,15 +69,17 @@ const RoomsPage: React.FC = () => {
 
             {/* Buttons Section */}
             <div className="flex justify-center md:justify-start space-x-4">
-              <Link href={room.moreInfoLink}>
-                <button className="bg-red-500 text-white py-2 px-4 sm:px-6 rounded-full shadow hover:bg-red-600 transition">
-                  More Info
-                </button>
+              <Link
+                href={room.moreInfoLink}
+                className="bg-red-500 text-white py-2 px-4 sm:px-6 rounded-full shadow hover:bg-red-600 transition inline-block text-center"
+              >
+                More Info
               </Link>
-              <Link href="/booking">
-                <button className="bg-blue-500 text-white py-2 px-4 sm:px-6 rounded-full shadow hover:bg-blue-600 transition">
-                  Book Now
-                </button>
+              <Link
+                href="/booking"
+                className="bg-blue-500 text-white py-2 px-4 sm:px-6 rounded-full shadow hover:bg-blue-600 transition inline-block text-center"
+              >
+                Book Now
               </Link>
             </div>
           </div>
