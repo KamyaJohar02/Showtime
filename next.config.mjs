@@ -1,8 +1,5 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  experimental: {
-    appDir: true, // Only if you're using the experimental `app` directory
-  },
+// next.config.mjs
+export default {
   images: {
     domains: [
       'upload.wikimedia.org',
@@ -16,5 +13,3 @@ const nextConfig = {
   },
   reactStrictMode: true,
 };
-
-module.exports = nextConfig;
