@@ -51,6 +51,14 @@ export default function Home() {
     { title: 'Decorations', image: '/Images/decoration6.jpg' },
     { title: 'Cakes', image: '/Images/cakes5.webp' },
     { title: 'Photoshoot', image: '/Images/photoshoot1.jpeg' },
+    { title: 'Surprise Events', image: '/Images/surprise2.jpg' },
+    { title: 'Private Parties', image: '/Images/party1.jpg' },
+    { title: 'Anniversaries', image: '/Images/anniversary1.webp' },
+    { title: 'Birthdays', image: '/Images/birthday3.jpg' },
+    { title: 'Corporate Events', image: '/Images/corporate1.jpg' },
+    { title: 'Weddings', image: '/Images/wedding1.webp' },
+    { title: 'Engagements', image: '/Images/engagement1.webp' },
+
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);

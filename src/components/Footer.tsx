@@ -44,9 +44,18 @@ const Footer = () => {
 
           {/* Social Media Section */}
           <div className="w-full sm:w-1/4 mb-6 mt-2">
-            <h5 className="font-bold mb-4">Social Media</h5>
-            <p className="text-gray-400">Follow us on social media.</p>
-          </div>
+  <h5 className="font-bold mb-4">Social Media</h5>
+  <p className="text-gray-400 mb-2">Follow us on social media:</p>
+  
+  <a
+    href="https://www.instagram.com/theshowtimestudio?igsh=eGh3N2tiZXNuYjNw"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-red-600 hover:underline"
+  >
+    Instagram
+  </a>
+</div>
 
           {/* Legal Section */}
           <div className="w-full sm:w-1/4 mb-6 mt-2">
@@ -65,14 +74,14 @@ const Footer = () => {
                   Terms and Conditions
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a
                   href="/privacy-policy"
                   className="text-gray-400 hover:text-white"
                 >
                   Privacy Policy
                 </a>
-              </li>
+              </li> */}
             </ul>
           </div>
 
