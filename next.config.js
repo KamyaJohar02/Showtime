@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  
   experimental: {
     appDir: true, // Only if you're using the experimental `app` directory
   },
@@ -12,9 +11,10 @@ const nextConfig = {
       'images.squarespace-cdn.com',
       'cf.bstatic.com',
       'fruitilicious.in',
+      'cdn-icons-png.flaticon.com', // ✅ Added this line
     ],
   },
-  reactStrictMode: true, // Properly aligned here
+  reactStrictMode: true,
 };
 
 module.exports = nextConfig;

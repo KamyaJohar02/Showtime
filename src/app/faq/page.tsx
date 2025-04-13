@@ -7,7 +7,7 @@ const faqs = [
     {
         question: "What is the Refund Policy?",
         answer:
-          "Refunds are provided only if cancellations are made at least 48 hours prior to the booking time. Please read our refund policy for more details.",
+          "Refunds are provided only if cancellations are made at least 24 hours prior to the booking time. Please contact us for more details",
       },
   {
     question: "Which movies or shows can we watch? Can we play our own videos?",
@@ -20,9 +20,59 @@ const faqs = [
       "Illegal or prohibited content is strictly not allowed. We do not take any liability for such cases.",
   },
   {
-    question: "Random Q",
+    question: "Am I responsible for my personal belongings?",
     answer:
-      "Answer.",
+      "Yes, customers are expected to take care of their own belongings. We are not liable for any personal item lost during your visit.",
+  },
+  {
+    question: "Does the booking time include setup and wrap-up?",
+    answer:
+      "Absolutely. Your booking duration includes the time required for both setup and checkout. Plan your activities accordingly.",
+  },
+  {
+    question: "Can we modify any technical setup inside the theater?",
+    answer:
+      "No, technical configurations such as projector, screen, or sound system must not be altered by customers. Our team will assist if any change is needed.",
+  },
+  {
+    question: "Is there an age restriction for bookings?",
+    answer:
+      "Yes, couples under 18 years are not permitted to book the theater. Valid ID proof like Aadhaar or DL will be checked at the time of booking.",
+  },
+  {
+    question: "What if we damage something inside the theater?",
+    answer:
+      "Customers will have to bear the cost of any damage to technical or non-technical items including walls, lights, or furniture.",
+  },
+  {
+    question: "Is there any cleaning fee after the booking?",
+    answer:
+      "If significant cleaning is needed post your booking, a fee of up to ₹1000 may be charged to cover the cost of cleaning staff.",
+  },
+  {
+    question: "What items are not allowed inside the theater?",
+    answer:
+      "Smoking, alcohol, or any illegal substance is strictly prohibited. We will take strict action if found violating this rule.",
+  },
+  {
+    question: "Are pets allowed inside the venue?",
+    answer:
+      "No, pets are not permitted inside the theater premises under any circumstances.",
+  },
+  {
+    question: "Can we bring our own food and drinks?",
+    answer:
+      "Yes, you can bring your own food or order online. We also have our in-house food menu. Cutlery is available at an extra cost.",
+  },
+  {
+    question: "Do you have washroom facilities?",
+    answer:
+      "Yes, we have clean and well-maintained washrooms available at all our locations.",
+  },
+  {
+    question: "Can we customize the decorations?",
+    answer:
+      "Decorations are generally as shown on the website. Personalization like neon signs or LED boards is available based on the selected package, but balloon color choices are fixed.",
   },
 ];
 
