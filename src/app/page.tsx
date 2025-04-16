@@ -25,7 +25,7 @@ export default function Home() {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % totalSlides);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [totalSlides]);
 
   useEffect(() => {
     if (letterIndex < textToDisplay.length) {

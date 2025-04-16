@@ -184,7 +184,7 @@ bookedSnapshot.docs.forEach((doc) => {
 
             return (
               <div key={theater.id} className="border rounded-lg shadow-md p-4">
-                <img
+                <Image
                   src={theater.image}
                   alt={theater.name}
                   className="rounded-lg w-full h-48 object-cover mb-4"
