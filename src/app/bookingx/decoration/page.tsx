@@ -142,8 +142,17 @@ const DecorationPage = () => {
           order_id: data.id,
           handler: async (response: any) => {
             try {
-              await addDoc(collection(db, "bookings"), bookingData);
+              const { razorpay_payment_id } = response;
+          
+              // Add payment ID to your booking object
+              const bookingWithPaymentId = {
+                ...bookingData,
+                razorpayPaymentId: razorpay_payment_id,
+              };
+          
+              await addDoc(collection(db, "bookings"), bookingWithPaymentId);
               await addDoc(collection(db, "booked"), bookedData);
+          
               alert("Payment successful and booking saved!");
               router.push("/");
             } catch (err) {
@@ -189,7 +198,7 @@ const DecorationPage = () => {
         <h2 className="text-2xl font-bold mb-4">Extra Decoration <span className="text-sm text-gray-500">(optional)</span></h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
           {extraDecorations.map((item) => (
-            <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-purple-700 bg-purple-100" : "border-gray-300"}`}>
+            <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-red-700 bg-red-100" : "border-gray-300"}`}>
               <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
               <p className="mt-2 font-medium">{item.name}</p>
               <p className="text-sm">₹ {item.price}</p>
@@ -200,7 +209,7 @@ const DecorationPage = () => {
         <h2 className="text-2xl font-bold mb-4">Choose Gifts <span className="text-sm text-gray-500">(optional)</span></h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
           {gifts.map((item) => (
-            <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-purple-700 bg-purple-100" : "border-gray-300"}`}>
+            <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-red-700 bg-red-100" : "border-gray-300"}`}>
               <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
               <p className="mt-2 font-medium">{item.name}</p>
               <p className="text-sm">₹ {item.price}</p>
@@ -211,7 +220,7 @@ const DecorationPage = () => {
         <h2 className="text-2xl font-bold mb-4">Special Services <span className="text-sm text-gray-500">(optional)</span></h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {specialServices.map((item) => (
-            <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-purple-700 bg-purple-100" : "border-gray-300"}`}>
+            <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-red-700 bg-red-100" : "border-gray-300"}`}>
               <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
               <p className="mt-2 font-medium">{item.name}</p>
               <p className="text-sm">₹ {item.price}</p>
@@ -223,7 +232,7 @@ const DecorationPage = () => {
           <button onClick={() => router.back()} className="py-3 px-8 bg-gray-300 text-black font-semibold rounded hover:bg-gray-400">Back</button>
           <button
             onClick={handlePaymentAndBooking}
-            className="py-3 px-8 rounded-full bg-purple-900 text-white font-semibold shadow-md hover:bg-purple-800"
+            className="py-3 px-8 rounded-full bg-red-900 text-white font-semibold shadow-md hover:bg-red-800"
           >
             Pay ₹{advance}
           </button>

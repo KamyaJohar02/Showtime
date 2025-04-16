@@ -87,7 +87,7 @@ const CakePage = () => {
               onClick={() => setSelectedCake(cake.name)}
               className={`relative p-3 border rounded-lg text-center transition hover:scale-105 cursor-pointer ${
                 selectedCake === cake.name
-                  ? "border-purple-700 bg-purple-100"
+                  ? "border-red-700 bg-red-100"
                   : "border-gray-300"
               }`}
             >
@@ -101,7 +101,7 @@ const CakePage = () => {
               <p className="mt-2 font-medium text-sm">{cake.name}</p>
               <p className="text-sm text-gray-600">₹ {cake.price}</p>
               {selectedCake === cake.name && (
-                <div className="absolute top-2 right-2 bg-purple-700 text-white text-xs px-2 py-1 rounded-full">
+                <div className="absolute top-2 right-2 bg-red-700 text-white text-xs px-2 py-1 rounded-full">
                   ✓
                 </div>
               )}
@@ -118,7 +118,7 @@ const CakePage = () => {
           </button>
           <button
             onClick={handleNext}
-            className="py-3 px-8 rounded-full text-white font-semibold shadow-md bg-purple-900 hover:bg-purple-800"
+            className="py-3 px-8 rounded-full text-white font-semibold shadow-md bg-red-900 hover:bg-red-800"
           >
             Next step
           </button>

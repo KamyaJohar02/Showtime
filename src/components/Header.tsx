@@ -91,23 +91,15 @@ function Header() {
         </Popover.Group>
 
         {/* Desktop login/profile */}
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          {user ? (
-            <Link
-              href="/myprofile"
-              className="text-sm font-semibold text-black px-3 py-2 rounded-md hover:bg-gray-200 hover:shadow transition-all"
-            >
-              My Profile
-            </Link>
-          ) : (
-            <button
-              onClick={() => router.push("/login")}
-              className="text-sm font-semibold text-black px-3 py-2 rounded-md hover:bg-gray-200 hover:shadow transition-all"
-            >
-              Log in →
-            </button>
-          )}
-        </div>
+<div className="hidden lg:flex lg:flex-1 lg:justify-end">
+  <button
+    onClick={() => router.push(user ? "/myprofile" : "/login")}
+    className="text-sm font-semibold text-black px-3 py-2 rounded-md hover:bg-gray-200 hover:shadow transition-all"
+  >
+    {user ? "My Profile" : "Log in →"}
+  </button>
+</div>
+
       </nav>
 
       {/* Mobile Nav */}

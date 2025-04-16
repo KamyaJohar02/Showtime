@@ -94,7 +94,7 @@ const ServicesPage: React.FC = () => {
 
             {/* Book Now Button */}
             <div className="flex justify-center md:justify-start">
-              <Link href="/booking">
+              <Link href="/bookingx">
                 <button className="bg-red-500 text-white py-2 px-6 rounded-full shadow hover:bg-red-600 transition">
                   Book Now
                 </button>

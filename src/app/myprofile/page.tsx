@@ -19,6 +19,7 @@ interface Booking {
   advanceAmount: number;
   dueAmount: number;
   status: string;
+  razorpayPaymentId?: string;
 }
 
 const MyProfilePage = () => {
@@ -122,6 +123,8 @@ const MyProfilePage = () => {
                 <th className="border border-gray-300 p-2">Due Amount</th>
                 <th className="border border-gray-300 p-2">Status</th>
                 <th className="border border-gray-300 p-2">Action</th>
+                <th className="border border-gray-300 p-2">Payment ID</th>
+
               </tr>
             </thead>
             <tbody>
@@ -139,6 +142,10 @@ const MyProfilePage = () => {
                   <td className="border border-gray-300 p-2">₹{booking.advanceAmount}</td>
                   <td className="border border-gray-300 p-2">₹{booking.dueAmount}</td>
                   <td className="border border-gray-300 p-2">{booking.status}</td>
+                  <td className="border border-gray-300 p-2">
+  {booking.razorpayPaymentId || "-"}
+</td>
+
                   <td className="border border-gray-300 p-2">
                     <button
                       onClick={() => {

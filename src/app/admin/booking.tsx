@@ -23,6 +23,7 @@ interface Booking {
   advanceAmount: number;
   dueAmount: number;
   status: string;
+  razorpayPaymentId?: string;
 }
 
 const ManageBookings: React.FC = () => {
@@ -31,6 +32,8 @@ const ManageBookings: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -64,25 +67,40 @@ const ManageBookings: React.FC = () => {
     loadAndUpdateBookings();
   }, []);
 
-  const handleDeleteBooking = async (booking: Booking) => {
-    const confirm = window.confirm("Are you sure you want to delete this booking?");
-    if (!confirm) return;
+  const handleDeleteBooking = async () => {
+    if (!selectedBooking) return;
 
     try {
-      await deleteDocument("bookings", booking.id);
+      if (selectedBooking.razorpayPaymentId) {
+        const refundRes = await fetch("/api/razorpay/refund", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paymentId: selectedBooking.razorpayPaymentId }),
+        });
+        const refundData = await refundRes.json();
+        if (!refundData.success) {
+          alert("Refund failed. Booking not deleted.");
+          return;
+        } else {
+          alert("Refund initiated successfully.");
+        }
+      }
+
+      await deleteDocument("bookings", selectedBooking.id);
 
       const bookedQuery = query(
         collection(db, "booked"),
-        where("room", "==", booking.room),
-        where("date", "==", booking.date),
-        where("timeSlot", "==", booking.timeSlot)
+        where("room", "==", selectedBooking.room),
+        where("date", "==", selectedBooking.date),
+        where("timeSlot", "==", selectedBooking.timeSlot)
       );
       const bookedSnapshot = await getDocs(bookedQuery);
       for (const docItem of bookedSnapshot.docs) {
         await deleteDoc(docItem.ref);
       }
 
-      setBookings((prev) => prev.filter((b) => b.id !== booking.id));
+      setBookings((prev) => prev.filter((b) => b.id !== selectedBooking.id));
+      setShowConfirmModal(false);
     } catch (err) {
       console.error("Error deleting booking:", err);
       alert("Failed to delete booking.");
@@ -167,6 +185,7 @@ const ManageBookings: React.FC = () => {
                   <th className="p-1 border">Advance</th>
                   <th className="p-1 border">Due</th>
                   <th className="p-1 border">Status</th>
+                  <th className="p-1 border">Payment ID</th>
                   <th className="p-1 border">Actions</th>
                 </tr>
               </thead>
@@ -187,9 +206,13 @@ const ManageBookings: React.FC = () => {
                     <td className="p-1 border">₹{booking.advanceAmount}</td>
                     <td className="p-1 border">₹{booking.dueAmount}</td>
                     <td className="p-1 border">{booking.status}</td>
+                    <td className="p-1 border">{booking.razorpayPaymentId || "-"}</td>
                     <td className="p-1 border space-x-2">
                       <button
-                        onClick={() => handleDeleteBooking(booking)}
+                        onClick={() => {
+                          setSelectedBooking(booking);
+                          setShowConfirmModal(true);
+                        }}
                         className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                       >
                         Delete
@@ -207,7 +230,6 @@ const ManageBookings: React.FC = () => {
             </table>
           </div>
 
-          {/* Pagination Controls */}
           <div className="mt-4 flex justify-center gap-2">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -228,6 +250,29 @@ const ManageBookings: React.FC = () => {
             </button>
           </div>
         </>
+      )}
+
+      {showConfirmModal && selectedBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold mb-4">Are you sure?</h2>
+            <p className="mb-6">Do you want to delete this booking?</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleDeleteBooking}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Yes, Delete Booking
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

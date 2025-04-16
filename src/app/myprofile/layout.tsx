@@ -14,6 +14,7 @@ interface Booking {
   status: string;
   advanceAmount: number;
   dueAmount: number;
+  razorpayPaymentId?: string;
 }
 
 const MyProfileLayout = () => {
@@ -48,10 +49,11 @@ const MyProfileLayout = () => {
             );
             const bookingsSnapshot = await getDocs(bookingsQuery);
 
-            const fetchedBookings = bookingsSnapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            })) as Booking[];
+            const fetchedBookings = bookingsSnapshot.docs.map((doc) => {
+              const data = doc.data() as Omit<Booking, "id">;
+              return { id: doc.id, ...data };
+            });
+            
 
             setBookings(fetchedBookings);
           }
@@ -75,17 +77,28 @@ const MyProfileLayout = () => {
 
   const handleCancel = async (booking: Booking) => {
     if (!isCancellable(booking)) return;
+
     try {
-      // Delete from 'bookings'
+      if (booking.razorpayPaymentId) {
+        const refundRes = await fetch("/api/razorpay/refund", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paymentId: booking.razorpayPaymentId }),
+        });
+
+        const refundData = await refundRes.json();
+
+        if (!refundData.success) {
+          alert("Failed to initiate refund. Booking not cancelled.");
+          return;
+        }
+      }
+
       await deleteDoc(doc(db, "bookings", booking.id));
-  
-      // Format date to match 'booked' collection format (e.g., '2024-12-26')
-      const formattedDate = booking.date;
-  
-      // Query and delete the matching record from 'booked'
+
       const bookedQuery = query(
         collection(db, "booked"),
-        where("date", "==", formattedDate),
+        where("date", "==", booking.date),
         where("room", "==", booking.room),
         where("timeSlot", "==", booking.timeSlot)
       );
@@ -93,16 +106,14 @@ const MyProfileLayout = () => {
       snapshot.forEach(async (docSnap) => {
         await deleteDoc(doc(db, "booked", docSnap.id));
       });
-  
-      // Update local state
+
       setBookings((prev) => prev.filter((b) => b.id !== booking.id));
-      alert("Booking cancelled successfully.");
+      alert("Booking cancelled and refund initiated.");
     } catch (error) {
       console.error("Cancellation failed:", error);
       alert("Failed to cancel booking.");
     }
   };
-  
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -187,6 +198,7 @@ const MyProfileLayout = () => {
                       <th className="border border-gray-300 p-2">Advance Amount</th>
                       <th className="border border-gray-300 p-2">Due Amount</th>
                       <th className="border border-gray-300 p-2">Status</th>
+                      <th className="border border-gray-300 p-2">Payment ID</th>
                       <th className="border border-gray-300 p-2">Action</th>
                     </tr>
                   </thead>
@@ -199,6 +211,7 @@ const MyProfileLayout = () => {
                         <td className="border border-gray-300 p-2">₹{booking.advanceAmount}</td>
                         <td className="border border-gray-300 p-2">₹{booking.dueAmount}</td>
                         <td className="border border-gray-300 p-2">{booking.status}</td>
+                        <td className="border border-gray-300 p-2">{booking.razorpayPaymentId || "-"}</td>
                         <td className="border border-gray-300 p-2 text-center">
                           <button
                             className={`py-1 px-3 rounded text-white text-sm ${

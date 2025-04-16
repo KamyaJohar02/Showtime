@@ -144,11 +144,12 @@ export default function Home() {
         </div>
       </section>
       <section className="flex mt-2 justify-center w-full px-12 ">
-        <Link href="/booking" passHref legacyBehavior>
-          <a className="bg-red-600 text-white py-4 px-10 rounded-full hover:bg-red-800 transition duration-300 text-center">
-            Book Now
-          </a>
-        </Link>
+      <Link
+  href="/bookingx"
+  className="bg-red-600 text-white py-4 px-10 rounded-full hover:bg-red-800 transition duration-300 text-center"
+>
+  Book Now
+</Link>
       </section>
 
       {/* Query Form and Map */}

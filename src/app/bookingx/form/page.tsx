@@ -198,7 +198,7 @@ const FormPage = () => {
             </button>
             <button
               type="submit"
-              className="bg-purple-700 text-white py-2 px-6 rounded"
+              className="bg-red-700 text-white py-2 px-6 rounded"
             >
               Next
             </button>

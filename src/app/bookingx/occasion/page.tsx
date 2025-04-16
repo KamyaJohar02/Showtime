@@ -153,7 +153,7 @@ const OccasionPage = () => {
               onClick={() => setSelectedOccasion(item.label)}
               className={`cursor-pointer p-3 rounded-lg border-2 text-center transition-transform hover:scale-105 ${
                 selectedOccasion === item.label
-                  ? "border-purple-700 bg-purple-100"
+                  ? "border-red-700 bg-red-100"
                   : "border-gray-300"
               }`}
             >
@@ -193,7 +193,7 @@ const OccasionPage = () => {
           </button>
           <button
             onClick={handleNext}
-            className="bg-purple-700 text-white py-2 px-6 rounded hover:bg-purple-800 transition"
+            className="bg-red-700 text-white py-2 px-6 rounded hover:bg-red-800 transition"
           >
             Next
           </button>
