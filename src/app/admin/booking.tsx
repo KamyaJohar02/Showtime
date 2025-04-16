@@ -4,18 +4,22 @@ import { useState, useEffect } from "react";
 import { getAllDocuments, deleteDocument, updateDocument } from "@/lib/firestoreUtils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
+import { db } from "@/firebaseConfig";
 
 interface Booking {
   id: string;
   name: string;
   email: string;
   mobile: string;
-  room: string; // Room name from database
-  date: string; // Date as a string in "YYYY-MM-DD" format
-  timeSlot: string;
-  decorations: string[]; // Array of decoration labels
-  cake: boolean;
   people: number;
+  room: string;
+  date: string;
+  timeSlot: string;
+  occasion?: string;
+  occasionName?: string;
+  cake?: string;
+  decorations?: string[];
   advanceAmount: number;
   dueAmount: number;
   status: string;
@@ -25,148 +29,113 @@ const ManageBookings: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
-  const [editedBooking, setEditedBooking] = useState<Partial<Booking> | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
-    const loadBookings = async () => {
+    const loadAndUpdateBookings = async () => {
       try {
         setLoading(true);
         const fetchedBookings = (await getAllDocuments("bookings")) as Booking[];
-        const currentDate = new Date();
-  
-        // Process bookings and update status if necessary
-        const updatedPendingBookings = await Promise.all(
+
+        const today = new Date().toISOString().split("T")[0];
+
+        const updatedBookings = await Promise.all(
           fetchedBookings.map(async (booking) => {
-            const bookingDate = new Date(booking.date);
-  
-            // If booking is pending and past its date, update status to "fulfilled"
-            if (booking.status === "pending" && bookingDate < currentDate) {
+            if (booking.status === "pending" && booking.date < today) {
               await updateDocument("bookings", booking.id, { status: "fulfilled" });
-              return null; // Exclude from pending bookings
+              return { ...booking, status: "fulfilled" };
             }
-  
-            // Include only pending bookings
-            return booking.status === "pending" ? booking : null;
+            return booking;
           })
         );
-  
-        // Filter out null values (fulfilled bookings)
-        const pendingBookings = updatedPendingBookings.filter(Boolean) as Booking[];
-  
-        setBookings(pendingBookings);
+
+        const pendingOnly = updatedBookings.filter((booking) => booking.status === "pending");
+        setBookings(pendingOnly);
         setLoading(false);
       } catch (err) {
-        console.error("Failed to load bookings:", err);
-        setError("Failed to load bookings.");
+        console.error("Failed to load/update bookings:", err);
+        setError("Failed to load/update bookings.");
         setLoading(false);
       }
     };
-  
-    loadBookings();
+
+    loadAndUpdateBookings();
   }, []);
-    
 
-
-  const handleDeleteBooking = async (id: string) => {
+  const handleDeleteBooking = async (booking: Booking) => {
     const confirm = window.confirm("Are you sure you want to delete this booking?");
     if (!confirm) return;
 
     try {
-      await deleteDocument("bookings", id);
-      setBookings((prev) => prev.filter((booking) => booking.id !== id));
+      await deleteDocument("bookings", booking.id);
+
+      const bookedQuery = query(
+        collection(db, "booked"),
+        where("room", "==", booking.room),
+        where("date", "==", booking.date),
+        where("timeSlot", "==", booking.timeSlot)
+      );
+      const bookedSnapshot = await getDocs(bookedQuery);
+      for (const docItem of bookedSnapshot.docs) {
+        await deleteDoc(docItem.ref);
+      }
+
+      setBookings((prev) => prev.filter((b) => b.id !== booking.id));
     } catch (err) {
       console.error("Error deleting booking:", err);
       alert("Failed to delete booking.");
     }
   };
 
-  const handleEditBooking = (booking: Booking) => {
-    setEditingBooking(booking);
-    setEditedBooking({ ...booking });
-  };
-
-  const handleSaveBooking = async () => {
-    if (!editedBooking || !editingBooking) return;
+  const handleEditMobile = async (booking: Booking) => {
+    const newMobile = prompt("Enter new mobile number:", booking.mobile);
+    if (!newMobile || newMobile === booking.mobile) return;
 
     try {
-      await updateDocument("bookings", editingBooking.id, editedBooking);
+      await updateDocument("bookings", booking.id, { mobile: newMobile });
       setBookings((prev) =>
-        prev.map((booking) =>
-          booking.id === editingBooking.id ? { ...booking, ...editedBooking } : booking
-        )
+        prev.map((b) => (b.id === booking.id ? { ...b, mobile: newMobile } : b))
       );
-      setEditingBooking(null);
-      setEditedBooking(null);
+      alert("Mobile number updated successfully.");
     } catch (err) {
-      console.error("Error updating booking:", err);
-      alert("Failed to update booking.");
+      console.error("Error updating mobile:", err);
+      alert("Failed to update mobile number.");
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditingBooking(null);
-    setEditedBooking(null);
-  };
-
+  const selectedDateString = selectedDate?.toLocaleDateString("en-CA");
   const filteredBookings = selectedDate
-    ? bookings.filter(
-        (booking) =>
-          new Date(booking.date).toISOString().split("T")[0] ===
-          selectedDate.toISOString().split("T")[0]
-      )
+    ? bookings.filter((booking) => booking.date === selectedDateString)
     : bookings;
 
-    const updateBookingStatuses = async () => {
-      const todayDate = new Date().toISOString().split("T")[0];
-    
-      // Prepare the updated bookings without overwriting the original state prematurely
-      const updatedBookings = bookings.map((booking) => {
-        if (booking.date < todayDate && booking.status === "pending") {
-          return { ...booking, status: "fulfilled" };
-        }
-        return booking;
-      });
-    
-      // Update the state only after mapping all bookings
-      setBookings(updatedBookings);
-    
-      // Save only the necessary status changes to the database
-      const bookingsToUpdate = updatedBookings.filter(
-        (booking) => booking.date < todayDate && booking.status === "fulfilled"
-      );
-    
-      try {
-        await Promise.all(
-          bookingsToUpdate.map(async (booking) => {
-            await updateDocument("bookings", booking.id, { status: "fulfilled" });
-          })
-        );
-      } catch (err) {
-        console.error("Failed to update booking statuses:", err);
-      }
-    };
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentBookings = filteredBookings.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Manage Bookings</h1>
+    <div className="p-4 text-xs">
+      <h1 className="text-base font-bold mb-4">Manage Bookings</h1>
 
-      <div className="mb-4">
-        <label htmlFor="filter-date" className="block text-lg font-medium mb-2">
-          Filter by Date:
-        </label>
+      <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-2">
         <DatePicker
-          id="filter-date"
           selected={selectedDate}
-          onChange={(date) => setSelectedDate(date)}
+          onChange={(date) => {
+            setSelectedDate(date);
+            setCurrentPage(1);
+          }}
           dateFormat="yyyy-MM-dd"
           placeholderText="Select a date to filter"
-          className="p-2 border rounded w-64"
+          className="p-1 border rounded w-64 text-sm"
         />
         <button
-          onClick={() => setSelectedDate(null)}
-          className="ml-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          onClick={() => {
+            setSelectedDate(null);
+            setCurrentPage(1);
+          }}
+          className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
         >
           Reset Filter
         </button>
@@ -179,185 +148,86 @@ const ManageBookings: React.FC = () => {
       ) : filteredBookings.length === 0 ? (
         <p>No bookings found for the selected date.</p>
       ) : (
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-2">Name</th>
-              <th className="border border-gray-300 p-2">Email</th>
-              <th className="border border-gray-300 p-2">Mobile</th>
-              <th className="border border-gray-300 p-2">Guest Count</th>
-              <th className="border border-gray-300 p-2">Room</th>
-              <th className="border border-gray-300 p-2">Date</th>
-              <th className="border border-gray-300 p-2">Time Slot</th> 
-              <th className="border border-gray-300 p-2">Decorations</th>
-              <th className="border border-gray-300 p-2">Cake</th>
-              <th className="border border-gray-300 p-2">Advance Amount</th>
-              <th className="border border-gray-300 p-2">Due Amount</th>
-              <th className="border border-gray-300 p-2">Status</th>
-              <th className="border border-gray-300 p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredBookings.map((booking) => (
-              <tr key={booking.id}>
-                {editingBooking && editingBooking.id === booking.id ? (
-                  <>
-                    <td className="border border-gray-300 p-2">{booking.name}</td>
-                    <td className="border border-gray-300 p-2">{booking.email}</td>
-                    <td className="border border-gray-300 p-2">{booking.mobile}</td>
-                    <td className="border border-gray-300 p-2">{booking.people}</td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="text"
-                        value={editedBooking?.room || ""}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({ ...prev, room: e.target.value }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <DatePicker
-                        selected={new Date(editedBooking?.date || booking.date)}
-                        onChange={(date) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            date: date?.toISOString().split("T")[0],
-                          }))
-                        }
-                        dateFormat="yyyy-MM-dd"
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="text"
-                        value={editedBooking?.timeSlot || ""}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            timeSlot: e.target.value,
-                          }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="text"
-                        value={(editedBooking?.decorations || []).join(", ")}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            decorations: e.target.value.split(", "),
-                          }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="checkbox"
-                        checked={editedBooking?.cake || false}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            cake: e.target.checked,
-                          }))
-                        }
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="number"
-                        value={editedBooking?.advanceAmount || 0}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            advanceAmount: Number(e.target.value),
-                          }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="number"
-                        value={editedBooking?.dueAmount || 0}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            dueAmount: Number(e.target.value),
-                          }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <select
-                        value={editedBooking?.status || ""}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({ ...prev, status: e.target.value }))
-                        }
-                        className="p-2 border rounded w-full"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="fulfilled">Fulfilled</option>
-                      </select>
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                    <button
-                        onClick={handleSaveBooking}
-                        className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                      >
-                        Save
-                      </button>
+        <>
+          <div className="overflow-x-auto">
+            <table className="text-xs w-full border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="p-1 border">Name</th>
+                  <th className="p-1 border">Email</th>
+                  <th className="p-1 border">Mobile</th>
+                  <th className="p-1 border">Guests</th>
+                  <th className="p-1 border">Room</th>
+                  <th className="p-1 border">Date</th>
+                  <th className="p-1 border">Slot</th>
+                  <th className="p-1 border">Occasion</th>
+                  <th className="p-1 border">Occasion Name</th>
+                  <th className="p-1 border">Cake</th>
+                  <th className="p-1 border">Decorations</th>
+                  <th className="p-1 border">Advance</th>
+                  <th className="p-1 border">Due</th>
+                  <th className="p-1 border">Status</th>
+                  <th className="p-1 border">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentBookings.map((booking) => (
+                  <tr key={booking.id}>
+                    <td className="p-1 border">{booking.name}</td>
+                    <td className="p-1 border">{booking.email}</td>
+                    <td className="p-1 border">{booking.mobile}</td>
+                    <td className="p-1 border">{booking.people}</td>
+                    <td className="p-1 border">{booking.room}</td>
+                    <td className="p-1 border">{booking.date}</td>
+                    <td className="p-1 border">{booking.timeSlot}</td>
+                    <td className="p-1 border">{booking.occasion || "-"}</td>
+                    <td className="p-1 border">{booking.occasionName || "-"}</td>
+                    <td className="p-1 border">{booking.cake || "No"}</td>
+                    <td className="p-1 border">{(booking.decorations || []).join(", ")}</td>
+                    <td className="p-1 border">₹{booking.advanceAmount}</td>
+                    <td className="p-1 border">₹{booking.dueAmount}</td>
+                    <td className="p-1 border">{booking.status}</td>
+                    <td className="p-1 border space-x-2">
                       <button
-                        onClick={handleCancelEdit}
-                        className="bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600 ml-2"
-                      >
-                        Cancel
-                      </button>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td className="border border-gray-300 p-2">{booking.name}</td>
-                    <td className="border border-gray-300 p-2">{booking.email}</td>
-                    <td className="border border-gray-300 p-2">{booking.mobile}</td>
-                    <td className="border border-gray-300 p-2">{booking.people}</td>
-                    <td className="border border-gray-300 p-2">{booking.room}</td>
-                    <td className="border border-gray-300 p-2">{booking.date}</td>
-                    <td className="border border-gray-300 p-2">{booking.timeSlot}</td>
-                    <td className="border border-gray-300 p-2">
-                      {(booking.decorations || []).join(", ")}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {booking.cake ? "Yes" : "No"}
-                    </td>
-                    <td className="border border-gray-300 p-2">₹{booking.advanceAmount}</td>
-                    <td className="border border-gray-300 p-2">₹{booking.dueAmount}</td>
-                    <td className="border border-gray-300 p-2">{booking.status}</td>
-                    <td className="border border-gray-300 p-2">
-                      <button
-                        onClick={() => handleEditBooking(booking)}
-                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteBooking(booking.id)}
-                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
+                        onClick={() => handleDeleteBooking(booking)}
+                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                       >
                         Delete
                       </button>
+                      <button
+                        onClick={() => handleEditMobile(booking)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                      >
+                        Edit Mobile
+                      </button>
                     </td>
-                  </>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="mt-4 flex justify-center gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <span className="px-4 py-1">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

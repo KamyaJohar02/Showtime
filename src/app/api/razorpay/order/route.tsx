@@ -3,6 +3,9 @@ import Razorpay from 'razorpay';
 
 export async function POST(req: NextRequest) {
   const { amount, name, email, phone } = await req.json();
+  if (!amount || !name || !email || !phone) {
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
 
   const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID!,
@@ -10,7 +13,8 @@ export async function POST(req: NextRequest) {
   });
 
   const options = {
-    amount, // amount in the smallest currency unit (paise)
+    amount: amount, // convert ₹ to paise
+ // amount in the smallest currency unit (paise)
     currency: 'INR',
     receipt: `receipt_order_${Math.floor(Math.random() * 10000)}`,
     payment_capture: 1,

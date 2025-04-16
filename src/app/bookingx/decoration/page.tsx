@@ -3,6 +3,9 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { db } from "@/firebaseConfig";
+import { collection, addDoc } from "firebase/firestore";
+import Razorpay from "razorpay";
 
 const extraDecorations = [
   { name: "Rose Heart", price: 150, image: "/Images/decorations/rose_heart.png" },
@@ -41,14 +44,9 @@ const DecorationPage = () => {
   const [email, setEmail] = useState("");
   const [occasion, setOccasion] = useState("");
   const [nameToInclude, setNameToInclude] = useState("");
-  const router = useRouter();
+  const [displayDate, setDisplayDate] = useState("");
 
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
+  const router = useRouter();
 
   useEffect(() => {
     const storedTheater = JSON.parse(localStorage.getItem("selectedTheater") || "null");
@@ -60,6 +58,9 @@ const DecorationPage = () => {
     const storedEmail = localStorage.getItem("email") || "";
     const storedOccasion = localStorage.getItem("selectedOccasion") || "";
     const storedNameToInclude = localStorage.getItem("nameToInclude") || "";
+    const storedDate = localStorage.getItem("selectedDate");
+    const formattedDate = storedDate ? new Date(storedDate).toLocaleDateString("en-GB") : "";
+    setDisplayDate(formattedDate);
 
     setSelectedTheater(storedTheater);
     setSelectedSlot(storedSlot);
@@ -78,39 +79,6 @@ const DecorationPage = () => {
     );
   };
 
-  const handleRazorpayPayment = async () => {
-    const res = await fetch("/api/razorpay/order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: 750 * 100,
-        name,
-        email,
-        phone: phoneNumber,
-      }),
-    });
-
-    const data = await res.json();
-
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: data.amount,
-      currency: "INR",
-      name: "Showtime Studio",
-      description: "Booking Advance",
-      order_id: data.id,
-      handler: function (response: any) {
-        alert("Payment Successful!");
-      },
-      prefill: { name, email, contact: phoneNumber },
-      notes: { occasion, nameToInclude },
-      theme: { color: "#7e22ce" },
-    };
-
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
-  };
-
   const selectedExtras = allItems.filter((item) => selectedItems.includes(item.name));
   const extrasTotal = selectedExtras.reduce((sum, item) => sum + item.price, 0);
   const cakeCost = selectedCake?.price || 0;
@@ -118,6 +86,102 @@ const DecorationPage = () => {
   const subtotal = theaterCost + cakeCost + extrasTotal;
   const advance = 750;
   const balance = subtotal - advance;
+
+  const handlePaymentAndBooking = async () => {
+    const decorations = selectedExtras.map((item) => item.name);
+    const cakeName = selectedCake?.name || "";
+    const selectedDate = new Date(localStorage.getItem("selectedDate") || new Date());
+    const dateString = selectedDate.toLocaleDateString("en-CA");
+  
+    const bookingData = {
+      name,
+      mobile: phoneNumber,
+      email,
+      room: selectedTheater?.name?.toLowerCase() || "unknown",
+      date: dateString,
+      status: "pending",
+      timeSlot: selectedSlot?.time || "",
+      decorations,
+      cake: cakeName,
+      advanceAmount: advance,
+      dueAmount: balance,
+      people: numPeople,
+      occasion,
+      occasionName: nameToInclude,
+    };
+  
+    const bookedData = {
+      date: dateString,
+      room: selectedTheater?.name?.toLowerCase() || "unknown",
+      timeSlot: selectedSlot?.time || "",
+    };
+  
+    try {
+      // ✅ Dynamically load Razorpay script
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      document.body.appendChild(script);
+  
+      script.onload = async () => {
+        const res = await fetch("/api/razorpay/order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: advance * 100, name, email, phone: phoneNumber }),
+        });
+        const data = await res.json();
+  
+        if (!data.id) throw new Error("Failed to create Razorpay order");
+  
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          amount: data.amount,
+          currency: "INR",
+          name: "Showtime Booking",
+          description: "Advance Booking Payment",
+          order_id: data.id,
+          handler: async (response: any) => {
+            try {
+              await addDoc(collection(db, "bookings"), bookingData);
+              await addDoc(collection(db, "booked"), bookedData);
+              alert("Payment successful and booking saved!");
+              router.push("/");
+            } catch (err) {
+              console.error("Firestore save failed after payment:", err);
+              alert("Payment succeeded but booking save failed.");
+            }
+          },
+          prefill: {
+            name,
+            email,
+            contact: phoneNumber,
+          },
+          theme: {
+            color: "#8B5CF6",
+          },
+          modal: {
+            ondismiss: () => {
+              alert("Payment cancelled.");
+              router.push("/");
+            },
+          },
+        };
+  
+        const razorpay = new (window as any).Razorpay(options);
+        razorpay.open();
+      };
+  
+      script.onerror = () => {
+        alert("Failed to load Razorpay script.");
+      };
+    } catch (err) {
+      console.error("Payment initiation failed:", err);
+      alert("Something went wrong. Please try again.");
+    }
+  };
+  
+  
+  
 
   return (
     <div className="flex flex-col md:flex-row gap-6 p-6">
@@ -157,7 +221,10 @@ const DecorationPage = () => {
 
         <div className="flex justify-between mt-10">
           <button onClick={() => router.back()} className="py-3 px-8 bg-gray-300 text-black font-semibold rounded hover:bg-gray-400">Back</button>
-          <button onClick={handleRazorpayPayment} className="py-3 px-8 rounded-full bg-purple-900 text-white font-semibold shadow-md hover:bg-purple-800">
+          <button
+            onClick={handlePaymentAndBooking}
+            className="py-3 px-8 rounded-full bg-purple-900 text-white font-semibold shadow-md hover:bg-purple-800"
+          >
             Pay ₹{advance}
           </button>
         </div>
@@ -184,6 +251,8 @@ const DecorationPage = () => {
             <p><strong>Email:</strong> {email}</p>
             <p><strong>Occasion:</strong> {occasion}</p>
             <p><strong>Include Name:</strong> {nameToInclude}</p>
+            <p><strong>Date:</strong> {displayDate}</p>
+
           </div>
         </div>
       </div>

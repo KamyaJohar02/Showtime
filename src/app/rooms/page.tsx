@@ -6,24 +6,24 @@ import Link from "next/link";
 
 const rooms = [
   {
-    id: "room1",
-    title: "Luxurious Private Suite",
+    id: "SWEET",
+    title: "SWEET",
     description:
-      "A spacious private suite designed for ultimate relaxation. Enjoy top-notch amenities and a serene environment.",
+      "Perfect for small family gatherings, this room features ample space, a cozy setting, and modern comforts to make your stay memorable.",
     imageSrc: "/Images/Room1.jpg",
     moreInfoLink: "/rooms/room1",
   },
   {
-    id: "room2",
-    title: "Cozy Family Room",
+    id: "GALAXY",
+    title: "GALAXY",
     description:
-      "Perfect for families, this room features ample space, a cozy setting, and modern comforts to make your stay memorable.",
+      "A spacious private suite designed for ultimate relaxation. Enjoy top-notch amenities and a serene environment.",
     imageSrc: "/Images/Room2.jpg",
     moreInfoLink: "/rooms/room2",
   },
   {
-    id: "room3",
-    title: "Elegant Conference Hall",
+    id: "WONDERS",
+    title: "WONDERS",
     description:
       "Ideal for meetings and conferences, our elegant hall is equipped with state-of-the-art technology and flexible seating.",
     imageSrc: "/Images/Room3.jpg",

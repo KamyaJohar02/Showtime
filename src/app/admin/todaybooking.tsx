@@ -1,46 +1,44 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAllDocuments, deleteDocument, updateDocument } from "@/lib/firestoreUtils";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import {
+  getAllDocuments,
+  deleteDocument,
+  updateDocument,
+  getDocsByMultipleFields,
+} from "@/lib/firestoreUtils";
 
 interface Booking {
   id: string;
   name: string;
   email: string;
   mobile: string;
-  room: string; // Room name from database
-  date: string; // Date as a string in "YYYY-MM-DD" format
+  room: string;
+  date: string;
   timeSlot: string;
-  decorations: string[]; // Array of decoration labels
-  cake: boolean;
+  decorations: string[];
+  cake: string;
   people: number;
   advanceAmount: number;
   dueAmount: number;
   status: string;
+  occasion?: string;
+  occasionName?: string;
 }
 
 const TodayBookings: React.FC = () => {
   const [todayBookings, setTodayBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
-  const [editedBooking, setEditedBooking] = useState<Partial<Booking> | null>(null);
 
   useEffect(() => {
     const loadTodayBookings = async () => {
       try {
         setLoading(true);
         const fetchedBookings = (await getAllDocuments("bookings")) as Booking[];
-        const todayDate = new Date().toLocaleDateString("en-CA"); // Ensures local timezone format "YYYY-MM-DD"
-
-        // Filter bookings with today's date
-        const filteredBookings = fetchedBookings.filter(
-          (booking) => booking.date === todayDate
-        );
-
-        setTodayBookings(filteredBookings);
+        const todayDate = new Date().toLocaleDateString("en-CA");
+        const filtered = fetchedBookings.filter((b) => b.date === todayDate);
+        setTodayBookings(filtered);
         setLoading(false);
       } catch (err) {
         console.error("Failed to load today's bookings:", err);
@@ -52,241 +50,117 @@ const TodayBookings: React.FC = () => {
     loadTodayBookings();
   }, []);
 
-  const handleDeleteBooking = async (id: string) => {
+  const handleDeleteBooking = async (booking: Booking) => {
     const confirm = window.confirm("Are you sure you want to delete this booking?");
     if (!confirm) return;
 
     try {
-      await deleteDocument("bookings", id);
-      setTodayBookings((prev) => prev.filter((booking) => booking.id !== id));
+      await deleteDocument("bookings", booking.id);
+
+      const bookedDocs = await getDocsByMultipleFields("booked", [
+        { field: "room", value: booking.room },
+        { field: "date", value: booking.date },
+        { field: "timeSlot", value: booking.timeSlot },
+      ]);
+
+      for (const doc of bookedDocs) {
+        await deleteDocument("booked", doc.id);
+      }
+
+      setTodayBookings((prev) => prev.filter((b) => b.id !== booking.id));
     } catch (err) {
       console.error("Error deleting booking:", err);
       alert("Failed to delete booking.");
     }
   };
 
-  const handleEditBooking = (booking: Booking) => {
-    setEditingBooking(booking);
-    setEditedBooking({ ...booking });
-  };
-
-  const handleSaveBooking = async () => {
-    if (!editedBooking || !editingBooking) return;
+  const handleEditMobile = async (booking: Booking) => {
+    const newMobile = prompt("Enter new mobile number:", booking.mobile);
+    if (!newMobile || newMobile === booking.mobile) return;
 
     try {
-      await updateDocument("bookings", editingBooking.id, editedBooking);
+      await updateDocument("bookings", booking.id, { mobile: newMobile });
       setTodayBookings((prev) =>
-        prev.map((booking) =>
-          booking.id === editingBooking.id ? { ...booking, ...editedBooking } : booking
-        )
+        prev.map((b) => (b.id === booking.id ? { ...b, mobile: newMobile } : b))
       );
-      setEditingBooking(null);
-      setEditedBooking(null);
+      alert("Mobile number updated successfully.");
     } catch (err) {
-      console.error("Error updating booking:", err);
-      alert("Failed to update booking.");
+      console.error("Error updating mobile:", err);
+      alert("Failed to update mobile number.");
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditingBooking(null);
-    setEditedBooking(null);
-  };
-
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Todays Bookings</h1>
+    <div className="p-4 text-xs">
+      <h1 className="text-base font-bold mb-4">Today's Bookings</h1>
 
       {loading ? (
-        <p>Loading todays bookings...</p>
+        <p>Loading bookings...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : todayBookings.length === 0 ? (
         <p>No bookings found for today.</p>
       ) : (
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-2">Name</th>
-              <th className="border border-gray-300 p-2">Email</th>
-              <th className="border border-gray-300 p-2">Mobile</th>
-              <th className="border border-gray-300 p-2">Guest Count</th>
-              <th className="border border-gray-300 p-2">Room</th>
-              <th className="border border-gray-300 p-2">Date</th>
-              <th className="border border-gray-300 p-2">Time Slot</th>
-              <th className="border border-gray-300 p-2">Decorations</th>
-              <th className="border border-gray-300 p-2">Cake</th>
-              <th className="border border-gray-300 p-2">Advance Amount</th>
-              <th className="border border-gray-300 p-2">Due Amount</th>
-              <th className="border border-gray-300 p-2">Status</th>
-              <th className="border border-gray-300 p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {todayBookings.map((booking) => (
-              <tr key={booking.id}>
-                {editingBooking && editingBooking.id === booking.id ? (
-                  <>
-                    <td className="border border-gray-300 p-2">{booking.name}</td>
-                    <td className="border border-gray-300 p-2">{booking.email}</td>
-                    <td className="border border-gray-300 p-2">{booking.mobile}</td>
-                    <td className="border border-gray-300 p-2">{booking.people}</td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="text"
-                        value={editedBooking?.room || ""}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({ ...prev, room: e.target.value }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="date"
-                        value={editedBooking?.date || ""}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            date: e.target.value,
-                          }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="text"
-                        value={editedBooking?.timeSlot || ""}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            timeSlot: e.target.value,
-                          }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="text"
-                        value={(editedBooking?.decorations || []).join(", ")}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            decorations: e.target.value.split(", "),
-                          }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="checkbox"
-                        checked={editedBooking?.cake || false}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            cake: e.target.checked,
-                          }))
-                        }
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="number"
-                        value={editedBooking?.advanceAmount || 0}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            advanceAmount: Number(e.target.value),
-                          }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <input
-                        type="number"
-                        value={editedBooking?.dueAmount || 0}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({
-                            ...prev,
-                            dueAmount: Number(e.target.value),
-                          }))
-                        }
-                        className="p-2 border rounded w-full"
-                      />
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <select
-                        value={editedBooking?.status || ""}
-                        onChange={(e) =>
-                          setEditedBooking((prev) => ({ ...prev, status: e.target.value }))
-                        }
-                        className="p-2 border rounded w-full"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="fulfilled">Fulfilled</option>
-                      </select>
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      <button
-                        onClick={handleSaveBooking}
-                        className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={handleCancelEdit}
-                        className="bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600 ml-2"
-                      >
-                        Cancel
-                      </button>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td className="border border-gray-300 p-2">{booking.name}</td>
-                    <td className="border border-gray-300 p-2">{booking.email}</td>
-                    <td className="border border-gray-300 p-2">{booking.mobile}</td>
-                    <td className="border border-gray-300 p-2">{booking.people}</td>
-                                        <td className="border border-gray-300 p-2">{booking.room}</td>
-                                        <td className="border border-gray-300 p-2">{booking.date}</td>
-                                        <td className="border border-gray-300 p-2">{booking.timeSlot}</td>
-                                        <td className="border border-gray-300 p-2">
-                                          {(booking.decorations || []).join(", ")}
-                                        </td>
-                                        <td className="border border-gray-300 p-2">
-                                          {booking.cake ? "Yes" : "No"}
-                                        </td>
-                                        <td className="border border-gray-300 p-2">₹{booking.advanceAmount}</td>
-                                        <td className="border border-gray-300 p-2">₹{booking.dueAmount}</td>
-                                        <td className="border border-gray-300 p-2">{booking.status}</td>
-                                        <td className="border border-gray-300 p-2">
-                                          <button
-                                            onClick={() => handleEditBooking(booking)}
-                                            className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                                          >
-                                            Edit
-                                          </button>
-                                          <button
-                                            onClick={() => handleDeleteBooking(booking.id)}
-                                            className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
-                                          >
-                                            Delete
-                                          </button>
-                                        </td>
-                                      </>
-                                    )}
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          )}
-                        </div>
-                      );
-                    };
-                    
-                    export default TodayBookings;
-                    
+        <div className="overflow-x-auto">
+          <table className="text-xs w-full border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-1 border">Name</th>
+                <th className="p-1 border">Email</th>
+                <th className="p-1 border">Mobile</th>
+                <th className="p-1 border">Guests</th>
+                <th className="p-1 border">Room</th>
+                <th className="p-1 border">Date</th>
+                <th className="p-1 border">Slot</th>
+                <th className="p-1 border">Occasion</th>
+                <th className="p-1 border">Occasion Name</th>
+                <th className="p-1 border">Cake</th>
+                <th className="p-1 border">Decorations</th>
+                <th className="p-1 border">Advance</th>
+                <th className="p-1 border">Due</th>
+                <th className="p-1 border">Status</th>
+                <th className="p-1 border">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {todayBookings.map((booking) => (
+                <tr key={booking.id}>
+                  <td className="p-1 border">{booking.name}</td>
+                  <td className="p-1 border">{booking.email}</td>
+                  <td className="p-1 border">{booking.mobile}</td>
+                  <td className="p-1 border">{booking.people}</td>
+                  <td className="p-1 border">{booking.room}</td>
+                  <td className="p-1 border">{booking.date}</td>
+                  <td className="p-1 border">{booking.timeSlot}</td>
+                  <td className="p-1 border">{booking.occasion || "-"}</td>
+                  <td className="p-1 border">{booking.occasionName || "-"}</td>
+                  <td className="p-1 border">{booking.cake || "No"}</td>
+                  <td className="p-1 border">{(booking.decorations || []).join(", ")}</td>
+                  <td className="p-1 border">₹{booking.advanceAmount}</td>
+                  <td className="p-1 border">₹{booking.dueAmount}</td>
+                  <td className="p-1 border">{booking.status}</td>
+                  <td className="p-1 border space-x-2">
+                    <button
+                      onClick={() => handleDeleteBooking(booking)}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => handleEditMobile(booking)}
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                    >
+                      Edit Mobile
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TodayBookings;

@@ -8,21 +8,21 @@ import 'slick-carousel/slick/slick-theme.css';
 const rooms = [
   {
     id: 1,
-    title: "Luxurious Private Suite",
-    description: "A spacious private suite designed for ultimate relaxation. Enjoy top-notch amenities and a serene environment.",
+    title: "SWEET",
+    description: "Perfect for small family gatherings, this room features ample space, a cozy setting, and modern comforts to make your stay memorable." ,
     images: ["/Images/room1.jpg", "/Images/room2.jpg", "/Images/room3.jpg"],
     moreInfoLink: "/rooms/room1",
   },
   {
     id: 2,
-    title: "Cozy Family Room",
-    description: "Perfect for families, this room features ample space, a cozy setting, and modern comforts to make your stay memorable.",
+    title: "GALAXY",
+    description: "A spacious private suite designed for ultimate relaxation. Enjoy top-notch amenities and a serene environment.",
     images: ["/Images/room2.jpg", "/Images/room2.jpg", "/Images/room2.jpg"],
     moreInfoLink: "/rooms/room2",
   },
   {
     id: 3,
-    title: "Elegant Conference Hall",
+    title: "WONDERS",
     description: "Ideal for meetings and conferences, our elegant hall is equipped with state-of-the-art technology and flexible seating.",
     images: ["/Images/room3.jpg", "/Images/room3.jpg", "/Images/room3.jpg"],
     moreInfoLink: "/rooms/room3",
@@ -44,7 +44,7 @@ const RoomCards: React.FC = () => {
 
   return (
     <div className="relative w-full px-5 pt-0 pb-3 bg-white">
-      <h2 className="text-6xl font-[Great Vibes] italic text-center text-gray-600 mb-10 font-serif">
+      <h2 className="text-6xl font-[Great Vibes] italic text-center text-red-600 mb-10 font-serif">
         Explore Our Rooms
       </h2>
 
@@ -80,11 +80,13 @@ const RoomCards: React.FC = () => {
 
               {/* More Info Button */}
               <div className="flex justify-center">
-                <Link href={room.moreInfoLink} legacyBehavior>
-                  <a className="bg-red-500 text-white py-2 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300">
-                    More Info
-                  </a>
-                </Link>
+              <Link
+  href={room.moreInfoLink}
+  className="bg-red-500 text-white py-2 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300"
+>
+  More Info
+</Link>
+
               </div>
             </div>
           </div>

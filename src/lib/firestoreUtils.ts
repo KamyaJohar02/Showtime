@@ -12,6 +12,7 @@ import {
   where,
   WhereFilterOp,
 } from "firebase/firestore";
+import { Query, DocumentData } from "firebase/firestore"; // make sure this is imported
 
 const auth = getAuth();
 const user = auth.currentUser;
@@ -120,4 +121,19 @@ export const toggleAvailability = async (collectionName: string, id: string) => 
       throw new Error("An unknown error occurred while updating availability.");
     }
   }
+};
+
+// Get documents by multiple field matches
+export const getDocsByMultipleFields = async (
+  collectionName: string,
+  filters: { field: string; value: any }[]
+) => {
+  let q: Query<DocumentData> = collection(db, collectionName);
+
+  filters.forEach((filter) => {
+    q = query(q, where(filter.field, "==", filter.value));
+  });
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };

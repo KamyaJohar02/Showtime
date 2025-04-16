@@ -18,8 +18,10 @@ const Room2Page: React.FC = () => {
             height={600}
             className="rounded-lg"
           />
+          {/* Dark overlay */}
+  <div className="absolute inset-0 bg-black bg-opacity-20 rounded-lg"></div>
           <div className="absolute bottom-3 sm:bottom-5 left-4 sm:left-5 text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-            Cozy Family Room
+            GALAXY
           </div>
         </div>
 
@@ -29,7 +31,7 @@ const Room2Page: React.FC = () => {
             Your Perfect Family Getaway
           </h2>
           <p className="text-base sm:text-lg text-gray-300 text-center mb-6 sm:mb-10">
-            This cozy family room offers ample space and comfort, designed to make your stay with loved ones truly memorable.
+            GALAXY offers ample space and comfort, designed to make your stay with loved ones truly memorable.
           </p>
 
           {/* Amenities Section */}

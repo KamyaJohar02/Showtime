@@ -51,13 +51,12 @@ export default function Home() {
     { title: 'Decorations', image: '/Images/decoration6.jpg' },
     { title: 'Cakes', image: '/Images/cakes5.webp' },
     { title: 'Photoshoot', image: '/Images/photoshoot1.jpeg' },
-    { title: 'Surprise Events', image: '/Images/surprise2.jpg' },
-    { title: 'Private Parties', image: '/Images/party1.jpg' },
-    { title: 'Anniversaries', image: '/Images/anniversary1.webp' },
-    { title: 'Birthdays', image: '/Images/birthday3.jpg' },
-    { title: 'Corporate Events', image: '/Images/corporate1.jpg' },
-    { title: 'Weddings', image: '/Images/wedding1.webp' },
-    { title: 'Engagements', image: '/Images/engagement1.webp' },
+    { title: 'Surprise Events', image: '/Images/surprise.webp' },
+    { title: 'Private Parties', image: '/Images/privatep.JPG' },
+    { title: 'Anniversaries', image: '/Images/anniversary1.JPG' },
+    { title: 'Birthdays', image: '/Images/birthday3.JPG' },
+    { title: 'Corporate Events', image: '/Images/corporate1.JPG' },
+    { title: 'Engagements', image: '/Images/engagement.JPEG' },
 
   ];
 
@@ -85,7 +84,7 @@ export default function Home() {
       </section>
 
       <section className="max-w-7xl mx-auto p-2">
-        <h2 className="text-6xl font-[Great Vibes] italic text-center text-gray-600 mb-5 mt-4 font-serif">
+        <h2 className="text-6xl font-[Great Vibes] italic text-center text-red-600 mb-5 mt-4 font-serif">
           Where every life moment becomes an experience
         </h2>
       </section>

@@ -74,19 +74,18 @@ const Bookingx = () => {
         setTheaters(fetchedTheaters);
 
         if (!selectedDate) return;
-        const formattedDate = `${selectedDate.getFullYear()}-${String(
-          selectedDate.getMonth() + 1
-        ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+const formattedDate = selectedDate.toLocaleDateString("en-CA"); // Correctly formats as YYYY-MM-DD in local time
 
         const bookedSnapshot = await getDocs(
           query(collection(db, "booked"), where("date", "==", formattedDate))
         );
         const bookedMap: Record<string, Set<string>> = {};
-        bookedSnapshot.docs.forEach((doc) => {
-          const data = doc.data();
-          if (!bookedMap[data.room]) bookedMap[data.room] = new Set();
-          bookedMap[data.room].add(data.timeSlot);
-        });
+bookedSnapshot.docs.forEach((doc) => {
+  const data = doc.data();
+  const roomName = (data.room as string)?.toLowerCase();
+  if (!bookedMap[roomName]) bookedMap[roomName] = new Set();
+  bookedMap[roomName].add(data.timeSlot);
+});
 
         const timeSlotSnapshot = await getDocs(collection(db, "timeSlots"));
         const baseSlots: TimeSlot[] = timeSlotSnapshot.docs.map((doc) => ({
@@ -98,7 +97,7 @@ const Bookingx = () => {
 
         const slotMap: Record<string, TimeSlot[]> = {};
         for (const theater of fetchedTheaters) {
-          const bookedSlots = bookedMap[theater.name] || new Set();
+          const bookedSlots = bookedMap[theater.name.toLowerCase()] || new Set();
           slotMap[theater.id] = baseSlots.map((slot) => ({
             ...slot,
             isBooked: !slot.availability || bookedSlots.has(slot.time),

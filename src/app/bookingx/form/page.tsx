@@ -29,19 +29,20 @@ const FormPage = () => {
     localStorage.removeItem("name");
     localStorage.removeItem("phoneNumber");
     localStorage.removeItem("email");
-
+  
+    // Reset people count and cake
+    localStorage.removeItem("numPeople");
+    localStorage.removeItem("selectedCake");
+    setNumPeople(2);
+    setSelectedCake(null);
+  
     const storedTheater = JSON.parse(localStorage.getItem("selectedTheater") || "null");
     const storedSlot = JSON.parse(localStorage.getItem("selectedSlot") || "null");
-
+  
     if (storedTheater) setSelectedTheater(storedTheater);
     if (storedSlot) setSelectedSlot(storedSlot);
-
-    const storedCake = JSON.parse(localStorage.getItem("selectedCake") || "null");
-    if (storedCake) setSelectedCake(storedCake);
-
-    const storedPeople = localStorage.getItem("numPeople");
-    if (storedPeople) setNumPeople(parseInt(storedPeople));
   }, []);
+  
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();

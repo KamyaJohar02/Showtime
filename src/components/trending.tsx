@@ -5,7 +5,7 @@ import Link from 'next/link';
 const Trending: React.FC = () => {
   return (
     <div className="w-full max-w-7xl mx-auto px-5 py-0">
-      <h2 className="text-6xl font-[Great Vibes] italic text-center text-gray-600 mb-10 font-serif">
+      <h2 className="text-6xl font-[Great Vibes] italic text-center text-red-600 mb-10 font-serif">
         Discover Our Services
       </h2>
 
