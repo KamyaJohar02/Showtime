@@ -105,7 +105,7 @@ const AddBooking: React.FC = () => {
         };
       
         fetchBookedSlots();
-      }, [selectedRoom, selectedDate]);
+      }, [selectedRoom, selectedDate, rooms]);
       
     
     
