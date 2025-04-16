@@ -20,6 +20,7 @@ const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseCon
 const auth: Auth = getAuth(app);
 const db: Firestore = getFirestore(app);
 
+// Set persistence for Firebase Authentication
 setPersistence(auth, browserLocalPersistence)
   .then(() => {
     console.log("✅ Firebase auth persistence set to LOCAL.");
