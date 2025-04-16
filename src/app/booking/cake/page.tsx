@@ -65,7 +65,7 @@ const CakePage = () => {
     if (selectedCakeObj) {
       localStorage.setItem("selectedCake", JSON.stringify(selectedCakeObj));
     }
-    router.push("/bookingx/decoration");
+    router.push("/booking/decoration");
   };
 
   const handleBack = () => {

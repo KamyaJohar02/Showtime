@@ -83,7 +83,7 @@ function Header() {
             Book Now
           </Link> */}
           <button
-            onClick={() => router.push("/bookingx")}
+            onClick={() => router.push("/booking")}
             className="ml-4 text-sm font-semibold bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 shadow-md transition-all duration-200"
           >
             Book Now

@@ -86,7 +86,7 @@ const TopPage: React.FC = () => {
           <h2 className={`${dancingScript.className} text-yellow-500 text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold text-center mb-6`}>
             {displayedText}
           </h2>
-          <Link href="/bookingx">
+          <Link href="/booking">
             <span className="bg-red-500 text-white py-2 sm:py-3 px-6 sm:px-8 rounded-full shadow-lg hover:bg-red-600 transition duration-300 text-sm sm:text-base md:text-lg cursor-pointer">
               Book Now
             </span>

@@ -3,11 +3,11 @@
 import React from "react";
 
 // Define a type for the props that include children
-interface BookingLayoutProps {
+interface BookingxLayoutProps {
   children: React.ReactNode;
 }
 
-export default function BookingLayout({ children }: BookingLayoutProps) {
+export default function BookingxLayout({ children }: BookingxLayoutProps) {
   return (
     <div>
       <section>{children}</section>

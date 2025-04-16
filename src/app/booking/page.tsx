@@ -1,762 +1,245 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { db } from "@/firebaseConfig";
-import { collection, getDocs, addDoc, query, where } from "firebase/firestore"; 
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/components/context/UserContext"; // Use your AuthProvider
-import { doc, getDoc } from "firebase/firestore"; // For fetching user data from Firestore
 
-
-
-interface Room {
-  roomId: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  rate: number;
-  availability: boolean;
-}
-
-interface Decoration {
-  imageUrl: string ;
+interface Theater {
   id: string;
-  label: string;
-  rate: number;
+  name: string;
+  slots: number;
+  maxPeople: number;
+  foodDrinks: boolean;
+  cancellation: boolean;
+  decoration: string;
+  price: number;
+  basePeople: number;
+  extraPeopleNote: string;
   image: string;
-  availability: boolean;
+  rating: number;
+  timeSlots: string[];
 }
 
 interface TimeSlot {
-  id: string;        // Unique identifier for the time slot
-  name: string;      // Name of the time slot (e.g., "Slot 1")
-  time: string;      // Time range (e.g., "10:00 AM - 12:00 PM")
+  id: string;
+  name: string;
+  time: string;
   availability: boolean;
-  isBooked?: boolean; // Whether the time slot is available
+  isBooked?: boolean;
 }
 
-const Booking: React.FC = () => {
-  const router = useRouter();
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [decorations, setDecorations] = useState<Decoration[]>([]);
+const roomPrices: Record<string, number> = {
+  "Sweet": 1099,
+  "Wonders": 1699,
+  "Galaxy": 2149,
+};
+
+const Bookingx = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [step, setStep] = useState<number>(1);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [theaters, setTheaters] = useState<Theater[]>([]);
+  const [slotsMap, setSlotsMap] = useState<Record<string, TimeSlot[]>>({});
+  const [selectedTheaterId, setSelectedTheaterId] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-  const [selectedDecorations, setSelectedDecorations] = useState<string[]>([]);
-  const [name, setName] = useState<string>("");
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [numPeople, setNumPeople] = useState<number>(1);
-  const [email, setEmail] = useState<string>("");
-  const [addCake, setAddCake] = useState(false);
   const [disabledDates, setDisabledDates] = useState<Date[]>([]);
-  const [slots, setSlots] = useState<TimeSlot[]>([]);
-  const { user } = useUser(); // Get the logged-in user from the AuthProvider
-  const [maxPeople, setMaxPeople] = useState<number>(12); // Default to the max limit
-  const [profile, setProfile] = useState({
-    name: "",
-    phoneNumber: "",
-    email: "",
-  });
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const urlStep = parseInt(searchParams.get("step") || "1");
-    setStep(urlStep);
-  
-    const savedRoom = localStorage.getItem("selectedRoom");
-    const savedSlot = localStorage.getItem("selectedSlot");
-    const savedDecorations = localStorage.getItem("selectedDecorations");
-  
-    if (savedRoom) setSelectedRoom(savedRoom);
-    if (savedSlot) setSelectedSlot(savedSlot);
-    if (savedDecorations) setSelectedDecorations(JSON.parse(savedDecorations));
-  }, []);
-  
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (user) {
-        try {
-          const userRef = doc(db, "users", user.uid); // Reference to the user's document
-          const userDoc = await getDoc(userRef); // Fetch the document from Firestore
-  
-          if (userDoc.exists()) {
-            const userData = userDoc.data(); // Extract user data
-            setName(userData.name || ""); // Populate `name` field
-            setEmail(userData.email || ""); // Populate `email` field
-            setPhoneNumber(userData.mobile || ""); // Populate `mobile` field
-          } else {
-            console.warn("User document does not exist in Firestore.");
-          }
-        } catch (error) {
-          console.error("Error fetching user profile from Firestore:", error);
-        }
-      }
-    };
-  
-    fetchUserProfile();
-  }, [user]);
-
-  useEffect(() => {
-    if (selectedRoom === "room1") setMaxPeople(5);
-    else if (selectedRoom === "room2") setMaxPeople(7);
-    else if (selectedRoom === "room3") setMaxPeople(12);
-    else setMaxPeople(12); // Default max
-  }, [selectedRoom]);
-  
-
-
-
-
-  // /*const rooms: Room[] = [
-  //   { id: 'room1', name: 'Room 1', description: 'A cozy room with a 150-inch screen.', imageUrl: '/Images/Room1.jpg', rate: 1400 },
-  //   { id: 'room2', name: 'Room 2', description: 'A spacious room with comfortable seating.', imageUrl: '/Images/Room2.jpg', rate: 1600 },
-  //   { id: 'room3', name: 'Room 3', description: 'A luxurious room with premium sound.', imageUrl: '/Images/Room3.jpg', rate: 1900 },
-  // ];
-
-  // const decorations: Decoration[] = [
-  //   { value: 'balloons', label: 'Balloons', rate: 100, image: '/Images/balloons.jpg' },
-  //   { value: 'flowers', label: 'Flowers', rate: 150, image: '/Images/flowers.jpeg' },
-  //   { value: 'candles', label: 'Candles', rate: 200, image: '/Images/candles.jpg' },
-  //   { value: 'fog', label: 'Fog', rate: 250, image: '/Images/smoke.jpg' },
-  // ];
-
-  /*const slots = [
-    '10:00 AM - 12:00 PM',
-    '12:00 PM - 02:00 PM',
-    '02:00 PM - 04:00 PM',
-    '04:00 PM - 06:00 PM',
-    '06:00 PM - 08:00 PM',
-  ];*/
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-        try {
-            // Fetch rooms
-            const roomsCollection = collection(db, "rooms");
-            const roomDocs = await getDocs(roomsCollection);
-            const fetchedRooms = roomDocs.docs.map((doc) => ({
-                roomId: doc.id,
-                ...doc.data(),
-            })) as Room[];
-            setRooms(fetchedRooms);
-
-            // Fetch decorations
-            const decorationsCollection = collection(db, "decorations");
-            const decorationDocs = await getDocs(decorationsCollection);
-            const fetchedDecorations = decorationDocs.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            })) as Decoration[];
-            setDecorations(fetchedDecorations);
-
-            // Fetch disabled dates
-            const disabledDatesCollection = collection(db, "disabledDates");
-            const disabledDateDocs = await getDocs(disabledDatesCollection);
-            const fetchedDisabledDates = disabledDateDocs.docs.map(
-                (doc) => new Date(doc.data().date)
-            );
-            setDisabledDates(fetchedDisabledDates);
-
-            // Fetch time slots
-            const timeSlotsCollection = collection(db, "timeSlots");
-            const timeSlotDocs = await getDocs(timeSlotsCollection);
-            const fetchedTimeSlots = timeSlotDocs.docs.map((doc) => ({
-                id: doc.id,
-                name: doc.data().name,
-                time: doc.data().time,
-                availability: doc.data().availability,
-            })) as TimeSlot[];
-
-            // Default slots without any booked information
-            if (!selectedRoom || !selectedDate) {
-                const defaultSlots = fetchedTimeSlots.map((slot) => ({
-                    ...slot,
-                    isBooked: false, // No slot is booked
-                }));
-                setSlots(defaultSlots);
-                return; // Exit early if room or date is not selected
-            }
-
-            // Format selected date to "YYYY-MM-DD"
-            const formattedDate = `${selectedDate.getFullYear()}-${String(
-                selectedDate.getMonth() + 1
-            ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
-
-            // Query booked collection for selected room and date
-            const bookedQuery = query(
-                collection(db, "booked"),
-                where(
-                    "room",
-                    "==",
-                    rooms.find((room) => room.roomId === selectedRoom)?.name
-                ),
-                where("date", "==", formattedDate)
-            );
-            const bookedDocs = await getDocs(bookedQuery);
-
-            // Extract booked time slots
-            const bookedSlots = new Set(
-                bookedDocs.docs.map((doc) => doc.data().timeSlot)
-            );
-            console.log("Fetched Booked Slots:", Array.from(bookedSlots));
-            console.log("Fetched Time Slots:", fetchedTimeSlots);
-
-            // Update slots with the isBooked property based on the time field
-            const updatedSlots = fetchedTimeSlots.map((slot) => ({
-              ...slot,
-              isBooked: bookedSlots.has(slot.time) || !slot.availability, // Disable if booked OR admin disabled
-            }));
-            console.log("Updated Slots:", updatedSlots);
-            setSlots(updatedSlots); // Update state with modified slots
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
-    };
-
-    fetchData();
-}, [selectedRoom, selectedDate, rooms]); // Ensure dependencies are updated
-
-
-
-  
-
-  const renderRoomSelection = () => (
-    <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
-
-      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
-        Select a Room
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-8">
-        {rooms.map((room) => (
-          <div
-            key={room.roomId}
-            onClick={() => room.availability && setSelectedRoom(room.roomId)}
-            className={`border p-6 rounded-lg bg-[#892929] transition-transform transform hover:scale-105 ${
-              selectedRoom === room.roomId
-                ? "border-4 border-red-500 shadow-lg"
-                : room.availability
-                ? "cursor-pointer border border-gray-300"
-                : "cursor-not-allowed border border-gray-500 opacity-50"
-            }`}
-          >
-            <Image
-              src={room.imageUrl}
-              alt={room.name}
-              width={500}
-              height={300}
-              className="rounded-md"
-            />
-            <h3 className="text-2xl text-white font-bold text-center mt-4">
-              {room.name}
-            </h3>
-            <p className="text-lg text-gray-300 text-center mt-2">
-              {room.description}
-            </p>
-            <p className="text-lg text-white text-center mt-2 font-bold">
-              ₹{room.rate}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Navigation Buttons */}
-      <div className="flex justify-center mt-6">
-        <button
-          className="bg-gray-300 text-black py-2 px-8 rounded"
-          onClick={() => router.push("/")}
-        >
-          Back
-        </button>
-        <button
-          className={`bg-red-500 text-white py-2 px-8 rounded ml-4 ${
-            !selectedRoom ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          onClick={() => setStep(2)}
-          disabled={!selectedRoom}
-        >
-          Next
-        </button>
-      </div>
-    </div>
-  );
-
-  
-
-const renderCalendar = () => {
+  const router = useRouter();
   const today = new Date();
 
-  return (
-    <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
+  useEffect(() => {
+    const fetchDisabledDates = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "disabledDates"));
+        const dates = snapshot.docs.map((doc) => new Date(doc.data().date));
+        setDisabledDates(dates);
+      } catch (error) {
+        console.error("Error fetching disabled dates:", error);
+      }
+    };
+    fetchDisabledDates();
+  }, []);
 
-      {/* Title Above the Card */}
-      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
-        Select a Date
-      </h2>
-      
-      {/* Calendar Card */}
-      <div className="bg-[#e58484] rounded-lg shadow-lg p-6 sm:p-8 md:p-10 lg:p-12 w-[80vw] sm:w-[60vw] md:w-[50vw] lg:w-[40vw] max-w-lg h-[50vh] sm:h-[60vh] md:h-[65vh] flex flex-col items-center">
-      <DayPicker
-  mode="single"
-  selected={selectedDate}
-  onSelect={(date) => setSelectedDate(date)}
-  disabled={[...disabledDates, { before: today }]} // Include fetched dates
-  defaultMonth={today} // Start on current month
-  className="bg-[#962a2a] rounded-lg text-white w-full flex justify-center"
-  styles={{
-    caption: { textAlign: "center", fontSize: "1.5rem", fontWeight: "bold" },
-    day: { justifyContent: "center", fontSize: "1.1rem" },
-  }}
-/>
-        
-        {/* Navigation Buttons */}
-        <div className="flex justify-center mt-6 space-x-4">
-          <button className="bg-gray-300 text-black py-2 px-6 sm:px-8 rounded" onClick={() => setStep(1)}>Back</button>
-          <button className="bg-red-500 text-white py-2 px-6 sm:px-8 rounded" onClick={() => setStep(3)}>Next</button>
-        </div>
-      </div>
-    </div>
-  );
-};
-  
-        
+  useEffect(() => {
+    const fetchTheatersAndSlots = async () => {
+      try {
+        const theaterSnapshot = await getDocs(collection(db, "rooms"));
+        const fetchedTheaters: Theater[] = theaterSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Theater[];
+        setTheaters(fetchedTheaters);
 
-const renderTimeSlots = () => (
-  <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
+        if (!selectedDate) return;
+const formattedDate = selectedDate.toLocaleDateString("en-CA"); // Correctly formats as YYYY-MM-DD in local time
 
-      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
-      Select a Time Slot
-    </h2>
-    <div className="bg-[#e58484] p-8 sm:p-10 rounded-lg shadow-lg w-[80vw] sm:w-[70vw] md:w-[50vw] lg:w-[45vw] max-w-xl h-auto flex flex-col items-center">
-      <div className="flex flex-col gap-4 w-full">
-        {slots.map((slot) => (
-          <div
-          key={slot.id}
-          className={`p-4 rounded-lg text-center text-lg sm:text-xl md:text-2xl transition-transform duration-300 transform hover:scale-105 ${
-            selectedSlot === slot.time
-              ? "bg-[#208b42] text-white" // Highlight selected slot
-              : slot.isBooked
-              ? "bg-gray-500 text-gray-700 cursor-not-allowed" // Grey out booked slots
-              : "bg-[#892929] text-gray-300 cursor-pointer" // Default style
-          }`}
-            onClick={() => !slot.isBooked && setSelectedSlot(slot.time)}
-          >
-            {slot.time}
-          </div>
-        ))}
-      </div>
-    </div>
-    <div className="flex justify-center mt-6 space-x-4">
-    <button
-  className="bg-gray-300 text-black py-2 px-6 sm:px-8 rounded"
-  onClick={() => {
-    setSelectedSlot(null); // Clear selected time slot
-    setStep(2); // Go back to calendar
-  }}
->
-  Back
-</button>
-      <button
-        className={`py-2 px-6 sm:px-8 rounded ${
-          selectedSlot ? "bg-red-500 text-white" : "bg-gray-300 text-gray-500 cursor-not-allowed"
-        }`}
-        onClick={() => selectedSlot && setStep(4)}
-        disabled={!selectedSlot}
-      >
-        Next
-      </button>
-    </div>
-  </div>
-);
+        const bookedSnapshot = await getDocs(
+          query(collection(db, "booked"), where("date", "==", formattedDate))
+        );
+        const bookedMap: Record<string, Set<string>> = {};
+bookedSnapshot.docs.forEach((doc) => {
+  const data = doc.data();
+  const roomName = (data.room as string)?.toLowerCase();
+  if (!bookedMap[roomName]) bookedMap[roomName] = new Set();
+  bookedMap[roomName].add(data.timeSlot);
+});
 
-  
-   
+        const timeSlotSnapshot = await getDocs(collection(db, "timeSlots"));
+        const baseSlots: TimeSlot[] = timeSlotSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+          time: doc.data().time,
+          availability: doc.data().availability,
+        }));
 
-const renderDecorations = () => (
-  <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
+        const slotMap: Record<string, TimeSlot[]> = {};
+        for (const theater of fetchedTheaters) {
+          const bookedSlots = bookedMap[theater.name.toLowerCase()] || new Set();
+          slotMap[theater.id] = baseSlots.map((slot) => ({
+            ...slot,
+            isBooked: !slot.availability || bookedSlots.has(slot.time),
+          }));
+        }
 
-      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
-      Select Decorations
-    </h2>
+        setSlotsMap(slotMap);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-    {/* Decorations Grid */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-      {decorations.map((decoration) => (
-        <div
-          key={decoration.id}
-          onClick={() =>
-            decoration.availability &&
-            setSelectedDecorations((prev) =>
-              prev.includes(decoration.id)
-                ? prev.filter((d) => d !== decoration.id)
-                : [...prev, decoration.id]
-            )
-          }
-          className={`flex flex-col items-center border p-4 rounded-lg  bg-[#822a2a] text-white transition-all duration-200 transform hover:scale-105 ${
-            selectedDecorations.includes(decoration.id)
-              ? "border-red-500 shadow-lg"
-              : decoration.availability
-              ? "cursor-pointer border-gray-300"
-              : "cursor-not-allowed border-gray-500 opacity-50"
-          }`}
-          style={{ height: "250px" }}
-        >
-          {/* Decoration Image */}
-          <Image
-            src={decoration.imageUrl}
-            alt={decoration.label}
-            width={80}
-            height={80}
-            className="rounded-md object-cover mb-4"
-          />
+    fetchTheatersAndSlots();
+  }, [selectedDate]);
 
-          {/* Decoration Details */}
-          <h3 className="text-xl font-bold text-center mb-1">
-            {decoration.label}
-          </h3>
-          <p className="text-lg font-semibold">₹{decoration.rate}</p>
-        </div>
-      ))}
-    </div>
+  const handleNext = () => {
+    if (selectedTheaterId && selectedSlot && selectedDate) {
+      const selectedTheater = theaters.find((t) => t.id === selectedTheaterId);
+      const selectedSlotObj = (slotsMap[selectedTheaterId] || []).find(
+        (slot) => slot.time === selectedSlot
+      );
 
-    {/* Navigation Buttons */}
-    <div className="flex justify-center mt-6 space-x-4">
-      <button
-        className="bg-gray-300 text-black py-2 px-8 rounded"
-        onClick={() => setStep(3)}
-      >
-        Back
-      </button>
-      <button
-  className="bg-red-500 text-white py-2 px-8 rounded"
-  onClick={() => {
-    // Save current selections to localStorage
-    localStorage.setItem("selectedRoom", selectedRoom || "");
-    localStorage.setItem("selectedSlot", selectedSlot || "");
-    localStorage.setItem("selectedDecorations", JSON.stringify(selectedDecorations));
+      if (selectedTheater && selectedSlotObj) {
+        const finalPrice = roomPrices[selectedTheater.name] || selectedTheater.price;
 
-    // Redirect to login if user not logged in
-    if (!user) {
-      const redirectUrl = encodeURIComponent("/booking?step=5");
-      router.push(`/login?redirect=${redirectUrl}`);
+        const fullTheaterData = {
+          id: selectedTheater.id,
+          name: selectedTheater.name,
+          price: finalPrice,
+        };
+
+        const fullSlotData = {
+          id: selectedSlotObj.id,
+          time: selectedSlotObj.time,
+        };
+
+        localStorage.setItem("selectedTheater", JSON.stringify(fullTheaterData));
+        localStorage.setItem("selectedSlot", JSON.stringify(fullSlotData));
+        localStorage.setItem("selectedDate", selectedDate.toISOString());
+
+        router.push("/booking/form");
+      }
     } else {
-      setStep(5);
-    }
-  }}
->
-  Next
-</button>
-
-    </div>
-  </div>
-);
-  
-
-  const renderUserDetailsForm = () => {
-    const handleNextStep = () => {
-      // Check for required fields and valid formats
-      if (!name || !/^[A-Za-z\s]+$/.test(name.trim())) {
-        alert("Please enter a valid name (alphabets and spaces only).");
-        return;
-      }
-      if (!phoneNumber || !/^\d{10}$/.test(phoneNumber.trim())) {
-        alert("Please enter a valid 10-digit phone number.");
-        return;
-      }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-        alert("Please enter a valid email address.");
-        return;
-      }
-      if (numPeople < 1) {
-        alert("Please specify the number of people.");
-        return;
-      }
-      if (!phoneNumber || !/^\d{10}$/.test(phoneNumber)) {
-        alert("Please enter a valid 10-digit phone number");
-        return;
-      }
-    
-      setStep(6); // Proceed to the next step if all validations pass
-    };
-    
-  
-    return (
-      <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
-
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
-              Enter Your Details</h2>
-  
-        {/* Form Container */}
-        <div className="bg-[#822a2a]  p-8 sm:p-10 rounded-lg shadow-lg w-[80vw] sm:w-[60vw] md:w-[50vw] lg:w-[40vw] max-w-md">
-          
-          {/* Full Name */}
-          <div className="mb-4">
-            <label className="block text-white text-lg mb-2">Full Name<span className="text-red-500">*</span></label>
-            <input
-            type="text"
-            value={name}
-            onChange={(e) =>
-              /^[A-Za-z\s]*$/.test(e.target.value) && setName(e.target.value)
-            }
-            className="w-full p-2 rounded text-black"
-            placeholder="Enter your full name"
-          />
-          </div>
-  
-          {/* Phone Number */}
-          <div className="mb-4">
-            <label className="block text-white text-lg mb-2">Phone Number<span className="text-red-500">*</span></label>
-            <input
-            type="tel"
-            value={phoneNumber}
-            onChange={(e) =>
-              /^\d*$/.test(e.target.value) && setPhoneNumber(e.target.value)
-            }
-            className="w-full p-2 rounded text-black"
-            placeholder="Enter your phone number"
-          />
-          </div>
-  
-          {/* Email */}
-          <div className="mb-4">
-            <label className="block text-white text-lg mb-2">Email ID<span className="text-red-500">*</span></label>
-            <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 rounded text-black"
-            placeholder="Enter your email"
-          />
-          </div>
-  
-          {/* Number of People with Counter */}
-<div className="mb-4">
-  <label className="block text-white text-lg mb-2">
-    Number of People for the Gathering<span className="text-red-500">*</span>
-  </label>
-  <div className="flex items-center">
-    <button
-      type="button"
-      onClick={() => setNumPeople(Math.max(1, numPeople - 1))}
-      className="p-2 bg-gray-300 rounded-l"
-    >
-      -
-    </button>
-    <input
-      type="text"
-      value={numPeople}
-      readOnly // Prevent manual typing
-      className="w-16 text-center p-2 border"
-    />
-    <button
-      type="button"
-      onClick={() =>
-        setNumPeople((prev) =>
-          selectedRoom === "room1"
-            ? Math.min(5, prev + 1)
-            : selectedRoom === "room2"
-            ? Math.min(7, prev + 1)
-            : selectedRoom === "room3"
-            ? Math.min(12, prev + 1)
-            : prev
-        )
-      }
-      className="p-2 bg-gray-300 rounded-r"
-    >
-      +
-    </button>
-  </div>
-</div>
-
-  
-          {/* Add Cake Option */}
-          <div className="flex items-center mt-4">
-            <input 
-              type="checkbox" 
-              id="add-cake" 
-              className="mr-2" 
-              onChange={(e) => setAddCake(e.target.checked)} 
-            />
-            <label htmlFor="add-cake" className="text-white text-lg">Do you wish to add cake? (₹500)</label>
-          </div>
-  
-          {/* Navigation Buttons */}
-          <div className="flex justify-center mt-6 space-x-4">
-            <button 
-              className="bg-gray-300 text-black py-2 px-8 rounded" 
-              onClick={() => {
-                setNumPeople(1); // Reset the counter to 1 when the Back button is clicked
-                setStep(4); // Go back to the previous step
-              }}
-            >
-              Back
-            </button>
-            <button 
-              className="bg-red-500 text-white py-2 px-8 rounded" 
-              onClick={handleNextStep}
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-  
-  const handleBookingSubmit = async () => {
-    try {
-      
-      const bookingData = {
-        name,
-        mobile: phoneNumber,
-        email,
-        room: rooms.find((room) => room.roomId === selectedRoom)?.name || "",
-        date: selectedDate
-  ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`
-  : "",
-        status: "pending",
-        timeSlot: selectedSlot,
-        decorations: selectedDecorations.map((d) =>
-          decorations.find((dec) => dec.id === d)?.label
-        ),
-        wantCake: addCake,
-        advanceAmount: 500,
-        dueAmount:
-  (rooms.find((room) => room.roomId === selectedRoom)?.rate || 0) +
-  selectedDecorations.reduce((total, d) => {
-    const decoration = decorations.find((dec) => dec.id === d);
-    return total + (decoration ? decoration.rate : 0);
-  }, 0) +
-  (addCake ? 500 : 0) -
-  500,
-
-        people: numPeople,
-      };
-  
-      await addDoc(collection(db, "bookings"), bookingData);
-
-      // Add minimal data to the booked collection
-      const bookedData = {
-        room: bookingData.room,
-        date: bookingData.date,
-        timeSlot: bookingData.timeSlot,
-    };
-    await addDoc(collection(db, "booked"), bookedData);
-  
-      alert("Booking submitted successfully!");
-      router.push("/"); // Navigate to another page or reset the form
-    } catch (error) {
-      console.error("Error submitting booking:", error);
-      alert("Failed to submit booking. Please try again.");
+      alert("Please select a date, theater, and slot before proceeding.");
     }
   };
-  
-
-  const renderSummary = () => {
-    // Calculate total amount
-    const roomCost = rooms.find((room) => room.roomId === selectedRoom)?.rate || 0;
-    const decorationCost = selectedDecorations.reduce((total, d) => {
-      const decoration = decorations.find((dec) => dec.id === d);
-      return total + (decoration ? decoration.rate : 0);
-    }, 0);
-    const cakeCost = addCake ? 500 : 0;
-    const totalAmount = roomCost + decorationCost + cakeCost;
-    const advanceAmount = 500;
-    const dueAmount = totalAmount - advanceAmount;
-  
-    return (
-      <div className="flex flex-col items-center min-h-screen bg-white p-4 sm:p-8">
-
-      <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 text-red-600 drop-shadow-md font-[Poppins] tracking-wide">
-      Booking Summary
-        </h2>
-        <div className="bg-[#e58484]  text-black p-6 rounded-lg w-full max-w-md shadow-lg space-y-3">
-          {/* Detail Boxes */}
-          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
-            <p className="font-semibold text-lg">Name:</p>
-            <p className="text-base">{name}</p>
-          </div>
-          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
-            <p className="font-semibold text-lg">Phone Number:</p>
-            <p className="text-base">{phoneNumber}</p>
-          </div>
-          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
-            <p className="font-semibold text-lg">Email:</p>
-            <p className="text-base">{email}</p>
-          </div>
-          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
-            <p className="font-semibold text-lg">Room:</p>
-            <p className="text-base">
-              {rooms.find((room) => room.roomId === selectedRoom)?.name}
-            </p>
-          </div>
-          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
-  <p className="font-semibold text-lg">Date:</p>
-  <p className="text-base">
-  {selectedDate
-    ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`
-    : "Not Selected"}
-</p> {/* Display as "YYYY-MM-DD" */}
-</div>
-          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
-            <p className="font-semibold text-lg">Time Slot:</p>
-            <p className="text-base">{selectedSlot}</p>
-          </div>
-          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
-            <p className="font-semibold text-lg">Decorations:</p>
-            <p className="text-base">
-              {selectedDecorations
-                .map((d) => decorations.find((dec) => dec.id === d)?.label)
-                .join(", ") || "None"}
-            </p>
-          </div>
-          <div className="bg-[#822a2a] text-white px-4 py-2 rounded-lg shadow-sm">
-            <p className="font-semibold text-lg">Cake:</p>
-            <p className="text-base">{addCake ? "Yes" : "No"}</p>
-          </div>
-          {/* Total Amount, Advance, and Due */}
-          <div className="bg-[#822a2a] text-white px-4 py-4 rounded-lg shadow-md border-t-4 border-red-500">
-            <p className="font-bold text-xl">Total Amount: ₹{totalAmount}</p>
-            <p className="text-sm mt-1">Advance: ₹{advanceAmount}</p>
-            <p className="text-sm">Due: ₹{dueAmount}</p>
-          </div>
-        </div>
-        {/* Navigation Buttons */}
-        <div className="flex justify-center mt-10 space-x-6">
-          <button
-            className="bg-gray-300 text-black py-2 px-8 rounded-full shadow-md"
-            onClick={() => setStep(5)}
-          >
-            Back
-          </button>
-          <button
-  className="bg-red-500 text-white py-2 px-8 rounded-full shadow-md"
-  onClick={handleBookingSubmit} // Call the function here
->
-  Submit and Pay
-</button>
-        </div>
-      </div>
-    );
-  };
-  
-  
-  
 
   return (
-    <div>
-      {step === 1 && renderRoomSelection()}
-      {step === 2 && renderCalendar()}
-      {step === 3 && renderTimeSlots()}
-      {step === 4 && renderDecorations()}
-      {step === 5 && renderUserDetailsForm()}
-      {step === 6 && renderSummary()}
+    <div className="flex flex-col min-h-screen justify-between">
+      <header className="p-6">
+        <h2 className="text-2xl font-bold mb-2">Select a Date</h2>
+        <button
+          onClick={() => setShowCalendar(!showCalendar)}
+          className="border px-4 py-2 rounded shadow bg-white hover:bg-gray-100"
+        >
+          {selectedDate?.toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }) || "Pick a date"}
+        </button>
+        {showCalendar && (
+          <div className="mt-4">
+            <DayPicker
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => {
+                setSelectedDate(date);
+                setShowCalendar(false);
+              }}
+              disabled={[...disabledDates, { before: today }]}
+              defaultMonth={today}
+              className="rounded-md border p-4 shadow bg-white"
+            />
+          </div>
+        )}
+      </header>
+
+      <main className="px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {theaters.map((theater) => {
+            const availableSlots = (slotsMap[theater.id] || []).filter((slot) => !slot.isBooked).length;
+            const displayPrice = roomPrices[theater.name] || theater.price;
+
+            return (
+              <div key={theater.id} className="border rounded-lg shadow-md p-4">
+                <img
+                  src={theater.image}
+                  alt={theater.name}
+                  className="rounded-lg w-full h-48 object-cover mb-4"
+                />
+                <h3 className="text-xl font-semibold mb-1">{theater.name}</h3>
+                <p className="text-red-500 text-sm mb-2">{availableSlots} Slots Available</p>
+                <ul className="text-sm text-gray-700 mb-2">
+                  <li>👥 Max {theater.maxPeople} People</li>
+                  <li>🍽️ Food & Drinks available</li>
+                  <li>✅ Free Cancellation*</li>
+                  <li>💼 Decoration {theater.decoration}</li>
+                </ul>
+                <div className="mb-2">
+                  <strong>Select Time Slot:</strong>
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    {(slotsMap[theater.id] || []).map((slot) => (
+                      <button
+                        key={slot.id}
+                        onClick={() => {
+                          setSelectedTheaterId(theater.id);
+                          setSelectedSlot(slot.time);
+                        }}
+                        disabled={slot.isBooked}
+                        className={`text-sm p-2 rounded transition-colors duration-200 ${
+                          selectedTheaterId === theater.id && selectedSlot === slot.time
+                            ? "bg-green-500 text-white"
+                            : slot.isBooked
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-gray-100 hover:bg-blue-100"
+                        }`}
+                      >
+                        {slot.time}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <p className="font-semibold text-lg mt-2">₹{displayPrice}</p>
+              </div>
+            );
+          })}
+        </div>
+      </main>
+
+      <footer className="mt-10 text-center text-sm text-gray-600 py-4">
+        {selectedTheaterId && selectedSlot && (
+          <button
+            onClick={handleNext}
+            className="bg-red-500 text-white px-6 py-3 rounded-full mt-4 shadow-lg"
+          >
+            Next
+          </button>
+        )}
+      </footer>
     </div>
   );
 };
 
-export default Booking;
+export default Bookingx;

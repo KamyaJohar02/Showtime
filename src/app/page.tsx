@@ -145,7 +145,7 @@ export default function Home() {
       </section>
       <section className="flex mt-2 justify-center w-full px-12 ">
       <Link
-  href="/bookingx"
+  href="/booking"
   className="bg-red-600 text-white py-4 px-10 rounded-full hover:bg-red-800 transition duration-300 text-center"
 >
   Book Now

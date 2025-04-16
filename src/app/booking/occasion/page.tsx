@@ -56,7 +56,7 @@ const OccasionPage = () => {
 
     localStorage.setItem("selectedOccasion", selectedOccasion);
     localStorage.setItem("nameToInclude", nameToInclude.trim());
-    router.push("/bookingx/cake");
+    router.push("/booking/cake");
   };
 
   const renderBookingSummary = () => {

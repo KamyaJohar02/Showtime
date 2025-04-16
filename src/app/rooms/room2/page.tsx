@@ -71,7 +71,7 @@ const Room2Page: React.FC = () => {
       </div>
 
       {/* Floating Book Now Button */}
-      <Link href="/bookingx">
+      <Link href="/booking">
         <button className="fixed bottom-4 right-4 sm:bottom-10 sm:right-10 bg-red-500 text-white py-2 px-6 sm:py-3 sm:px-8 rounded-full shadow-lg hover:bg-red-600 transition duration-300 z-20">
           Book Now
         </button>

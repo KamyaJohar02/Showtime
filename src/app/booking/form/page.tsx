@@ -52,7 +52,7 @@ const FormPage = () => {
     localStorage.setItem("email", email);
     localStorage.setItem("numPeople", String(numPeople));
 
-    router.push("/bookingx/occasion");
+    router.push("/booking/occasion");
   };
 
   const getMaxPeopleLimit = () => {

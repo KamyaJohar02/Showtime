@@ -76,7 +76,7 @@ const RoomsPage: React.FC = () => {
                 More Info
               </Link>
               <Link
-                href="/bookingx"
+                href="/booking"
                 className="bg-blue-500 text-white py-2 px-4 sm:px-6 rounded-full shadow hover:bg-blue-600 transition inline-block text-center"
               >
                 Book Now
