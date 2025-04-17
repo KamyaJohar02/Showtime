@@ -129,7 +129,7 @@ const CakePage = () => {
         <h3 className="text-lg font-bold mb-2">Booking summary</h3>
         <div className="text-sm space-y-1">
           <div className="flex justify-between">
-            <span>{selectedTheater?.name || "Room"} ({numPeople} ppl)</span>
+            <span>{selectedTheater?.name || "Room"} ({numPeople} people)</span>
             <span>₹ {theaterCost}</span>
           </div>
           {selectedSlot?.time && (
