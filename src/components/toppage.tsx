@@ -13,7 +13,9 @@ const dancingScript = Dancing_Script({
 const images = [
   '/Images/photo1.png',
   '/Images/photo2.png',
-  '/Images/car1_2.jpg',
+  '/Images/Room1.jpg',
+  '/Images/Room2.jpg',
+  '/Images/Room3.jpg',
 ];
 
 const textToDisplay = "Celebrate your special moments in style with Showtime";

@@ -10,7 +10,7 @@ const rooms = [
     title: "SWEET",
     description:
       "Perfect for small family gatherings, this room features ample space, a cozy setting, and modern comforts to make your stay memorable.",
-    imageSrc: "/Images/Room1.jpg",
+    imageSrc: "/Images/Room1.JPG",
     moreInfoLink: "/rooms/room1",
   },
   {
@@ -18,7 +18,7 @@ const rooms = [
     title: "GALAXY",
     description:
       "A spacious private suite designed for ultimate relaxation. Enjoy top-notch amenities and a serene environment.",
-    imageSrc: "/Images/Room2.jpg",
+    imageSrc: "/Images/Room2.JPG",
     moreInfoLink: "/rooms/room2",
   },
   {
@@ -26,7 +26,7 @@ const rooms = [
     title: "WONDERS",
     description:
       "Ideal for meetings and conferences, our elegant hall is equipped with state-of-the-art technology and flexible seating.",
-    imageSrc: "/Images/Room3.jpg",
+    imageSrc: "/Images/Room3.JPG",
     moreInfoLink: "/rooms/room3",
   },
 ];

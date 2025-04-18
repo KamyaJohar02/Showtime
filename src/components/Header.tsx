@@ -32,7 +32,7 @@ function Header() {
         backgroundPosition: "center",
       }}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
+      <nav className="mx-auto flex max-w-4xl items-center justify-between p-6 lg:px-8">
         {/* Logo */}
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5">
