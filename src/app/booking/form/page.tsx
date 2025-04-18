@@ -46,14 +46,35 @@ const FormPage = () => {
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
-
+  
+    const theaterName = selectedTheater?.name || "";
+    const config = roomConfig[theaterName] || {
+      maxPeople: 100,
+      extraChargeStartsAfter: 1000,
+      extraChargePerPerson: 0,
+    };
+  
+    const baseTheaterCost = selectedTheater?.price || 0;
+    const extraPeopleCount = Math.max(numPeople - config.extraChargeStartsAfter, 0);
+    const extraCost = extraPeopleCount * config.extraChargePerPerson;
+    const finalTheaterCost = baseTheaterCost + extraCost;
+  
+    // ✅ Use updated theater object
+    const updatedTheater = {
+      ...selectedTheater,
+      price: finalTheaterCost,
+    };
+  
+    // ✅ Save it in localStorage
+    localStorage.setItem("selectedTheater", JSON.stringify(updatedTheater));
     localStorage.setItem("name", name);
     localStorage.setItem("phoneNumber", phoneNumber);
     localStorage.setItem("email", email);
     localStorage.setItem("numPeople", String(numPeople));
-
+  
     router.push("/booking/occasion");
   };
+  
 
   const getMaxPeopleLimit = () => {
     const config = roomConfig[selectedTheater?.name] || { maxPeople: 100 };

@@ -7,12 +7,14 @@ import { auth } from "@/firebaseConfig";
 import ManageBookings from "./booking";
 import ManageRooms from "./rooms";
 import ManageDates from "./dates";
-import ManageDecorations from "./decorations";
 import ManageTimeSlots from "./timeslots";
-import AddBooking from "./addbooking";
 import CompletedBookings from "./completedbookings";
 import TodayBookings from "./todaybooking";
 import AuthGuard from "@/components/ui/AuthGuard";
+import UserQueries from "./userqueries";
+import Dashboard from "./dashboard"; // 👈 import your new dashboard
+
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSection] = useState<string>("dashboard");
@@ -32,25 +34,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const renderActiveSection = () => {
     switch (activeSection) {
       case "dashboard":
-        return <div>Welcome to the Admin Panel!</div>;
-      case "addBookings":
-        return <AddBooking />;
+  return <Dashboard setActiveSection={setActiveSection} />;
+
       case "todayBookings":
         return <TodayBookings />;
       case "bookings":
         return <ManageBookings />;
       case "completedBookings":
         return <CompletedBookings />;
+        case "userQueries":
+  return <UserQueries />;
+
       case "rooms":
         return <ManageRooms />;
       case "dates":
         return <ManageDates />;
-      case "decorations":
-        return <ManageDecorations />;
       case "timeSlots":
         return <ManageTimeSlots />;
-      default:
-        return <div>Welcome to the Admin Panel!</div>;
+        default:
+          return <Dashboard setActiveSection={setActiveSection} />;
+        
     }
   };
 
@@ -68,17 +71,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 Dashboard
               </button>
-              <button
-                onClick={() => setActiveSection("addBookings")}
-                className={`block text-sm ${activeSection === "addBookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
-              >
-                Add Bookings
-              </button>
+              
               <button
                 onClick={() => setActiveSection("todayBookings")}
                 className={`block text-sm ${activeSection === "todayBookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
               >
-                Today’s Bookings
+                Today's Bookings
               </button>
               <button
                 onClick={() => setActiveSection("bookings")}
@@ -86,6 +84,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 Manage Bookings
               </button>
+              <button
+  onClick={() => setActiveSection("userQueries")}
+  className={`block text-sm ${activeSection === "userQueries" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
+>
+  User Queries
+</button>
               <button
                 onClick={() => setActiveSection("completedBookings")}
                 className={`block text-sm ${activeSection === "completedBookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
@@ -104,12 +108,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 Manage Dates
               </button>
-              <button
-                onClick={() => setActiveSection("decorations")}
-                className={`block text-sm ${activeSection === "decorations" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
-              >
-                Manage Decorations
-              </button>
+              
               <button
                 onClick={() => setActiveSection("timeSlots")}
                 className={`block text-sm ${activeSection === "timeSlots" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}

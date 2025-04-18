@@ -50,7 +50,7 @@ export default function Home() {
     { title: 'Gifts', image: '/Images/gifts3.avif' },
     { title: 'Decorations', image: '/Images/decoration6.jpg' },
     { title: 'Cakes', image: '/Images/cakes5.webp' },
-    { title: 'Photoshoot', image: '/Images/photoshoot1.jpeg' },
+   /* { title: 'Photoshoot', image: '/Images/photoshoot1.jpeg' },*/
     { title: 'Surprise Events', image: '/Images/surprise.webp' },
     { title: 'Private Parties', image: '/Images/privatep.JPG' },
     { title: 'Anniversaries', image: '/Images/anniversary1.JPG' },
@@ -117,40 +117,36 @@ export default function Home() {
 
       
 
-      <section className="w-full bg-white py-10 px-4">
-        {/* <h2 className="text-4xl font-bold text-center mb-8">Our Services</h2> */}
-        <div className="overflow-hidden max-w-6xl mx-auto">
-          <div
-            className="flex transition-transform duration-700 ease-in-out"
-            style={{ transform: `translateX(-${currentIndex * 25}%)` }}
-          >
-            {services.concat(services).map((service, index) => (
-              <div key={index} className="w-1/4 px-2 flex-shrink-0">
-                <div className="rounded-xl overflow-hidden shadow-lg">
-                  <Image
-                    src={service.image}
-                    alt={service.title}
-                    width={400}
-                    height={300}
-                    className="object-cover w-full h-64"
-                  />
-                  <div className="text-center py-3 bg-gray-800 text-white font-semibold text-lg">
-                    {service.title}
-                  </div>
-                </div>
-              </div>
-            ))}
+<section className="w-full bg-white py-10 px-4">
+  <div className="max-w-6xl mx-auto">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      {services.map((service, index) => (
+        <div key={index} className="rounded-xl overflow-hidden shadow-lg">
+          <Image
+            src={service.image}
+            alt={service.title}
+            width={400}
+            height={300}
+            className="object-cover w-full h-44 sm:h-56 md:h-64"
+          />
+          <div className="text-center py-2 bg-gray-800 text-white font-semibold text-sm sm:text-base">
+            {service.title}
           </div>
         </div>
-      </section>
-      <section className="flex mt-2 justify-center w-full px-12 ">
-      <Link
-  href="/booking"
-  className="bg-red-600 text-white py-4 px-10 rounded-full hover:bg-red-800 transition duration-300 text-center"
->
-  Book Now
-</Link>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
+
+<section className="flex justify-center mt-6 w-full">
+  <Link
+    href="/booking"
+    className="bg-red-600 text-white py-3 px-8 rounded-full hover:bg-red-800 transition duration-300 text-center"
+  >
+    Book Now
+  </Link>
+</section>
+
 
       {/* Query Form and Map */}
       <section className="flex flex-col md:flex-row justify-between items-center w-full px-0 bg-gray-100 py-8">

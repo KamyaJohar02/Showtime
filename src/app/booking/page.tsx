@@ -185,10 +185,22 @@ bookedSnapshot.docs.forEach((doc) => {
             return (
               <div key={theater.id} className="border rounded-lg shadow-md p-4">
                 <Image
-                  src={theater.image}
-                  alt={theater.name}
-                  className="rounded-lg w-full h-48 object-cover mb-4"
-                />
+  src={
+    theater.image ||
+    (theater.name === "Sweet"
+      ? "/Images/Room1.jpg"
+      : theater.name === "Wonders"
+      ? "/Images/Room2.jpg"
+      : theater.name === "Galaxy"
+      ? "/Images/Room3.jpg"
+      : "/Images/Room1.jpg")
+  }
+  alt={theater.name}
+  width={400}
+  height={200}
+  className="rounded-lg w-full h-48 object-cover mb-4"
+/>
+
                 <h3 className="text-xl font-semibold mb-1">{theater.name}</h3>
                 <p className="text-red-500 text-sm mb-2">{availableSlots} Slots Available</p>
                 <ul className="text-sm text-gray-700 mb-2">
