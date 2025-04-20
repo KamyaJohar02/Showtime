@@ -188,11 +188,11 @@ bookedSnapshot.docs.forEach((doc) => {
   src={
     theater.image ||
     (theater.name === "Sweet"
-      ? "/Images/Room1.jpg"
+      ? "/Images/sweetroom.jpg"
       : theater.name === "Wonders"
-      ? "/Images/Room2.jpg"
+      ? "/Images/galaxyroom.jpg"
       : theater.name === "Galaxy"
-      ? "/Images/Room3.jpg"
+      ? "/Images/wondersroom.jpg"
       : "/Images/Room1.jpg")
   }
   alt={theater.name}

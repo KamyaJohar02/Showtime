@@ -9,8 +9,17 @@ import RoomCards from '@/components/rooms';
 import Link from 'next/link';
 import { db } from "@/firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
+import ClientLayout from "@/components/layouts/ClientLayout";
 
 export default function Home() {
+  return (
+    <ClientLayout>
+      <ActualHome />
+    </ClientLayout>
+  );
+}
+
+function ActualHome() {
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
@@ -50,14 +59,12 @@ export default function Home() {
     { title: 'Gifts', image: '/Images/gifts3.avif' },
     { title: 'Decorations', image: '/Images/decoration6.jpg' },
     { title: 'Cakes', image: '/Images/cakes5.webp' },
-   /* { title: 'Photoshoot', image: '/Images/photoshoot1.jpeg' },*/
     { title: 'Surprise Events', image: '/Images/surprise.webp' },
     { title: 'Private Parties', image: '/Images/privatep.JPG' },
     { title: 'Anniversaries', image: '/Images/anniversary1.JPG' },
     { title: 'Birthdays', image: '/Images/birthday3.JPG' },
     { title: 'Corporate Events', image: '/Images/corporate1.JPG' },
     { title: 'Engagements', image: '/Images/engagement.JPEG' },
-
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -89,66 +96,36 @@ export default function Home() {
         </h2>
       </section>
 
-      {/* <section className="w-full relative">
-        <div className="h-96 sm:h-screen w-full overflow-hidden relative bg-transparent">
-          {imagePaths.map((index, slideIndex) => (
-            <div
-              key={index}
-              className="absolute top-0 left-0 w-full h-full transition-transform duration-1000 ease-in-out"
-              style={{
-                transform: `translateX(${100 * (slideIndex - currentSlide)}%)`,
-              }}
-            >
-              <Image
-                src={`/Images/${index}.webp`}
-                alt={`Carousel Image ${index}`}
-                fill
-                className="w-full h-full object-cover brightness-50"
-              />
-            </div>
-          ))}
-          <div className="absolute top-16 left-8 right-12 w-full h-1/2 flex items-start justify-start">
-            <h2 className="text-yellow-400 text-7xl md:text-10xl font-[Great Vibes] italic text-left pl-2 pr-6 pt-4 leading-snug font-serif">
-              {displayedText}
-            </h2>
+      <section className="w-full bg-white py-10 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {services.map((service, index) => (
+              <div key={index} className="rounded-xl overflow-hidden shadow-lg">
+                <Image
+                  src={service.image}
+                  alt={service.title}
+                  width={400}
+                  height={300}
+                  className="object-cover w-full h-44 sm:h-56 md:h-64"
+                />
+                <div className="text-center py-2 bg-gray-800 text-white font-semibold text-sm sm:text-base">
+                  {service.title}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </section> */}
+      </section>
 
-      
+      <section className="flex justify-center mt-6 w-full">
+        <Link
+          href="/booking"
+          className="bg-red-600 text-white py-3 px-8 rounded-full hover:bg-red-800 transition duration-300 text-center"
+        >
+          Book Now
+        </Link>
+      </section>
 
-<section className="w-full bg-white py-10 px-4">
-  <div className="max-w-6xl mx-auto">
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-      {services.map((service, index) => (
-        <div key={index} className="rounded-xl overflow-hidden shadow-lg">
-          <Image
-            src={service.image}
-            alt={service.title}
-            width={400}
-            height={300}
-            className="object-cover w-full h-44 sm:h-56 md:h-64"
-          />
-          <div className="text-center py-2 bg-gray-800 text-white font-semibold text-sm sm:text-base">
-            {service.title}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
-
-<section className="flex justify-center mt-6 w-full">
-  <Link
-    href="/booking"
-    className="bg-red-600 text-white py-3 px-8 rounded-full hover:bg-red-800 transition duration-300 text-center"
-  >
-    Book Now
-  </Link>
-</section>
-
-
-      {/* Query Form and Map */}
       <section className="flex flex-col md:flex-row justify-between items-center w-full px-0 bg-gray-100 py-8">
         <div className="w-full md:w-1/2 px-6">
           <h2 className="text-2xl font-bold text-red-600 mb-4">
@@ -160,7 +137,6 @@ export default function Home() {
               e.preventDefault();
               const form = e.target as HTMLFormElement;
               const formData = new FormData(form);
-
               const name = formData.get("name") as string;
               const mobile = formData.get("mobile") as string;
               const query = formData.get("query") as string;
@@ -176,7 +152,6 @@ export default function Home() {
                   mobile,
                   query,
                 });
-
                 alert("Your query has been submitted successfully!");
                 console.log("Document written with ID: ", docRef.id);
               } catch (error) {
@@ -205,7 +180,7 @@ export default function Home() {
 
         <div className="w-full md:w-1/2 px-6 mt-8 md:mt-0">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3493.2331728145536!2d77.3161935!3d28.5971406!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ced61040f1983%3A0x16f8ea0e1f3e8c91!2sShowTime%20Cinema!5e0!3m2!1sen!2sin!4v1689582367082!5m2!1sen!2sin"
+            src="https://www.google.com/maps/embed?..."
             width="100%"
             height="300"
             style={{ border: 0 }}

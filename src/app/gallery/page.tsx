@@ -4,9 +4,15 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 
 const images = [
-  "/Images/Room1.jpg",
-  "/Images/Room2.jpg",
-  "/Images/Room3.jpg",
+  "/Images/sweet1.jpg",
+  "/Images/sweet2.jpg",
+  "/Images/sweet3.jpg",
+  "/Images/galaxy1.jpg",
+  "/Images/galaxy2.jpg",
+  "/Images/galaxy3.jpg",
+  "/Images/galaxy1.jpg",
+  "/Images/galaxy2.jpg",
+  "/Images/galaxy3.jpg",
 ];
 
 const GalleryPage = () => {

@@ -12,11 +12,11 @@ const Room1Page: React.FC = () => {
         {/* Room Image Container */}
         <div className="w-full max-w-5xl mb-6 sm:mb-8 overflow-hidden rounded-lg shadow-lg relative">
           <Image
-            src="/Images/Room1.jpg" // Replace with the actual room image path
+            src="/Images/sweetroom.jpg" // Replace with the actual room image path
             alt="Luxurious Private Suite"
             layout="responsive"
-            width={1000}
-            height={600}
+            width={500}
+            height={300}
             className="rounded-lg"
           />
           {/* Dark overlay */}

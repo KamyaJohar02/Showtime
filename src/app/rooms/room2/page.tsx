@@ -11,7 +11,7 @@ const Room2Page: React.FC = () => {
         {/* Room Image Container */}
         <div className="w-full max-w-5xl mb-6 sm:mb-8 overflow-hidden rounded-lg shadow-lg relative">
           <Image
-            src="/Images/Room2.jpg" // Replace with the actual room image path
+            src="/Images/galaxyroom.jpg" // Replace with the actual room image path
             alt="Cozy Family Room"
             layout="responsive"
             width={1000}
