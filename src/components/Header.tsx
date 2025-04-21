@@ -5,14 +5,14 @@ import Link from "next/link";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Dialog, Popover } from "@headlessui/react";
 import Image from "next/image";
-import { useUser } from "@/components/context/UserContext";
+import { useAuth } from "@/components/context/AuthContext";
 import { auth } from "@/firebaseConfig";
 import { signOut } from "firebase/auth";
 
 function Header() {
   const router = useRouter();
-  const { user } = useUser();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {

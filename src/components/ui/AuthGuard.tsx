@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useUser } from "@/components/context/UserContext"; // Replace with your actual context
+import { useAuth } from "@/components/context/AuthContext";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -11,21 +11,22 @@ interface AuthGuardProps {
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useUser(); // Get the user state from context
+  const { user, isAdmin, loading } = useAuth();
 
   useEffect(() => {
+  if (!loading) {
     if (!user) {
-      // Handle redirection for /admin
       if (pathname === "/admin") {
-        router.push("/login"); // No redirect query parameter
-        return;
+        router.push("/login");
+      } else {
+        router.push(`/login?redirect=${pathname}`);
       }
-
-      // Handle redirection for other paths (e.g., /booking)
-      const redirectPath = encodeURIComponent(pathname);
-      router.push(`/login?redirect=${redirectPath}`);
+    } else if (pathname === "/admin" && !isAdmin) {
+      router.push("/not-authorized");
     }
-  }, [user, pathname, router]);
+  }
+}, [user, isAdmin, loading, pathname, router]);
+
 
   if (!user) {
     return <div>Loading...</div>; // Optional loading indicator

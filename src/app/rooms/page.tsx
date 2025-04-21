@@ -52,9 +52,9 @@ const RoomsPage: React.FC = () => {
             <Image
               src={room.imageSrc}
               alt={room.title}
-              width={700}
-              height={500}
-              className="object-cover w-full h-full"
+              width={500}
+              height={350}
+              className="object-cover w-full h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px]"
             />
           </div>
 

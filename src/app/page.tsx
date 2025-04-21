@@ -1,22 +1,17 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Trending from '@/components/trending';
-import TopPage from '@/components/toppage';
-import RoomCards from '@/components/rooms';
-import Link from 'next/link';
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Trending from "@/components/trending";
+import TopPage from "@/components/toppage";
+import RoomCards from "@/components/rooms";
+import Link from "next/link";
 import { db } from "@/firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
-import ClientLayout from "@/components/layouts/ClientLayout";
 
 export default function Home() {
-  return (
-    <ClientLayout>
-      <ActualHome />
-    </ClientLayout>
-  );
+  return <ActualHome />;
 }
 
 function ActualHome() {

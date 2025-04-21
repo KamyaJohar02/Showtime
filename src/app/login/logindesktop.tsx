@@ -683,6 +683,7 @@ const handleSendOtp = async () => {
         <p className="text-sm text-red-500 mt-1">Passwords do not match.</p>
       )}
   </div>
+  
 
   <button
     onClick={handleSignup}
@@ -722,6 +723,8 @@ const handleSendOtp = async () => {
           )}
         </div>
       </div>
+      
+      
 
       {showResetPassword && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

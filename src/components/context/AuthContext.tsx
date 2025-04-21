@@ -1,32 +1,26 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { auth, db } from "@/firebaseConfig";
+import { createContext, useState, useEffect, useContext } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
+import { auth, db } from "@/firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
-import { createContext, useContext, useEffect, useState } from "react";
 
-// ✅ Updated to check 'adminusers' collection
-
-// Auth context type definition
-type AuthContextType = {
+type UserContextType = {
   user: User | null;
   isAdmin: boolean;
   loading: boolean;
 };
 
-// Create context
-const AuthContext = createContext<AuthContextType>({
+const UserContext = createContext<UserContextType>({
   user: null,
   isAdmin: false,
   loading: true,
 });
 
-// AuthProvider component
-function AuthProvider({ children }: { children: React.ReactNode }) {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -35,10 +29,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (currentUser) {
         try {
-          // 🔄 Switch to reading from 'adminusers' collection
           const adminRef = doc(db, "adminusers", currentUser.uid);
           const adminDoc = await getDoc(adminRef);
-
           setIsAdmin(adminDoc.exists());
         } catch (error) {
           console.error("Error checking admin role:", error);
@@ -55,13 +47,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, loading }}>
+    <UserContext.Provider value={{ user, isAdmin, loading }}>
       {children}
-    </AuthContext.Provider>
+    </UserContext.Provider>
   );
-}
+};
 
-export default AuthProvider;
-
-// Hook to use auth context
-export const useAuth = () => useContext(AuthContext);
+// ✅ Updated hook with correct typing
+export const useAuth = () => useContext(UserContext);

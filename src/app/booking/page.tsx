@@ -241,6 +241,12 @@ bookedSnapshot.docs.forEach((doc) => {
       </main>
 
       <footer className="mt-10 text-center text-sm text-gray-600 py-4">
+      <button
+    onClick={() => router.push("/")}
+    className="bg-gray-400 text-black px-6 py-2 rounded-full shadow-sm mr-4 hover:bg-green-400"
+  >
+    ← Back to Home
+  </button>
         {selectedTheaterId && selectedSlot && (
           <button
             onClick={handleNext}
