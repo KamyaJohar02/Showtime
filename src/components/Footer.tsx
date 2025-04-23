@@ -36,8 +36,21 @@ const Footer = () => {
           <div className="w-full sm:w-1/4 mb-6 mt-2">
             <h5 className="font-bold mb-4">Legal</h5>
             <ul>
-              <li><a href="/faq" className="text-gray-400 hover:text-white">Refund Policy</a></li>
-              <li><a href="/privacy-policy" className="text-gray-400 hover:text-white">Terms and Conditions</a></li>
+              <li>
+                <a href="/privacy-policy" className="text-gray-400 hover:text-white">
+                  Refund Policy
+                </a>
+              </li>
+              <li>
+                <a href="/privacy-policy" className="text-gray-400 hover:text-white">
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a href="/privacy-policy" className="text-gray-400 hover:text-white">
+                  Terms and Conditions
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -68,9 +81,14 @@ const Footer = () => {
         <div className="mt-8 text-center text-gray-500">
           Copyright ©2024 Franchise LLP - Private Movie Theaters - All rights reserved
         </div>
+
+        {/* Powered by Razorpay */}
+        <div className="mt-2 text-center text-white font-semibold">
+          ⚡ Powered by Razorpay
+        </div>
       </div>
     </footer>
-  );``
+  );
 };
 
 export default Footer;

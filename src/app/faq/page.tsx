@@ -1,14 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 
 const faqs = [
-    {
-        question: "What is the Refund Policy?",
-        answer:
-          "Refunds are provided only if cancellations are made at least 24 hours prior to the booking time. Please contact us for more details",
-      },
+  {
+    question: "What is the Refund Policy?",
+    answer: (
+      <>
+        <p>
+          Cancellations made <strong>at least 24 hours</strong> before the event are eligible for a full refund. 
+          Cancellations made within 24 hours of the booking time are non-refundable.
+          Refunds (if applicable) will be processed within <strong>7 business days</strong> to the original payment method.
+        </p>
+        <p className="mt-2 text-sm">
+          For full details, see our{" "}
+          <Link href="/privacy-policy" className="text-blue-600 underline">
+            Refund & Privacy Policy
+          </Link>
+          .
+        </p>
+      </>
+    ),
+  },
   {
     question: "Which movies or shows can we watch? Can we play our own videos?",
     answer:

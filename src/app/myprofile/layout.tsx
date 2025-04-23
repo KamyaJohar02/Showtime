@@ -5,6 +5,8 @@ import { signOut } from "firebase/auth";
 import { auth, db } from "@/firebaseConfig";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+
 
 interface Booking {
   id: string;
@@ -25,6 +27,10 @@ const MyProfileLayout = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const router = useRouter();
+
+  const [showCancelPopup, setShowCancelPopup] = useState(false);
+const [cancelledPaymentId, setCancelledPaymentId] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -77,7 +83,7 @@ const MyProfileLayout = () => {
 
   const handleCancel = async (booking: Booking) => {
     if (!isCancellable(booking)) return;
-
+  
     try {
       if (booking.razorpayPaymentId) {
         const refundRes = await fetch("/api/razorpay/refund", {
@@ -85,17 +91,17 @@ const MyProfileLayout = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ paymentId: booking.razorpayPaymentId }),
         });
-
+  
         const refundData = await refundRes.json();
-
+  
         if (!refundData.success) {
           alert("Failed to initiate refund. Booking not cancelled.");
           return;
         }
       }
-
+  
       await deleteDoc(doc(db, "bookings", booking.id));
-
+  
       const bookedQuery = query(
         collection(db, "booked"),
         where("date", "==", booking.date),
@@ -106,14 +112,16 @@ const MyProfileLayout = () => {
       snapshot.forEach(async (docSnap) => {
         await deleteDoc(doc(db, "booked", docSnap.id));
       });
-
+  
       setBookings((prev) => prev.filter((b) => b.id !== booking.id));
-      alert("Booking cancelled and refund initiated.");
+      setCancelledPaymentId(booking.razorpayPaymentId || null); // ✅ save the payment ID
+      setShowCancelPopup(true); // ✅ show the animated popup
     } catch (error) {
       console.error("Cancellation failed:", error);
       alert("Failed to cancel booking.");
     }
   };
+  
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -184,9 +192,19 @@ const MyProfileLayout = () => {
 
         {activeTab === "bookings" && (
           <div>
-            <h1 className="text-3xl font-bold mb-4">My Bookings</h1>
-            {bookings.length === 0 ? (
-              <p>No bookings found.</p>
+            <h1 className="text-2xl font-semibold mt-6 mb-1">My Bookings</h1>
+<p className="text-sm text-gray-600 mb-4">
+  For cancellations and refunds, please review our{" "}
+  <a
+    href="/privacy-policy"
+    className="text-blue-600 underline hover:text-blue-800"
+    target="_blank"
+  >
+    Refund Policy
+  </a>.
+</p>
+{bookings.length === 0 ? (
+  <p>No bookings found.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-gray-300 mt-4">
@@ -265,6 +283,42 @@ const MyProfileLayout = () => {
             </div>
           </div>
         )}
+        {showCancelPopup && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full animate-fade-in scale-95">
+    <Image
+  src="/Images/tick.png"
+  alt="Booking Cancelled"
+  width={80}
+  height={80}
+  className="mx-auto mb-4"
+/>
+      <h2 className="text-xl font-semibold text-center mb-2">Booking Cancelled</h2>
+      <p className="text-center text-sm text-gray-700 mb-1">
+        Your booking has been successfully cancelled.
+      </p>
+      <p className="text-center text-xs text-gray-600 mb-3">
+        Refund will be processed within 7 business days to the original payment method.
+      </p>
+      {cancelledPaymentId && (
+        <p className="text-center text-xs text-gray-500 mb-4">
+          Payment ID: <strong>{cancelledPaymentId}</strong>
+        </p>
+      )}
+      <div className="flex justify-center">
+        <button
+          className="bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-6 rounded"
+          onClick={() => setShowCancelPopup(false)}
+        >
+          Okay
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+        
       </main>
     </div>
   );

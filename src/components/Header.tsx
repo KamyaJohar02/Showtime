@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Dialog, Popover } from "@headlessui/react";
+import { Dialog,DialogPanel, Popover } from "@headlessui/react";
 import Image from "next/image";
 import { useAuth } from "@/components/context/AuthContext";
 import { auth } from "@/firebaseConfig";
@@ -34,17 +34,20 @@ function Header() {
     >
       <nav className="mx-auto flex max-w-4xl items-center justify-between p-6 lg:px-8">
         {/* Logo */}
-        <div className="flex lg:flex-1">
-          <Link href="/" className="-m-1.5 p-1.5">
-            <span className="sr-only">Showtime</span>
-            <Image
-              src="/Images/logo.png"
-              alt="Showtime Logo"
-              width={200}
-              height={100}
-            />
-          </Link>
-        </div>
+<div className="flex lg:flex-1">
+  <Link href="/" passHref className="-m-1.5 p-1.5">
+    <span className="sr-only">Showtime</span>
+    <Image
+      src="/Images/logo.png"
+      alt="Showtime Logo"
+      width={200}
+      height={100}
+      className="cursor-pointer"
+      priority
+    />
+  </Link>
+</div>
+
 
         {/* Hamburger */}
         <div className="flex lg:hidden">
@@ -105,25 +108,28 @@ function Header() {
       {/* Mobile Nav */}
       <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
         <div className="fixed inset-0 z-10" />
-        <Dialog.Panel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="-m-1.5 p-1.5">
-              <span className="sr-only">Showtime</span>
-              <Image
-                src="/Images/logo.png"
-                alt="Showtime Logo"
-                width={100}
-                height={50}
-              />
-            </Link>
-            <button
-              type="button"
-              className="-m-2.5 rounded-md p-2.5 text-black"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
+        <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+        <div className="flex items-center justify-between">
+  <Link href="/" passHref className="-m-1.5 p-1.5">
+    <span className="sr-only">Showtime</span>
+    <Image
+      src="/Images/logo.png"
+      alt="Showtime Logo"
+      width={100}
+      height={50}
+      className="cursor-pointer"
+      priority
+    />
+  </Link>
+  <button
+    type="button"
+    className="-m-2.5 rounded-md p-2.5 text-black"
+    onClick={() => setMobileMenuOpen(false)}
+  >
+    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+  </button>
+</div>
+
 
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
@@ -166,7 +172,7 @@ function Header() {
               </div>
             </div>
           </div>
-        </Dialog.Panel>
+        </DialogPanel>
       </Dialog>
     </header>
   );

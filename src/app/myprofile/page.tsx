@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { auth, db } from "@/firebaseConfig";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+
 
 interface Booking {
   id: string;
@@ -30,6 +32,10 @@ const MyProfilePage = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const router = useRouter();
+
+  const [showCancelPopup, setShowCancelPopup] = useState(false);
+const [cancelledPaymentId, setCancelledPaymentId] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -87,7 +93,8 @@ const MyProfilePage = () => {
     try {
       await deleteDoc(doc(db, "bookings", booking.id));
       setBookings((prev) => prev.filter((b) => b.id !== booking.id));
-      alert("Booking cancelled successfully.");
+      setCancelledPaymentId(booking.razorpayPaymentId || null); // ✅ Set payment ID if available
+    setShowCancelPopup(true); // ✅ Show the cancellation popup
     } catch (err) {
       console.error("Failed to cancel booking:", err);
       alert("Failed to cancel booking.");
@@ -103,9 +110,19 @@ const MyProfilePage = () => {
         <h1 className="text-3xl font-semibold mb-4">Welcome, {userDetails.name}</h1>
         <p><strong>Mobile:</strong> {userDetails.mobile}</p>
 
-        <h2 className="text-2xl font-semibold mt-6">My Bookings</h2>
-        {bookings.length === 0 ? (
-          <p>No bookings found.</p>
+        <h2 className="text-2xl font-semibold mt-6 mb-1">My Bookings</h2>
+<p className="text-sm text-gray-600 mb-4">
+  For cancellations and refunds, please review our{" "}
+  <a
+    href="/privacy-policy"
+    className="text-blue-600 underline hover:text-blue-800"
+    target="_blank"
+  >
+    Refund Policy
+  </a>.
+</p>
+{bookings.length === 0 ? (
+  <p>No bookings found.</p>
         ) : (
           <table className="w-full border-collapse border border-gray-300 mt-4">
             <thead>
@@ -191,6 +208,41 @@ const MyProfilePage = () => {
           </div>
         </div>
       )}
+      {showCancelPopup && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full animate-fade-in scale-95">
+    <Image
+  src="/Images/tick.png"
+  alt="Booking Cancelled"
+  width={80}
+  height={80}
+  className="mx-auto mb-4"
+/>
+
+      <h2 className="text-xl font-semibold text-center mb-2">Booking Cancelled</h2>
+      <p className="text-center text-sm text-gray-700 mb-1">
+        Your booking has been successfully cancelled.
+      </p>
+      <p className="text-center text-xs text-gray-600 mb-3">
+        Refund will be processed within 7 business days to the original payment method.
+      </p>
+      {cancelledPaymentId && (
+        <p className="text-center text-xs text-gray-500 mb-4">
+          Payment ID: <strong>{cancelledPaymentId}</strong>
+        </p>
+      )}
+      <div className="flex justify-center">
+        <button
+          className="bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-6 rounded"
+          onClick={() => setShowCancelPopup(false)}
+        >
+          Okay
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </>
   );
 };

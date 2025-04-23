@@ -19,6 +19,8 @@ function ActualHome() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [letterIndex, setLetterIndex] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
+  const [paymentId, setPaymentId] = useState("");
 
   const imagePaths = [5, 14, 3, 4, 13];
   const totalSlides = imagePaths.length;
@@ -47,6 +49,25 @@ function ActualHome() {
     }
   }, [letterIndex]);
 
+  useEffect(() => {
+    const confirmed = localStorage.getItem("bookingConfirmed");
+    const paymentId = localStorage.getItem("paymentId");
+  
+    if (confirmed === "true") {
+      setShowConfirmation(true);
+      setTimeout(() => {
+        localStorage.removeItem("bookingConfirmed");
+      }, 1000);
+    }
+  
+    if (paymentId) {
+      setPaymentId(paymentId);
+      localStorage.removeItem("paymentId");
+    }
+  }, []);
+  
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
   const services = [
     { title: 'Private Screening', image: '/Images/screening7.jpg' },
     { title: 'Snacks And Beverages', image: '/Images/snacks4.jpg' },
@@ -73,6 +94,43 @@ function ActualHome() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-0">
+      {showConfirmation && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full animate-fade-in">
+      <Image
+        src="/Images/tick.png"
+        alt="Booking Confirmed"
+        width={80}
+        height={80}
+        className="mx-auto mb-4"
+      />
+      <h2 className="text-xl font-semibold text-center mb-2">Booking Confirmed</h2>
+      <p className="text-center text-sm text-gray-700 mb-2">
+        Your booking has been successfully completed!
+      </p>
+      {paymentId && (
+        <p className="text-center text-xs text-gray-500 mb-4">
+          Payment ID: <strong>{paymentId}</strong>
+        </p>
+      )}
+      <div className="flex justify-center gap-3">
+        <button
+          className="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-1 px-4 rounded"
+          onClick={() => setShowConfirmation(false)}
+        >
+          Okay
+        </button>
+        <button
+          className="bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-4 rounded"
+          onClick={() => router.push("/myprofile")}
+        >
+          Go to My Bookings
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       <section className="w-full mb-10">
         <TopPage />
       </section>

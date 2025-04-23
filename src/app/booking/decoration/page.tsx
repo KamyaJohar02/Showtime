@@ -153,13 +153,16 @@ const DecorationPage = () => {
               await addDoc(collection(db, "bookings"), bookingWithPaymentId);
               await addDoc(collection(db, "booked"), bookedData);
           
-              alert("Payment successful and booking saved!");
-              router.push("/");
-            } catch (err) {
-              console.error("Firestore save failed after payment:", err);
-              alert("Payment succeeded but booking save failed.");
-            }
-          },
+              // ✅ Show confirmation popup on homepage
+    localStorage.setItem("bookingConfirmed", "true");
+    localStorage.setItem("paymentId", razorpay_payment_id);
+
+    router.push("/"); // Redirect to home
+  } catch (err) {
+    console.error("Firestore save failed after payment:", err);
+    alert("Payment succeeded but booking save failed.");
+  }
+},
           prefill: {
             name,
             email,
