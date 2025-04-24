@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { db } from "@/firebaseConfig";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 import Razorpay from "razorpay";
 
 const extraDecorations = [
@@ -46,6 +46,11 @@ const DecorationPage = () => {
   const [nameToInclude, setNameToInclude] = useState("");
   const [displayDate, setDisplayDate] = useState("");
 
+  const [couponCode, setCouponCode] = useState("");
+const [couponApplied, setCouponApplied] = useState(false);
+const [discountPercent, setDiscountPercent] = useState(0);
+const [couponError, setCouponError] = useState("");
+
   const router = useRouter();
 
   useEffect(() => {
@@ -84,9 +89,47 @@ const DecorationPage = () => {
   const cakeCost = selectedCake?.price || 0;
   const theaterCost = selectedTheater?.price || 0;
   const subtotal = theaterCost + cakeCost + extrasTotal;
+  const discountedTotal = couponApplied
+  ? Math.round(subtotal - (subtotal * discountPercent) / 100)
+  : subtotal;
+
   const advance = 500;
   const balance = subtotal - advance;
 
+
+
+  const handleApplyCoupon = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "coupons"));
+      let matched = false;
+  
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.name === couponCode.trim().toUpperCase()) {
+          setDiscountPercent(Number(data.percentageDiscount));
+          setCouponApplied(true);
+          setCouponError("");
+          matched = true;
+        }
+      });
+  
+      if (!matched) {
+        setCouponError("Sorry, the code is invalid.");
+      }
+    } catch (err) {
+      console.error("Failed to apply coupon:", err);
+      setCouponError("Something went wrong. Try again.");
+    }
+  };
+  
+  const handleRemoveCoupon = () => {
+    setCouponApplied(false);
+    setDiscountPercent(0);
+    setCouponCode("");
+    setCouponError("");
+  };
+    
+  
   const handlePaymentAndBooking = async () => {
     const decorations = selectedExtras.map((item) => item.name);
     const cakeName = selectedCake?.name || "";
@@ -251,7 +294,7 @@ const DecorationPage = () => {
           {selectedExtras.map((item) => (
             <div key={item.name} className="flex justify-between"><span>{item.name}</span><span>₹ {item.price}</span></div>
           ))}
-          <div className="flex justify-between border-t mt-2 pt-2 font-medium"><span>Subtotal</span><span>₹ {subtotal}</span></div>
+          <div className="flex justify-between border-t mt-2 pt-2 font-medium"><span>Subtotal</span><span>₹ {discountedTotal}</span></div>
           <div className="mt-4 font-semibold">Advance amount payable</div>
           <div className="flex justify-between"><span>₹ {advance}</span></div>
           <div className="flex justify-between text-xs text-gray-500"><span>Balance amount</span><span>₹ {balance}</span></div>
@@ -264,6 +307,45 @@ const DecorationPage = () => {
             <p><strong>Occasion:</strong> {occasion}</p>
             <p><strong>Include Name:</strong> {nameToInclude}</p>
             <p><strong>Date:</strong> {displayDate}</p>
+          {/* Coupon Input */}
+          <div className="mt-4">
+  <label className="block font-bold mb-1">Apply Coupon</label>
+  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+    <input
+      type="text"
+      value={couponCode}
+      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+      placeholder="Enter your coupon code"
+      className="px-4 py-2 rounded-md border border-gray-300 w-full sm:w-auto text-sm focus:outline-none focus:ring-2 focus:ring-red-500 uppercase"
+    />
+    {!couponApplied ? (
+      
+      <button
+        onClick={handleApplyCoupon}
+        className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
+      >
+        Apply
+      </button>
+    ) : (
+      <button
+        onClick={handleRemoveCoupon}
+        className="px-4 py-2 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600 transition"
+      >
+        Remove
+      </button>
+    )}
+  </div>
+  {couponError && (
+    <p className="text-sm text-red-500 mt-1">{couponError}</p>
+  )}
+  {couponApplied && (
+  <p className="text-xs text-green-600 mt-2 italic">
+    NOTE: Prices have been reduced
+  </p>
+)}
+</div>
+
+
 
           </div>
         </div>
