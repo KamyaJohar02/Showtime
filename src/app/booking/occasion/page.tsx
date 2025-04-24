@@ -63,7 +63,7 @@ const OccasionPage = () => {
     const theaterCost = selectedTheater?.price || 0;
     const cakeCost = selectedCake?.price || 0;
     const total = theaterCost + cakeCost;
-    const advance = 750;
+    const advance = 500;
     const due = total - advance;
 
     return (

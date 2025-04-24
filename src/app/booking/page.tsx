@@ -32,10 +32,12 @@ interface TimeSlot {
   isBooked?: boolean;
 }
 
+
+
 const roomPrices: Record<string, number> = {
-  "Sweet": 1099,
-  "Wonders": 1699,
-  "Galaxy": 2149,
+  "Sweet": 1999,
+  "Wonder": 2199,
+  "Galaxy": 2499,
 };
 
 const Bookingx = () => {
@@ -49,6 +51,8 @@ const Bookingx = () => {
 
   const router = useRouter();
   const today = new Date();
+  const isOfferActive = true; // 🔁 Change to false later to remove offer
+
 
   useEffect(() => {
     const fetchDisabledDates = async () => {
@@ -72,46 +76,48 @@ const Bookingx = () => {
           ...doc.data(),
         })) as Theater[];
         setTheaters(fetchedTheaters);
-
+  
         if (!selectedDate) return;
-const formattedDate = selectedDate.toLocaleDateString("en-CA"); // Correctly formats as YYYY-MM-DD in local time
-
+  
+        const formattedDate = selectedDate.toLocaleDateString("en-CA");
+  
         const bookedSnapshot = await getDocs(
           query(collection(db, "booked"), where("date", "==", formattedDate))
         );
         const bookedMap: Record<string, Set<string>> = {};
-bookedSnapshot.docs.forEach((doc) => {
-  const data = doc.data();
-  const roomName = (data.room as string)?.toLowerCase();
-  if (!bookedMap[roomName]) bookedMap[roomName] = new Set();
-  bookedMap[roomName].add(data.timeSlot);
-});
-
-        const timeSlotSnapshot = await getDocs(collection(db, "timeSlots"));
-        const baseSlots: TimeSlot[] = timeSlotSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          name: doc.data().name,
-          time: doc.data().time,
-          availability: doc.data().availability,
-        }));
-
+        bookedSnapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          const roomName = (data.room as string)?.toLowerCase();
+          if (!bookedMap[roomName]) bookedMap[roomName] = new Set();
+          bookedMap[roomName].add(data.timeSlot);
+        });
+  
         const slotMap: Record<string, TimeSlot[]> = {};
         for (const theater of fetchedTheaters) {
-          const bookedSlots = bookedMap[theater.name.toLowerCase()] || new Set();
-          slotMap[theater.id] = baseSlots.map((slot) => ({
-            ...slot,
-            isBooked: !slot.availability || bookedSlots.has(slot.time),
+          // 🔄 Fetch timeSlots from subcollection of each room
+          const timeSlotSnapshot = await getDocs(collection(db, "rooms", theater.id, "timeSlots"));
+  
+          const roomSlots: TimeSlot[] = timeSlotSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            name: doc.data().name,
+            time: doc.data().time,
+            availability: doc.data().availability,
+            isBooked: !doc.data().availability ||
+              (bookedMap[theater.name.toLowerCase()]?.has(doc.data().time) ?? false),
           }));
+  
+          slotMap[theater.id] = roomSlots; // ✅ map per-theater subcollection
         }
-
+  
         setSlotsMap(slotMap);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
+  
     fetchTheatersAndSlots();
   }, [selectedDate]);
+  
 
   const handleNext = () => {
     if (selectedTheaterId && selectedSlot && selectedDate) {
@@ -121,7 +127,11 @@ bookedSnapshot.docs.forEach((doc) => {
       );
 
       if (selectedTheater && selectedSlotObj) {
-        const finalPrice = roomPrices[selectedTheater.name] || selectedTheater.price;
+        const originalPrice = roomPrices[selectedTheater.name] || selectedTheater.price;
+const discountedPrice = selectedTheater.name === "Sweet" ? 999 :
+                        selectedTheater.name === "Wonder" ? 999 :
+                        selectedTheater.name === "Galaxy" ? 999 : originalPrice;
+const finalPrice = isOfferActive ? discountedPrice : originalPrice;
 
         const fullTheaterData = {
           id: selectedTheater.id,
@@ -150,15 +160,29 @@ bookedSnapshot.docs.forEach((doc) => {
       <header className="p-6">
         <h2 className="text-2xl font-bold mb-2">Select a Date</h2>
         <button
-          onClick={() => setShowCalendar(!showCalendar)}
-          className="border px-4 py-2 rounded shadow bg-white hover:bg-gray-100"
-        >
-          {selectedDate?.toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          }) || "Pick a date"}
-        </button>
+  onClick={() => setShowCalendar(!showCalendar)}
+  className="border px-4 py-2 rounded shadow bg-white hover:bg-gray-100 flex items-center gap-2"
+>
+  <span>
+    {selectedDate?.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }) || "Pick a date"}
+  </span>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={`h-4 w-4 transition-transform duration-200 ${
+      showCalendar ? "rotate-180" : "rotate-0"
+    }`}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+  </svg>
+</button>
+
         {showCalendar && (
           <div className="mt-4">
             <DayPicker
@@ -189,7 +213,7 @@ bookedSnapshot.docs.forEach((doc) => {
     theater.image ||
     (theater.name === "Sweet"
       ? "/Images/sweetroom.jpg"
-      : theater.name === "Wonders"
+      : theater.name === "Wonder"
       ? "/Images/galaxyroom.jpg"
       : theater.name === "Galaxy"
       ? "/Images/wondersroom.jpg"
@@ -233,7 +257,32 @@ bookedSnapshot.docs.forEach((doc) => {
                     ))}
                   </div>
                 </div>
-                <p className="font-semibold text-lg mt-2">₹{displayPrice}</p>
+                <div className="mt-2 text-lg font-semibold">
+  {isOfferActive ? (
+    theater.name === "Sweet" ? (
+      <p>
+        <span className="line-through text-gray-500 mr-2">₹1999</span>
+        <span className="text-red-600 font-bold">₹999</span>
+      </p>
+    ) : theater.name === "Galaxy" ? (
+      <p>
+        <span className="line-through text-gray-500 mr-2">₹2999</span>
+        <span className="text-red-600 font-bold">₹999</span>
+      </p>
+    ) : theater.name === "Wonder" ? (
+      <p>
+        <span className="line-through text-gray-500 mr-2">₹2699</span>
+        <span className="text-red-600 font-bold">₹999</span>
+      </p>
+    ) : (
+      <p>₹{displayPrice}</p>
+    )
+  ) : (
+    // 👇 Use this when offer is turned off
+    <p>₹{displayPrice}</p>
+  )}
+</div>
+
               </div>
             );
           })}

@@ -84,7 +84,7 @@ const DecorationPage = () => {
   const cakeCost = selectedCake?.price || 0;
   const theaterCost = selectedTheater?.price || 0;
   const subtotal = theaterCost + cakeCost + extrasTotal;
-  const advance = 750;
+  const advance = 500;
   const balance = subtotal - advance;
 
   const handlePaymentAndBooking = async () => {

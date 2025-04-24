@@ -55,9 +55,10 @@ const TopPage: React.FC = () => {
       {/* 🔥 Gradient Marquee Ribbon */}
       <div className="w-full bg-gradient-to-r from-red-500 via-orange-400 to-yellow-300 overflow-hidden whitespace-nowrap py-2 z-50">
         <div className="inline-block animate-marquee text-black font-bold text-sm sm:text-base px-4">
-          HURRY UP !!! BOOK YOUR SLOTS NOW DISCOUNT GOING SOON —
-          HURRY UP !!! BOOK YOUR SLOTS NOW DISCOUNT GOING SOON —
-          HURRY UP !!! BOOK YOUR SLOTS NOW DISCOUNT GOING SOON —
+        ⏰ Hurry! Exclusive Discount Ending Soon — Book Now! —
+          Use code NEW10 to avail 10% Discount on your bookings —
+          ⏰ Hurry! Exclusive Discount Ending Soon — Book Now! —
+          Use code NEW10 to avail 10% Discount on your bookings
         </div>
       </div>
 

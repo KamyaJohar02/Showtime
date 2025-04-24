@@ -21,7 +21,7 @@ const Room3Page: React.FC = () => {
           {/* Dark overlay */}
   <div className="absolute inset-0 bg-black bg-opacity-20 rounded-lg"></div>
           <div className="absolute bottom-3 sm:bottom-5 left-4 sm:left-5 text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-            WONDERS
+            WONDER
           </div>
         </div>
 
@@ -31,7 +31,7 @@ const Room3Page: React.FC = () => {
             A Professional Setting for Memorable Events
           </h2>
           <p className="text-base sm:text-lg text-gray-300 text-center mb-6 sm:mb-10">
-            Designed for success, WONDERS is equipped with the latest technology and flexible seating for all your event needs.
+            Designed for success, WONDER is equipped with the latest technology and flexible seating for all your event needs.
           </p>
 
           {/* Amenities Section */}

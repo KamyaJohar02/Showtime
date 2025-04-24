@@ -19,9 +19,9 @@ const FormPage = () => {
     string,
     { maxPeople: number; extraChargeStartsAfter: number; extraChargePerPerson: number }
   > = {
-    Sweet: { maxPeople: 6, extraChargeStartsAfter: 3, extraChargePerPerson: 500 },
-    Galaxy: { maxPeople: 14, extraChargeStartsAfter: 4, extraChargePerPerson: 500 },
-    Wonders: { maxPeople: 11, extraChargeStartsAfter: 4, extraChargePerPerson: 500 },
+    Sweet: { maxPeople: 6, extraChargeStartsAfter: 3, extraChargePerPerson: 450 },
+    Galaxy: { maxPeople: 14, extraChargeStartsAfter: 4, extraChargePerPerson: 450 },
+    Wonder: { maxPeople: 11, extraChargeStartsAfter: 4, extraChargePerPerson: 450 },
   };
 
   useEffect(() => {
@@ -96,7 +96,7 @@ const FormPage = () => {
 
     const cakeCost = selectedCake?.price || 0;
     const total = finalTheaterCost + cakeCost;
-    const advance = 750;
+    const advance = 500;
     const due = total - advance;
 
     return (

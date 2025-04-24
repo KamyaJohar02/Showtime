@@ -22,8 +22,8 @@ const rooms = [
     moreInfoLink: "/rooms/room2",
   },
   {
-    id: "WONDERS",
-    title: "WONDERS",
+    id: "WONDER",
+    title: "WONDER",
     description:
       "Ideal for meetings and conferences, our elegant hall is equipped with state-of-the-art technology and flexible seating.",
     imageSrc: "/Images/Room3.JPG",
