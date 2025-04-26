@@ -78,7 +78,7 @@ const privacy = [
             <li>We reserve the right to stop any screening that violates these guidelines.</li>
           </ul>
         </li>
-        <li><strong>Changes to Bookings:</strong> Changes must be requested at least 24 hours in advance and are subject to availability.</li>
+        <li><strong>Changes to Bookings:</strong> Changes must be requested at least 36 hours in advance and are subject to availability.</li>
         <li><strong>Termination:</strong> We reserve the right to terminate services if a customer violates these Terms.</li>
         <li><strong>Governing Law:</strong> These Terms shall be governed by and construed in accordance with the laws of India.</li>
         <li><strong>Contact Us:</strong>
@@ -95,8 +95,8 @@ const privacy = [
     answer: `
       <p><strong>Effective Date:</strong> April 26, 2025</p>
       <ul class="list-disc list-inside space-y-2">
-        <li>Cancellations made <strong>at least 24 hours</strong> prior to the event are eligible for a full refund.</li>
-        <li>Cancellations made <strong>within 24 hours</strong> of the booking time are <strong>non-refundable</strong>.</li>
+        <li>Cancellations made <strong>at least 36 hours</strong> prior to the event are eligible for a full refund.</li>
+        <li>Cancellations made <strong>within 36 hours</strong> of the booking time are <strong>non-refundable</strong>.</li>
         <li>Refunds (if eligible) will be processed within <strong>7 business days</strong> to the original payment method.</li>
         <li>For payment or refund related issues, please contact us directly at <a href="mailto:theshowtimestudioco@gmail.com" class="text-blue-600 underline">theshowtimestudioco@gmail.com</a>.</li>
       </ul>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAllDocuments, deleteDocument, updateDocument } from "@/lib/firestoreUtils";
+import { getAllDocuments, updateDocument } from "@/lib/firestoreUtils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
@@ -32,9 +32,70 @@ const ManageBookings: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const itemsPerPage = 10;
+
+  // New state for Edit Mobile popup
+  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+  const [newMobile, setNewMobile] = useState<string>("");
+
+  const exportToCSV = () => {
+    if (filteredBookings.length === 0) {
+      alert("No bookings available to export.");
+      return;
+    }
+  
+    const headers = [
+      "Name",
+      "Email",
+      "Mobile",
+      "Guests",
+      "Room",
+      "Date",
+      "Slot",
+      "Occasion",
+      "Occasion Name",
+      "Cake",
+      "Decorations",
+      "Advance",
+      "Due",
+      "Status",
+      "Payment ID",
+    ];
+  
+    const rows = filteredBookings.map((b) => [
+      b.name,
+      b.email,
+      b.mobile,
+      b.people,
+      b.room,
+      b.date,
+      b.timeSlot,
+      b.occasion || "-",
+      b.occasionName || "-",
+      b.cake || "No",
+      (b.decorations || []).join("; "),
+      `₹${b.advanceAmount}`,
+      `₹${b.dueAmount}`,
+      b.status,
+      b.razorpayPaymentId || "-",
+    ]);
+  
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")),
+    ].join("\n");
+  
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+  
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `bookings_export_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
 
   useEffect(() => {
     const loadAndUpdateBookings = async () => {
@@ -67,56 +128,17 @@ const ManageBookings: React.FC = () => {
     loadAndUpdateBookings();
   }, []);
 
-  const handleDeleteBooking = async () => {
-    if (!selectedBooking) return;
+  const handleEditMobileSave = async () => {
+    if (!editingBooking || newMobile.trim() === "") return;
 
     try {
-      if (selectedBooking.razorpayPaymentId) {
-        const refundRes = await fetch("/api/razorpay/refund", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paymentId: selectedBooking.razorpayPaymentId }),
-        });
-        const refundData = await refundRes.json();
-        if (!refundData.success) {
-          alert("Refund failed. Booking not deleted.");
-          return;
-        } else {
-          alert("Refund initiated successfully.");
-        }
-      }
-
-      await deleteDocument("bookings", selectedBooking.id);
-
-      const bookedQuery = query(
-        collection(db, "booked"),
-        where("room", "==", selectedBooking.room),
-        where("date", "==", selectedBooking.date),
-        where("timeSlot", "==", selectedBooking.timeSlot)
-      );
-      const bookedSnapshot = await getDocs(bookedQuery);
-      for (const docItem of bookedSnapshot.docs) {
-        await deleteDoc(docItem.ref);
-      }
-
-      setBookings((prev) => prev.filter((b) => b.id !== selectedBooking.id));
-      setShowConfirmModal(false);
-    } catch (err) {
-      console.error("Error deleting booking:", err);
-      alert("Failed to delete booking.");
-    }
-  };
-
-  const handleEditMobile = async (booking: Booking) => {
-    const newMobile = prompt("Enter new mobile number:", booking.mobile);
-    if (!newMobile || newMobile === booking.mobile) return;
-
-    try {
-      await updateDocument("bookings", booking.id, { mobile: newMobile });
+      await updateDocument("bookings", editingBooking.id, { mobile: newMobile });
       setBookings((prev) =>
-        prev.map((b) => (b.id === booking.id ? { ...b, mobile: newMobile } : b))
+        prev.map((b) => (b.id === editingBooking.id ? { ...b, mobile: newMobile } : b))
       );
       alert("Mobile number updated successfully.");
+      setEditingBooking(null);
+      setNewMobile("");
     } catch (err) {
       console.error("Error updating mobile:", err);
       alert("Failed to update mobile number.");
@@ -157,6 +179,14 @@ const ManageBookings: React.FC = () => {
         >
           Reset Filter
         </button>
+        <button
+  onClick={exportToCSV}
+  disabled={filteredBookings.length === 0}
+  className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  Export to CSV
+</button>
+
       </div>
 
       {loading ? (
@@ -210,15 +240,9 @@ const ManageBookings: React.FC = () => {
                     <td className="p-1 border space-x-2">
                       <button
                         onClick={() => {
-                          setSelectedBooking(booking);
-                          setShowConfirmModal(true);
+                          setEditingBooking(booking);
+                          setNewMobile(booking.mobile);
                         }}
-                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
-                      <button
-                        onClick={() => handleEditMobile(booking)}
                         className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                       >
                         Edit Mobile
@@ -252,23 +276,33 @@ const ManageBookings: React.FC = () => {
         </>
       )}
 
-      {showConfirmModal && selectedBooking && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {/* Edit Mobile Popup */}
+      {editingBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-            <h2 className="text-lg font-semibold mb-4">Are you sure?</h2>
-            <p className="mb-6">Do you want to delete this booking?</p>
+            <h2 className="text-lg font-semibold mb-4">Edit Mobile Number</h2>
+            <input
+              type="text"
+              value={newMobile}
+              onChange={(e) => setNewMobile(e.target.value)}
+              className="w-full border px-3 py-2 rounded mb-4 focus:outline-none focus:ring focus:ring-blue-500"
+              placeholder="Enter new mobile number"
+            />
             <div className="flex justify-end gap-3">
               <button
-                onClick={() => setShowConfirmModal(false)}
+                onClick={() => {
+                  setEditingBooking(null);
+                  setNewMobile("");
+                }}
                 className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
               >
-                Close
+                Cancel
               </button>
               <button
-                onClick={handleDeleteBooking}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                onClick={handleEditMobileSave}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               >
-                Yes, Delete Booking
+                Save
               </button>
             </div>
           </div>

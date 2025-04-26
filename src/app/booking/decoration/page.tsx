@@ -8,26 +8,27 @@ import { collection, addDoc, getDocs } from "firebase/firestore";
 import Razorpay from "razorpay";
 
 const extraDecorations = [
-  { name: "Rose Heart", price: 150, image: "/Images/decorations/rose_heart.png" },
-  { name: "Candle Path", price: 300, image: "/Images/decorations/candle_path.png" },
-  { name: "LED Numbers", price: 100, image: "/Images/decorations/led_numbers.png" },
+  { name: "Chocolates", price: 150, image: "/Images/decorations/rose_heart.png" },
+  { name: "Sparkle Candle", price: 300, image: "/Images/decorations/candle_path.png" },
+  { name: "LED Name", price: 100, image: "/Images/decorations/led_numbers.png" },
 ];
 
 const gifts = [
-  { name: "Small Heart Pillow", price: 200, image: "/Images/gifts/pillow.png" },
+  { name: "Teddy Bear", price: 200, image: "/Images/gifts/pillow.png" },
   { name: "Event Sash", price: 100, image: "/Images/gifts/sash.png" },
   { name: "Crown", price: 150, image: "/Images/gifts/crown.png" },
-  { name: "Bouquet (7 roses)", price: 350, image: "/Images/gifts/bouquet.png" },
+  { name: "Bouquet", price: 350, image: "/Images/gifts/bouquet.png" },
+  { name: "Propose Rings", price: 350, image: "/Images/gifts/bouquet.png" },
 ];
 
 const specialServices = [
   { name: "Photoshoot (15 min)", price: 300, image: "/Images/services/photo15.jpg" },
   { name: "Photoshoot (30 min)", price: 500, image: "/Images/services/photo15.jpg" },
-  { name: "Fog Entry (1 pot)", price: 350, image: "/Images/services/fogg.png" },
-  { name: "Fog Entry (2 pots)", price: 700, image: "/Images/services/fogg.png" },
-  { name: "Fog Entry (3 pots)", price: 900, image: "/Images/services/fogg.png" },
-  { name: "Fog Entry (4 pots)", price: 1100, image: "/Images/services/fogg.png" },
-  { name: "Grand Fog Entry (10 pots)", price: 2500, image: "/Images/services/fogg.png" },
+  { name: "Fog Entry (1 pot)", price: 300, image: "/Images/services/fogg.png" },
+  { name: "Fog Entry (2 pots)", price: 500, image: "/Images/services/fogg.png" },
+  { name: "Fog Entry (3 pots)", price: 800, image: "/Images/services/fogg.png" },
+  { name: "Fog Entry (4 pots)", price: 1000, image: "/Images/services/fogg.png" },
+  { name: "Grand Fog Entry (10 pots)", price: 2000, image: "/Images/services/fogg.png" },
   { name: "Kids Car Entry", price: 300, image: "/Images/services/kids_car.png" },
 ];
 

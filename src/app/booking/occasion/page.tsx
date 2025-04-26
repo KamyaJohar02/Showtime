@@ -13,7 +13,7 @@ const occasions = [
   { label: "Farewell", image: "/Images/occasions/farewell.WEBP" },
   { label: "Congratulations", image: "/Images/occasions/congrats.WEBP" },
   { label: "Baby Shower", image: "/Images/occasions/babyshower.WEBP" },
-  { label: "Groom To Be", image: "/Images/occasions/groom.WEBP" },
+  /*{ label: "Groom To Be", image: "/Images/occasions/groom.WEBP" }, */
 ];
 
 const OccasionPage = () => {

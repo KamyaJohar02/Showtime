@@ -1,12 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  getAllDocuments,
-  deleteDocument,
-  updateDocument,
-  getDocsByMultipleFields,
-} from "@/lib/firestoreUtils";
+import { getAllDocuments, updateDocument } from "@/lib/firestoreUtils";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Booking {
   id: string;
@@ -31,6 +28,9 @@ const TodayBookings: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+  const [newMobile, setNewMobile] = useState<string>("");
+
   useEffect(() => {
     const loadTodayBookings = async () => {
       try {
@@ -50,45 +50,105 @@ const TodayBookings: React.FC = () => {
     loadTodayBookings();
   }, []);
 
-  const handleDeleteBooking = async (booking: Booking) => {
-    const confirm = window.confirm("Are you sure you want to delete this booking?");
-    if (!confirm) return;
+  const handleEditMobileSave = async () => {
+    if (!editingBooking || newMobile.trim() === "") return;
 
     try {
-      await deleteDocument("bookings", booking.id);
-
-      const bookedDocs = await getDocsByMultipleFields("booked", [
-        { field: "room", value: booking.room },
-        { field: "date", value: booking.date },
-        { field: "timeSlot", value: booking.timeSlot },
-      ]);
-
-      for (const doc of bookedDocs) {
-        await deleteDocument("booked", doc.id);
-      }
-
-      setTodayBookings((prev) => prev.filter((b) => b.id !== booking.id));
-    } catch (err) {
-      console.error("Error deleting booking:", err);
-      alert("Failed to delete booking.");
-    }
-  };
-
-  const handleEditMobile = async (booking: Booking) => {
-    const newMobile = prompt("Enter new mobile number:", booking.mobile);
-    if (!newMobile || newMobile === booking.mobile) return;
-
-    try {
-      await updateDocument("bookings", booking.id, { mobile: newMobile });
+      await updateDocument("bookings", editingBooking.id, { mobile: newMobile });
       setTodayBookings((prev) =>
-        prev.map((b) => (b.id === booking.id ? { ...b, mobile: newMobile } : b))
+        prev.map((b) => (b.id === editingBooking.id ? { ...b, mobile: newMobile } : b))
       );
       alert("Mobile number updated successfully.");
+      setEditingBooking(null);
+      setNewMobile("");
     } catch (err) {
       console.error("Error updating mobile:", err);
       alert("Failed to update mobile number.");
     }
   };
+
+  const generateBillPDF = (booking: Booking) => {
+    const doc = new jsPDF() as any;
+  
+    // Business Header
+    doc.setFontSize(22);
+    doc.text("THE SHOWTIME STUDIO", 15, 20);
+    doc.setFontSize(11);
+    doc.text("A-87/3, Block A, Wazirpur Industrial Area, Delhi", 15, 28);
+    doc.text("Phone: +91-9911825047", 15, 34);
+  
+    // Invoice Info (right side)
+    const todayDate = new Date().toLocaleDateString("en-GB");
+    doc.setFontSize(12);
+    doc.text(`Invoice No: ________`, 150, 20);
+    doc.text(`Date: ${todayDate}`, 150, 28);
+  
+    // Billed To
+    doc.setFontSize(14);
+    doc.text("BILLED TO:", 15, 50);
+    doc.setFontSize(12);
+    doc.text(booking.name, 15, 58);
+    doc.text(booking.mobile, 15, 64);
+    doc.text(booking.email, 15, 70);
+  
+    // Booking Details (Guests, Slot, Occasion, Occasion Name)
+    autoTable(doc, {
+      startY: 80,
+      theme: "grid",
+      head: [["Guests", "Slot", "Occasion", "Occasion Name"]],
+      body: [[
+        booking.people,
+        booking.timeSlot,
+        booking.occasion || "-",
+        booking.occasionName || "-"
+      ]],
+      styles: { fontSize: 10 },
+    });
+  
+    // Items Table (Cake + Decorations + Room Booking)
+    const tableY = doc.lastAutoTable.finalY + 10;
+  
+    const items: [string, string][] = [];
+  
+    if (booking.cake) {
+      items.push([`Cake: ${booking.cake}`, "1"]);
+    }
+    if (booking.decorations && booking.decorations.length > 0) {
+      items.push([`Decorations: ${booking.decorations.join(", ")}`, "1"]);
+    }
+    items.push([`Room Booking: ${booking.room}`, "1"]);
+  
+    autoTable(doc, {
+      startY: tableY,
+      head: [["Item", "Quantity"]],
+      body: items,
+      theme: "grid",
+      styles: { fontSize: 10 },
+    });
+  
+    // Payment Summary
+    const summaryY = doc.lastAutoTable.finalY + 10;
+  
+    autoTable(doc, {
+      startY: summaryY,
+      head: [["Subtotal", "Advance Paid", "Due Amount"]],
+      body: [[
+        `₹${booking.advanceAmount + booking.dueAmount}`,
+        `₹${booking.advanceAmount}`,
+        `₹${booking.dueAmount}`
+      ]],
+      theme: "grid",
+      styles: { fontSize: 10 },
+    });
+  
+    // Footer
+    doc.setFontSize(11);
+    doc.text("Thank you for choosing The Showtime Studio!", 105, 285, { align: "center" });
+  
+    doc.save(`invoice_booking_${booking.name}.pdf`);
+  };
+  
+  
 
   return (
     <div className="p-4 text-xs">
@@ -141,22 +201,58 @@ const TodayBookings: React.FC = () => {
                   <td className="p-1 border">{booking.status}</td>
                   <td className="p-1 border space-x-2">
                     <button
-                      onClick={() => handleDeleteBooking(booking)}
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                    <button
-                      onClick={() => handleEditMobile(booking)}
+                      onClick={() => {
+                        setEditingBooking(booking);
+                        setNewMobile(booking.mobile);
+                      }}
                       className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                     >
                       Edit Mobile
+                    </button>
+                    <button
+                      onClick={() => generateBillPDF(booking)}
+                      className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                    >
+                      Print Bill
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Edit Mobile Popup */}
+      {editingBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold mb-4">Edit Mobile Number</h2>
+            <input
+              type="text"
+              value={newMobile}
+              onChange={(e) => setNewMobile(e.target.value)}
+              className="w-full border px-3 py-2 rounded mb-4 focus:outline-none focus:ring focus:ring-blue-500"
+              placeholder="Enter new mobile number"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setEditingBooking(null);
+                  setNewMobile("");
+                }}
+                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditMobileSave}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Save
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

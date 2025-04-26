@@ -70,7 +70,7 @@ function ActualHome() {
 
   const services = [
     { title: 'Private Screening', image: '/Images/screening7.jpg' },
-    { title: 'Snacks And Beverages', image: '/Images/snacks4.jpg' },
+    { title: 'Snacks & Beverages', image: '/Images/snacks4.jpg' },
     { title: 'Bouquets', image: '/Images/Bouquet2.webp' },
     { title: 'Gifts', image: '/Images/gifts3.avif' },
     { title: 'Decorations', image: '/Images/decoration6.jpg' },
@@ -80,7 +80,7 @@ function ActualHome() {
     { title: 'Anniversaries', image: '/Images/anniversary1.JPG' },
     { title: 'Birthdays', image: '/Images/birthday3.JPG' },
     { title: 'Corporate Events', image: '/Images/corporate1.JPG' },
-    { title: 'Engagements', image: '/Images/engagement.JPEG' },
+    { title: 'Engagement Party', image: '/Images/engagement.JPEG' },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -232,16 +232,16 @@ function ActualHome() {
         </div>
 
         <div className="w-full md:w-1/2 px-6 mt-8 md:mt-0">
-          <iframe
-            src="https://www.google.com/maps/embed?..."
-            width="100%"
-            height="300"
-            style={{ border: 0 }}
-            allowFullScreen={false}
-            loading="lazy"
-            className="rounded-lg shadow-md"
-            title="Google Map"
-          ></iframe>
+        <iframe
+  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3499.6613783751436!2d77.15980607501079!3d28.69977438102487!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d03000cb32845%3A0xf35c273b958ec89e!2sThe%20Showtime%20Studio!5e0!3m2!1sfi!2sin!4v1745669586069!5m2!1sfi!2sin"
+  width="100%"
+  height="300"
+  style={{ border: "0" }}
+  allowFullScreen
+  loading="lazy"
+  className="rounded-lg shadow-md"
+  title="Google Map"
+/>
         </div>
       </section>
 

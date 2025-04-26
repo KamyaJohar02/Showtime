@@ -214,9 +214,9 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
     (theater.name === "Sweet"
       ? "/Images/sweetroom.jpg"
       : theater.name === "Wonder"
-      ? "/Images/galaxyroom.jpg"
-      : theater.name === "Galaxy"
       ? "/Images/wondersroom.jpg"
+      : theater.name === "Galaxy"
+      ? "/Images/galaxyroom.jpg"
       : "/Images/Room1.jpg")
   }
   alt={theater.name}

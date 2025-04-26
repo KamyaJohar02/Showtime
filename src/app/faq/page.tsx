@@ -10,8 +10,8 @@ const faqs = [
     answer: (
       <>
         <p>
-          Cancellations made <strong>at least 24 hours</strong> before the event are eligible for a full refund. 
-          Cancellations made within 24 hours of the booking time are non-refundable.
+          Cancellations made <strong>at least 36 hours</strong> before the event are eligible for a full refund. 
+          Cancellations made within 36 hours of the booking time are non-refundable.
           Refunds (if applicable) will be processed within <strong>7 business days</strong> to the original payment method.
         </p>
         <p className="mt-2 text-sm">

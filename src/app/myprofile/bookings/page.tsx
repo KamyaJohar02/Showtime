@@ -84,7 +84,7 @@ const MyProfileBookingsPage = () => {
     const [startTime] = booking.timeSlot.split("-");
     const isoTime = convertTo24Hour(startTime.trim());
     const bookingDateTime = new Date(`${booking.date}T${isoTime}`);
-    return bookingDateTime.getTime() - now.getTime() > 24 * 60 * 60 * 1000;
+    return bookingDateTime.getTime() - now.getTime() > 36 * 60 * 60 * 1000;
   };
 
   function convertTo24Hour(timeStr: string): string {

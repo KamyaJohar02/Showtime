@@ -25,16 +25,19 @@ function Header() {
 
   return (
     <header
-      className="bg-cover bg-center"
+      className="relative bg-cover bg-center"
       style={{
-        backgroundImage: "url('/Images/headerbg2.jpg')",
+        backgroundImage: "url('/Images/bgok.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
-      <nav className="mx-auto flex max-w-4xl items-center justify-between p-6 lg:px-8">
-        {/* Logo */}
-        <div className="flex lg:flex-1">
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black opacity-20"></div>
+
+      <nav className="relative z-10 mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
+        {/* Left - Logo */}
+        <div className="flex flex-1">
           <Link href="/" passHref className="-m-1.5 p-1.5">
             <span className="sr-only">Showtime</span>
             <Image
@@ -42,25 +45,14 @@ function Header() {
               alt="Showtime Logo"
               width={200}
               height={100}
-              className="cursor-pointer"
+              className="cursor-pointer object-contain"
               priority
             />
           </Link>
         </div>
 
-        {/* Hamburger */}
-        <div className="flex lg:hidden">
-          <button
-            type="button"
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-black"
-            onClick={() => setMobileMenuOpen(true)}
-          >
-            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-          </button>
-        </div>
-
-        {/* Desktop Nav */}
-        <Popover.Group className="hidden lg:flex lg:items-center lg:gap-x-6">
+        {/* Center - Menu */}
+        <div className="hidden lg:flex flex-1 justify-center space-x-4">
           {[
             { name: "About Us", href: "/about" },
             { name: "Services", href: "/services" },
@@ -71,28 +63,37 @@ function Header() {
             <Link
               key={item.name}
               href={item.href}
-              className="text-sm font-semibold text-black px-3 py-2 rounded-md hover:bg-gray-200 hover:shadow transition-all duration-200"
+              className="text-sm font-semibold text-black bg-gray-200 px-4 py-1.5 rounded-md whitespace-nowrap hover:bg-white hover:shadow transition-all duration-200"
             >
               {item.name}
             </Link>
           ))}
-
-          {/* Book Now CTA */}
           <button
             onClick={() => router.push("/booking")}
-            className="ml-4 text-sm font-semibold bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 shadow-md transition-all duration-200"
+            className="text-sm font-semibold bg-red-600 text-white px-4 py-1.5 rounded-md hover:bg-red-700 shadow-md whitespace-nowrap transition-all duration-200"
           >
             Book Now
           </button>
-        </Popover.Group>
+        </div>
 
-        {/* Desktop login/profile */}
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+        {/* Right - Login/Profile */}
+        <div className="hidden lg:flex flex-1 justify-end">
           <button
             onClick={() => router.push(user ? "/myprofile" : "/login")}
-            className="text-sm font-semibold text-black px-3 py-2 rounded-md hover:bg-gray-200 hover:shadow transition-all"
+            className="text-sm font-semibold text-black bg-gray-200 px-2.5 py-1.5 rounded-md hover:bg-white hover:shadow transition-all"
           >
             {user ? "My Profile" : "Log in →"}
+          </button>
+        </div>
+
+        {/* Hamburger for mobile */}
+        <div className="flex lg:hidden">
+          <button
+            type="button"
+            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-white"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
       </nav>
@@ -107,9 +108,9 @@ function Header() {
               <Image
                 src="/Images/logo.png"
                 alt="Showtime Logo"
-                width={100}
-                height={50}
-                className="cursor-pointer"
+                width={140}
+                height={70}
+                className="cursor-pointer object-contain"
                 priority
               />
             </Link>
@@ -130,7 +131,7 @@ function Header() {
                     key={page}
                     href={page === "book" ? "/booking" : `/${page}`}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-black hover:bg-gray-200 transition"
+                    className="-mx-3 block rounded-lg bg-gray-200 px-3 py-2 text-base font-semibold text-black hover:bg-white transition"
                   >
                     {page === "book" ? "Book Now" : page.charAt(0).toUpperCase() + page.slice(1)}
                   </Link>
@@ -145,7 +146,7 @@ function Header() {
                         setMobileMenuOpen(false);
                         router.push("/myprofile");
                       }}
-                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-black hover:bg-gray-200"
+                      className="-mx-3 block rounded-lg bg-gray-200 px-3 py-2.5 text-base font-semibold text-black hover:bg-white"
                     >
                       My Profile
                     </button>
@@ -154,7 +155,7 @@ function Header() {
                         setMobileMenuOpen(false);
                         handleLogout();
                       }}
-                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-black hover:bg-gray-200"
+                      className="-mx-3 block rounded-lg bg-gray-200 px-3 py-2.5 text-base font-semibold text-black hover:bg-white"
                     >
                       Logout
                     </button>
@@ -165,7 +166,7 @@ function Header() {
                       setMobileMenuOpen(false);
                       router.push("/login");
                     }}
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-black hover:bg-gray-200"
+                    className="-mx-3 block rounded-lg bg-gray-200 px-3 py-2.5 text-base font-semibold text-black hover:bg-white"
                   >
                     Log In
                   </button>
