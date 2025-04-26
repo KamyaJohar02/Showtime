@@ -5,14 +5,14 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const occasions = [
-  { label: "Birthday", image: "/Images/occasions/birthday.WEBP" },
-  { label: "Anniversary", image: "/Images/occasions/anniversary.WEBP" },
-  { label: "Romantic Date", image: "/Images/occasions/romantic.WEBP" },
-  { label: "Marriage Proposal", image: "/Images/occasions/proposal.WEBP" },
-  { label: "Bride to be", image: "/Images/occasions/bride.WEBP" },
-  { label: "Farewell", image: "/Images/occasions/farewell.WEBP" },
-  { label: "Congratulations", image: "/Images/occasions/congrats.WEBP" },
-  { label: "Baby Shower", image: "/Images/occasions/babyshower.WEBP" },
+  { label: "Birthday", image: "/Images/occasions/birthday.png" },
+  { label: "Anniversary", image: "/Images/occasions/anniversary.png" },
+  { label: "Romantic Date", image: "/Images/occasions/romantic.png" },
+  { label: "Marriage Proposal", image: "/Images/occasions/proposal.png" },
+  { label: "Bride to be", image: "/Images/occasions/bride.png" },
+  { label: "Farewell", image: "/Images/occasions/farewell.png" },
+  { label: "Congratulations", image: "/Images/occasions/congrats.png" },
+  { label: "Baby Shower", image: "/Images/occasions/babyshower.png" },
   /*{ label: "Groom To Be", image: "/Images/occasions/groom.WEBP" }, */
 ];
 
@@ -63,7 +63,7 @@ const OccasionPage = () => {
     const theaterCost = selectedTheater?.price || 0;
     const cakeCost = selectedCake?.price || 0;
     const total = theaterCost + cakeCost;
-    const advance = 500;
+    const advance = 499;
     const due = total - advance;
 
     return (

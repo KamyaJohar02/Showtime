@@ -82,7 +82,7 @@ function Header() {
             onClick={() => router.push(user ? "/myprofile" : "/login")}
             className="text-sm font-semibold text-black bg-gray-200 px-2.5 py-1.5 rounded-md hover:bg-white hover:shadow transition-all"
           >
-            {user ? "My Profile" : "Log in →"}
+            {user ? "👤 My Profile" : "👤 Log in"}
           </button>
         </div>
 

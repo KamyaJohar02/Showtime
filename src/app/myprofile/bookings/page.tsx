@@ -127,61 +127,93 @@ const MyProfileBookingsPage = () => {
     <>
       <div className="p-6">
         <h1 className="text-2xl font-semibold mt-6 mb-1">My Bookings</h1>
+
+        {/* Swipe hint for mobile */}
+        <div className="text-sm text-gray-500 mb-2 block sm:hidden">
+          👉 Swipe right to view more columns
+        </div>
+
         {bookings.length === 0 ? (
-          <p>No bookings found.</p>
-        ) : (
-          <table className="w-full border-collapse border border-gray-300 mt-4">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2">Name</th>
-                <th className="border p-2">Email</th>
-                <th className="border p-2">Mobile</th>
-                <th className="border p-2">Room</th>
-                <th className="border p-2">Date</th>
-                <th className="border p-2">Time Slot</th>
-                <th className="border p-2">Guest Count</th>
-                <th className="border p-2">Advance</th>
-                <th className="border p-2">Due</th>
-                <th className="border p-2">Status</th>
-                <th className="border p-2">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((booking) => (
-                <tr key={booking.id}>
-                  <td className="border p-2">{booking.name}</td>
-                  <td className="border p-2">{booking.email}</td>
-                  <td className="border p-2">{booking.mobile}</td>
-                  <td className="border p-2">{booking.room}</td>
-                  <td className="border p-2">{booking.date}</td>
-                  <td className="border p-2">{booking.timeSlot}</td>
-                  <td className="border p-2">{booking.people}</td>
-                  <td className="border p-2">₹{booking.advanceAmount}</td>
-                  <td className="border p-2">₹{booking.dueAmount}</td>
-                  <td className="border p-2">{booking.status}</td>
-                  <td className="border p-2">
-                    <button
-                      onClick={() => {
-                        setSelectedBooking(booking);
-                        setShowConfirmModal(true);
-                      }}
-                      disabled={!isCancellable(booking)}
-                      className={`px-3 py-1 text-sm rounded text-white ${
-                        isCancellable(booking)
-                          ? "bg-green-600 hover:bg-green-700"
-                          : "bg-gray-400 cursor-not-allowed"
-                      }`}
-                    >
-                      Cancel
-                    </button>
-                  </td>
+  <div className="flex flex-col items-center justify-center text-center mt-10">
+    <Image
+      src="/Images/emptybookings.png" // <-- You can change this image as you like
+      alt="No Bookings"
+      width={200}
+      height={200}
+      className="mb-4"
+    />
+    <h2 className="text-xl font-semibold mb-2">No bookings found</h2>
+    <p className="text-gray-600 mb-4">Looks like you haven't made any bookings yet!</p>
+    <button
+      onClick={() => router.push("/booking")}
+      className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-full"
+    >
+      Book Now
+    </button>
+  </div>
+) : (
+          <div className="overflow-x-auto">
+            <table className="text-xs w-full border-collapse border border-gray-300 mt-4">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border p-2">Name</th>
+                  <th className="border p-2">Email</th>
+                  <th className="border p-2">Mobile</th>
+                  <th className="border p-2">Room</th>
+                  <th className="border p-2">Date</th>
+                  <th className="border p-2">Time Slot</th>
+                  <th className="border p-2">Guest Count</th>
+                  <th className="border p-2">Advance</th>
+                  <th className="border p-2">Due</th>
+                  <th className="border p-2">Status</th>
+                  <th className="border p-2">Payment ID</th>
+                  <th className="border p-2">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {bookings.map((booking) => (
+                  <tr key={booking.id}>
+                    <td className="border p-2">{booking.name}</td>
+                    <td className="border p-2">{booking.email}</td>
+                    <td className="border p-2">{booking.mobile}</td>
+                    <td className="border p-2">{booking.room}</td>
+                    <td className="border p-2">{booking.date}</td>
+                    <td className="border p-2">{booking.timeSlot}</td>
+                    <td className="border p-2">{booking.people}</td>
+                    <td className="border p-2">₹{booking.advanceAmount}</td>
+                    <td className="border p-2">₹{booking.dueAmount}</td>
+                    <td className="border p-2">{booking.status}</td>
+                    <td className="border p-2">{booking.razorpayPaymentId || "-"}</td>
+                    <td className="border p-2">
+                      <button
+                        onClick={() => {
+                          setSelectedBooking(booking);
+                          setShowConfirmModal(true);
+                        }}
+                        disabled={!isCancellable(booking)}
+                        className={`px-3 py-1 text-sm rounded text-white ${
+                          isCancellable(booking)
+                            ? "bg-green-600 hover:bg-green-700"
+                            : "bg-gray-400 cursor-not-allowed"
+                        }`}
+                        title={
+                          isCancellable(booking)
+                            ? ""
+                            : "Cannot cancel booking within 36 hours"
+                        }
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
+      {/* Confirm Cancel Popup */}
       {showConfirmModal && selectedBooking && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
@@ -209,6 +241,7 @@ const MyProfileBookingsPage = () => {
         </div>
       )}
 
+      {/* Cancel Success Popup */}
       {showCancelPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full animate-fade-in scale-95">

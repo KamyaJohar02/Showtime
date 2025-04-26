@@ -131,6 +131,33 @@
     animation: fadeIn 0.3s ease-out;
   }
 
+  @keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .rainbow-wrapper {
+    display: inline-block;
+    padding: 0.5rem 1.5rem; /* adjust for oval */
+    border-radius: 9999px; /* fully rounded */
+    background-color: #1f2937; /* dark gray oval background */
+  }
+  
+  .rainbow-text {
+    background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
+    background-size: 1400% 1400%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbow 6s ease infinite;
+    font-weight: bold;
+    font-size: 1.5rem; /* or whatever size you want */
+  }
+  
+  
+  
+
   @keyframes fadeIn {
     from {
       opacity: 0;

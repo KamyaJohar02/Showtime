@@ -8,27 +8,31 @@ import { collection, addDoc, getDocs } from "firebase/firestore";
 import Razorpay from "razorpay";
 
 const extraDecorations = [
-  { name: "Chocolates", price: 150, image: "/Images/decorations/rose_heart.png" },
-  { name: "Sparkle Candle", price: 300, image: "/Images/decorations/candle_path.png" },
-  { name: "LED Name", price: 100, image: "/Images/decorations/led_numbers.png" },
+  { name: "Occasion Themed Decoration", price: 450, image: "/Images/decorations/ocdeco.jpg" },
+  { name: "Chocolates", price: 150, image: "/Images/decorations/chocolate.jpg" },
+  { name: "Sparkle Candle", price: 300, image: "/Images/decorations/sparklecandle.jpg" },
+  { name: "LED Name", price: 100, image: "/Images/decorations/ledname.jpg" },
+  { name: "Candle Path", price: 300, image: "/Images/decorations/candle_path.png" },
+
 ];
 
 const gifts = [
-  { name: "Teddy Bear", price: 200, image: "/Images/gifts/pillow.png" },
+  { name: "Teddy Bear 2 feet", price: 500, image: "/Images/gifts/teddybear.webp" },
+  { name: "Teddy Bear 5 feet", price: 1000, image: "/Images/gifts/teddybear.webp" },
   { name: "Event Sash", price: 100, image: "/Images/gifts/sash.png" },
   { name: "Crown", price: 150, image: "/Images/gifts/crown.png" },
-  { name: "Bouquet", price: 350, image: "/Images/gifts/bouquet.png" },
-  { name: "Propose Rings", price: 350, image: "/Images/gifts/bouquet.png" },
+  { name: "Single Rose Bouquet", price: 300, image: "/Images/gifts/bouquet.png" },
+  { name: "Propose Rings", price: 300, image: "/Images/gifts/proposerings.jpg" },
 ];
 
 const specialServices = [
-  { name: "Photoshoot (15 min)", price: 300, image: "/Images/services/photo15.jpg" },
+  { name: "Bubbles", price: 300, image: "/Images/services/bubbles.jpg" },
   { name: "Photoshoot (30 min)", price: 500, image: "/Images/services/photo15.jpg" },
   { name: "Fog Entry (1 pot)", price: 300, image: "/Images/services/fogg.png" },
   { name: "Fog Entry (2 pots)", price: 500, image: "/Images/services/fogg.png" },
   { name: "Fog Entry (3 pots)", price: 800, image: "/Images/services/fogg.png" },
   { name: "Fog Entry (4 pots)", price: 1000, image: "/Images/services/fogg.png" },
-  { name: "Grand Fog Entry (10 pots)", price: 2000, image: "/Images/services/fogg.png" },
+  { name: "Grand Fog Entry (10 pots)", price: 2100, image: "/Images/services/fogg.png" },
   { name: "Kids Car Entry", price: 300, image: "/Images/services/kids_car.png" },
 ];
 
@@ -94,7 +98,7 @@ const [couponError, setCouponError] = useState("");
   ? Math.round(subtotal - (subtotal * discountPercent) / 100)
   : subtotal;
 
-  const advance = 500;
+  const advance = 499;
   const balance = subtotal - advance;
 
 

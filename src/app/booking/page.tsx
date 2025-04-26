@@ -262,17 +262,23 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
     theater.name === "Sweet" ? (
       <p>
         <span className="line-through text-gray-500 mr-2">₹1999</span>
-        <span className="text-red-600 font-bold">₹999</span>
+        <span className="inline-block px-4 py-1 rounded-full bg-gray-300">
+    <span className="rainbow-text font-bold text-2xl">₹999</span>
+  </span>
       </p>
     ) : theater.name === "Galaxy" ? (
       <p>
         <span className="line-through text-gray-500 mr-2">₹2999</span>
-        <span className="text-red-600 font-bold">₹999</span>
+        <span className="inline-block px-4 py-1 rounded-full bg-gray-300">
+    <span className="rainbow-text font-bold text-2xl">₹999</span>
+  </span>
       </p>
     ) : theater.name === "Wonder" ? (
       <p>
         <span className="line-through text-gray-500 mr-2">₹2699</span>
-        <span className="text-red-600 font-bold">₹999</span>
+        <span className="inline-block px-4 py-1 rounded-full bg-gray-300">
+    <span className="rainbow-text font-bold text-2xl">₹999</span>
+  </span>
       </p>
     ) : (
       <p>₹{displayPrice}</p>

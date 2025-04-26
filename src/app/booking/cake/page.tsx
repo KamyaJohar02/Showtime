@@ -58,7 +58,7 @@ const CakePage = () => {
   const cakeCost = selectedCakeObj?.price || 0;
   const theaterCost = selectedTheater?.price || 0;
   const subtotal = theaterCost + cakeCost;
-  const advance = 500;
+  const advance = 499;
   const balance = subtotal - advance;
 
   const handleNext = () => {

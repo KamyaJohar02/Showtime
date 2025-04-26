@@ -45,7 +45,7 @@ const privacy = [
         <li><strong>Contact Us:</strong> If you have any questions about this Privacy Policy, please contact us at:
           <ul>
             <li><strong>Email:</strong> theshowtimestudioco@gmail.com</li>
-            <li><strong>Phone:</strong> +91 9811231212</li>
+            <li><strong>Phone:</strong> +91 9220433244</li>
           </ul>
         </li>
       </ol>
@@ -57,34 +57,50 @@ const privacy = [
       <p><strong>Effective Date:</strong> April 26, 2025</p>
       <ol>
         <li><strong>Introduction:</strong> These Terms and Conditions ("Terms") govern your use of Showtime Studio Co. services and website. By using our services, you agree to these Terms.</li>
+        <br>
+
         <li><strong>Booking and Payments:</strong>
           <ul>
-            <li>All bookings must be confirmed with a valid payment method.</li>
-            <li>A deposit may be required to secure your booking.</li>
-            <li>Full payment must be made before the event.</li>
+            <li>- All bookings must be confirmed with a valid payment method.</li>
+            <li>- A deposit may be required to secure your booking.</li>
+            <li>- Full payment must be made before the event.</li>
           </ul>
         </li>
+        <br>
+
         <li><strong>Customer Responsibilities:</strong>
-          <ul>
-            <li>Customers must comply with all rules and regulations of the venue.</li>
-            <li>Illegal or prohibited content is strictly not allowed.</li>
-            <li>Any damages caused to the property during the booking will be charged to the customer.</li>
-          </ul>
-        </li>
+  <ul>
+    <li>- Customers must comply with all rules and regulations of the venue.</li>
+    <li>- Smoking and drinking are strictly prohibited inside the theater.</li>
+    <li>- Carrying an Aadhaar Card is mandatory; it will be scanned during entry.</li>
+    <li>- Couples must be 18+ years old to be allowed entry.</li>
+    <li>- We do NOT provide any movie/OTT accounts. We will assist with setup using your OTT accounts or downloaded content.</li>
+    <li>- Party poppers, snow sprays, cold fire, or any similar items are strictly prohibited inside the theater.</li>
+    <li>- Guests are requested to maintain cleanliness inside the theater premises.</li>
+    <li>- Any damages caused to the property, including decorative materials like balloons and lights, will be chargeable.</li>
+    <li>- Illegal or prohibited content is strictly not allowed.</li>
+  </ul>
+</li>
+<br>
+
         <li><strong>Liability:</strong> Showtime Studio Co. is not responsible for any personal injuries, loss of belongings, or disruptions caused by technical issues or natural events. We reserve the right to cancel or modify bookings due to unforeseen circumstances.</li>
+        <br>
+
         <li><strong>Content Guidelines:</strong>
           <ul>
-            <li>Customers are prohibited from playing illegal, prohibited, or copyrighted content without appropriate permissions.</li>
-            <li>We reserve the right to stop any screening that violates these guidelines.</li>
+            <li>- Customers are prohibited from playing illegal, prohibited, or copyrighted content without appropriate permissions.</li>
+            <li>- We reserve the right to stop any screening that violates these guidelines.</li>
           </ul>
         </li>
+        <br>
+
         <li><strong>Changes to Bookings:</strong> Changes must be requested at least 36 hours in advance and are subject to availability.</li>
         <li><strong>Termination:</strong> We reserve the right to terminate services if a customer violates these Terms.</li>
         <li><strong>Governing Law:</strong> These Terms shall be governed by and construed in accordance with the laws of India.</li>
         <li><strong>Contact Us:</strong>
           <ul>
             <li><strong>Email:</strong> theshowtimestudioco@gmail.com</li>
-            <li><strong>Phone:</strong> +91 9811231212</li>
+            <li><strong>Phone:</strong> +91 9220433244</li>
           </ul>
         </li>
       </ol>

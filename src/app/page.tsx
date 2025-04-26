@@ -73,7 +73,7 @@ function ActualHome() {
     { title: 'Snacks & Beverages', image: '/Images/snacks4.jpg' },
     { title: 'Bouquets', image: '/Images/Bouquet2.webp' },
     { title: 'Gifts', image: '/Images/gifts3.avif' },
-    { title: 'Decorations', image: '/Images/decoration6.jpg' },
+    { title: 'Decorations', image: '/Images/galaxy3.jpg' },
     { title: 'Cakes', image: '/Images/cakes5.webp' },
     { title: 'Surprise Events', image: '/Images/surprise.webp' },
     { title: 'Private Parties', image: '/Images/privatep.JPG' },
@@ -246,7 +246,7 @@ function ActualHome() {
       </section>
 
       <a
-        href="https://wa.me/919911825047"
+        href="https://wa.me/919220433244"
         className="fixed bottom-4 right-4 p-4 rounded-full shadow-lg bg-white"
         target="_blank"
         rel="noopener noreferrer"

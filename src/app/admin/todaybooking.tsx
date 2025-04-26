@@ -75,7 +75,7 @@ const TodayBookings: React.FC = () => {
     doc.text("THE SHOWTIME STUDIO", 15, 20);
     doc.setFontSize(11);
     doc.text("A-87/3, Block A, Wazirpur Industrial Area, Delhi", 15, 28);
-    doc.text("Phone: +91-9911825047", 15, 34);
+    doc.text("Phone: +91-9220433244", 15, 34);
   
     // Invoice Info (right side)
     const todayDate = new Date().toLocaleDateString("en-GB");
