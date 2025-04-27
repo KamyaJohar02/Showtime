@@ -65,7 +65,7 @@ const Footer = () => {
                 New Delhi- 110052
               </address>
               <div className="mt-2">
-                +91 9811231212<br />
+                +91 9220433244<br />
                 <a
                   href="mailto:theshowtimestudioco@gmail.com"
                   className="text-gray-400 hover:text-white"
@@ -77,7 +77,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Footer Bottom Section */}
+        {/* Footer Bottom Section changes made okay*/}
         <div className="mt-8 text-center text-gray-500">
           Copyright ©2024 Franchise LLP - Private Movie Theaters - All rights reserved
         </div>
