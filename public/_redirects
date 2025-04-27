@@ -1,1 +1,7 @@
-/*    /index.html   200
+/Images/*    /Images/:splat    200
+/_next/*     /_next/:splat     200
+/static/*    /static/:splat    200
+/favicon.ico /favicon.ico      200
+/robots.txt  /robots.txt       200
+
+/*           /index.html       200
