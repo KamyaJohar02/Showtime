@@ -8,8 +8,9 @@ export default {
       'images.squarespace-cdn.com',
       'cf.bstatic.com',
       'fruitilicious.in',
-      'cdn-icons-png.flaticon.com', // ✅ Added this line
+      'cdn-icons-png.flaticon.com',
     ],
+    unoptimized: true, // ✅ Add this line
   },
   reactStrictMode: true,
 };
