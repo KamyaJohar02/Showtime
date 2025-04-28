@@ -78,7 +78,7 @@ const Footer = () => {
         </div>
 
         {/* Footer Bottom Section changes made okay*/}
-        <div className="mt-8 text-center text-gray-500">
+        <div className="mt-8 text-center text-gray-400">
           Copyright ©2024 Franchise LLP - Private Movie Theaters - All rights reserved
         </div>
 
