@@ -248,7 +248,7 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
                           selectedTheaterId === theater.id && selectedSlot === slot.time
                             ? "bg-green-500 text-white"
                             : slot.isBooked
-                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            ? "bg-red-300 text-gray-500 cursor-not-allowed"
                             : "bg-gray-100 hover:bg-blue-100"
                         }`}
                       >
@@ -288,6 +288,15 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
     <p>₹{displayPrice}</p>
   )}
 </div>
+{/* 🎯 New "Next" button inside the card */}
+  {selectedTheaterId === theater.id && selectedSlot && (
+    <button
+      onClick={handleNext}
+      className="bg-red-500 text-white px-4 py-2 rounded-full mt-4 w-full shadow-md hover:bg-red-600"
+    >
+      Next
+    </button>
+     )}
 
               </div>
             );
@@ -302,14 +311,7 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
   >
     ← Back to Home
   </button>
-        {selectedTheaterId && selectedSlot && (
-          <button
-            onClick={handleNext}
-            className="bg-red-500 text-white px-6 py-3 rounded-full mt-4 shadow-lg"
-          >
-            Next
-          </button>
-        )}
+        
       </footer>
     </div>
   );
