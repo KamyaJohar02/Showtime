@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getAllDocuments, deleteDocument } from "@/lib/firestoreUtils";
+import { toast } from "react-hot-toast";
 
 interface Query {
   id: string;
@@ -38,7 +39,7 @@ const UserQueries = () => {
       await deleteDocument("queries", id);
       setQueries((prev) => prev.filter((q) => q.id !== id));
     } catch (error) {
-      alert("Failed to delete query.");
+      toast.error("Failed to delete query.");
       console.error(error);
     }
   };

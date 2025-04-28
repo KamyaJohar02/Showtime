@@ -13,6 +13,7 @@ import TodayBookings from "./todaybooking";
 import AuthGuard from "@/components/ui/AuthGuard";
 import UserQueries from "./userqueries";
 import Dashboard from "./dashboard"; // 👈 import your new dashboard
+import { toast } from "react-hot-toast";
 
 
 
@@ -27,7 +28,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       router.push("/login"); // Redirect to login page
     } catch (error) {
       console.error("Error logging out:", error);
-      alert("Failed to log out. Please try again.");
+      toast.error("Failed to log out. Please try again.");
     }
   };
 

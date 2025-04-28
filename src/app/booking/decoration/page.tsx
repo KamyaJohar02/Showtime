@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { db } from "@/firebaseConfig";
 import { collection, addDoc, getDocs } from "firebase/firestore";
+import { toast } from "react-hot-toast";
 import Razorpay from "razorpay";
 
 const extraDecorations = [
@@ -208,7 +209,7 @@ const [couponError, setCouponError] = useState("");
     router.push("/"); // Redirect to home
   } catch (err) {
     console.error("Firestore save failed after payment:", err);
-    alert("Payment succeeded but booking save failed.");
+    toast.error("Payment succeeded but booking save failed.");
   }
 },
           prefill: {
@@ -221,7 +222,7 @@ const [couponError, setCouponError] = useState("");
           },
           modal: {
             ondismiss: () => {
-              alert("Payment cancelled.");
+              toast.error("Payment cancelled.");
               router.push("/");
             },
           },
@@ -232,11 +233,11 @@ const [couponError, setCouponError] = useState("");
       };
   
       script.onerror = () => {
-        alert("Failed to load Razorpay script.");
+        toast.error("Failed to load Razorpay script.");
       };
     } catch (err) {
       console.error("Payment initiation failed:", err);
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     }
   };
   

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
 import {
   collection,
   query,
@@ -45,7 +46,7 @@ const MyProfileBookingsPage = () => {
       try {
         const user = auth.currentUser;
         if (!user) {
-          alert("You need to log in to view this page.");
+          toast.error("You need to log in to view this page.");
           router.push("/login");
           return;
         }
@@ -116,7 +117,7 @@ const MyProfileBookingsPage = () => {
       setShowCancelPopup(true);
     } catch (err) {
       console.error("Failed to cancel booking:", err);
-      alert("Failed to cancel booking.");
+      toast.error("Failed to cancel booking.");
     }
   };
 

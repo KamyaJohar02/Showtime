@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
+import { toast } from "react-hot-toast";
 
 interface Booking {
   id: string;
@@ -40,7 +41,7 @@ const ManageBookings: React.FC = () => {
 
   const exportToCSV = () => {
     if (filteredBookings.length === 0) {
-      alert("No bookings available to export.");
+      toast.error("No bookings available to export.");
       return;
     }
   
@@ -136,12 +137,12 @@ const ManageBookings: React.FC = () => {
       setBookings((prev) =>
         prev.map((b) => (b.id === editingBooking.id ? { ...b, mobile: newMobile } : b))
       );
-      alert("Mobile number updated successfully.");
+      toast.success("Mobile number updated successfully.");
       setEditingBooking(null);
       setNewMobile("");
     } catch (err) {
       console.error("Error updating mobile:", err);
-      alert("Failed to update mobile number.");
+      toast.error("Failed to update mobile number.");
     }
   };
 

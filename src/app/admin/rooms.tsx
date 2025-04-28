@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getAllDocuments, toggleAvailability, updateDocument } from "@/lib/firestoreUtils";
 import Image from "next/image";
+import { toast } from "react-hot-toast";
 
 interface Room {
   roomId: string; // Updated from `id` to `roomId`
@@ -58,7 +59,7 @@ const ManageRooms: React.FC = () => {
       );
     } catch (err) {
       console.error("Error toggling availability:", err);
-      alert("Failed to update room availability.");
+      toast.error("Failed to update room availability.");
     }
   };
 
@@ -79,7 +80,7 @@ const ManageRooms: React.FC = () => {
       setEditingRoom(null); // Exit edit mode
     } catch (err) {
       console.error("Error updating room:", err);
-      alert("Failed to save changes.");
+      toast.error("Failed to save changes.");
     }
   };
 

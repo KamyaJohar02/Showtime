@@ -7,6 +7,7 @@ import "react-day-picker/dist/style.css";
 import { db } from "@/firebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 interface Theater {
   id: string;
@@ -151,7 +152,7 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
         router.push("/booking/form");
       }
     } else {
-      alert("Please select a date, theater, and slot before proceeding.");
+      toast.error("Please select a date, theater, and slot before proceeding.");
     }
   };
 

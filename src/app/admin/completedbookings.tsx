@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { getAllDocuments, deleteDocument } from "@/lib/firestoreUtils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { toast } from "react-hot-toast";
 
 interface Booking {
   id: string;
@@ -56,7 +57,7 @@ const CompletedBookings: React.FC = () => {
       setBookings((prev) => prev.filter((booking) => booking.id !== id));
     } catch (err) {
       console.error("Error deleting booking:", err);
-      alert("Failed to delete booking.");
+      toast.error("Failed to delete booking.");
     }
   };
 

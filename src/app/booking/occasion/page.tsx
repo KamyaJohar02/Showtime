@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 const occasions = [
   { label: "Birthday", image: "/Images/occasions/birthday.png" },
@@ -50,7 +51,7 @@ const OccasionPage = () => {
 
   const handleNext = () => {
     if (!selectedOccasion || !nameToInclude.trim()) {
-      alert("Please select an occasion and enter a name to be included.");
+      toast.success("Please select an occasion and enter a name to be included.");
       return;
     }
 

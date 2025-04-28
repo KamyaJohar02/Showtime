@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { toast } from "react-hot-toast";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -143,19 +144,21 @@ const handleSendOtp = async () => {
       });
   
       const data = await res.json();
-  
-      if (data.success) {
-        setOtpSent(true);
-        setCooldown(30);
-        alert("OTP sent successfully!");
-      } else {
-        setLoginMobileError(data.message || "Failed to send OTP");
-      }
-    } catch (err) {
-      console.error("Error sending OTP:", err);
-      setLoginMobileError("Something went wrong while sending OTP.");
+
+    if (data.success) {
+      setOtpSent(true);
+      setCooldown(30);
+      toast.success("OTP sent successfully!"); // ✅ Replaced alert with toast
+    } else {
+      setLoginMobileError(data.message || "Failed to send OTP");
+      toast.error(data.message || "Failed to send OTP"); // ✅ Optional: show error as toast too
     }
-  }; 
+  } catch (err) {
+    console.error("Error sending OTP:", err);
+    setLoginMobileError("Something went wrong while sending OTP.");
+    toast.error("Something went wrong while sending OTP."); // ✅ Optional: show error
+  }
+};
   const handleResendOtp = async () => {
     setFormData((prev) => ({
       ...prev,
@@ -174,13 +177,13 @@ const handleSendOtp = async () => {
       if (data.success) {
         setOtpSent(true);
         setCooldown(30);
-        alert("OTP resent successfully!");
+        toast.success("OTP resent successfully!");
       } else {
-        alert(data.message || "Failed to resend OTP");
+        toast.error(data.message || "Failed to resend OTP");
       }
     } catch (err) {
       console.error("Error resending OTP:", err);
-      alert("Something went wrong while resending OTP.");
+      toast.error("Something went wrong while resending OTP.");
     }
   };
   const handleOtpChange = (idx: number, value: string) => {
@@ -226,7 +229,7 @@ const handleSendOtp = async () => {
     const password = formData.password;
 
     if (!email) {
-      alert("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
       return;
     }
 
@@ -251,7 +254,7 @@ const handleSendOtp = async () => {
       if (error instanceof Error) {
         alert(error.message);
       } else {
-        alert("An unexpected error occurred. Please try again.");
+        toast.error("An unexpected error occurred. Please try again.");
       }
     }
   };
@@ -261,7 +264,7 @@ const handleSendOtp = async () => {
   
     try {
       if (!email || !password || !name || !mobile) {
-        alert("Please fill all the fields");
+        toast.error("Please fill all the fields");
         return;
       }
   
@@ -269,7 +272,7 @@ const handleSendOtp = async () => {
       const emailQuery = query(collection(db, "users"), where("email", "==", email));
       const emailSnapshot = await getDocs(emailQuery);
       if (!emailSnapshot.empty) {
-        alert("This email is already registered. Please use a different email.");
+        toast.error("This email is already registered. Please use a different email.");
         return;
       }
   
@@ -277,7 +280,7 @@ const handleSendOtp = async () => {
       const mobileQuery = query(collection(db, "users"), where("mobile", "==", mobile));
       const mobileSnapshot = await getDocs(mobileQuery);
       if (!mobileSnapshot.empty) {
-        alert("This mobile number is already registered. Please use a different number.");
+        toast.error("This mobile number is already registered. Please use a different number.");
         return;
       }
   
@@ -295,7 +298,7 @@ const handleSendOtp = async () => {
         createdAt: new Date(),
       });
   
-      alert("Signup successful! Redirecting to login page...");
+      toast.success("Signup successful! Redirecting to login page...");
       setFormData({
         name: "",
         email: "",
@@ -313,19 +316,19 @@ const handleSendOtp = async () => {
       if (error instanceof FirebaseError) {
         switch (error.code) {
           case "auth/email-already-in-use":
-            alert("The email address is already in use. Please use a different email.");
+            toast.error("The email address is already in use. Please use a different email.");
             break;
           case "auth/invalid-email":
-            alert("Invalid email address. Please enter a valid email.");
+            toast.error("Invalid email address. Please enter a valid email.");
             break;
           case "auth/weak-password":
-            alert("Password is too weak. Please enter a stronger password.");
+            toast.error("Password is too weak. Please enter a stronger password.");
             break;
           default:
-            alert("An error occurred. Please try again.");
+            toast.error("An error occurred. Please try again.");
         }
       } else {
-        alert("An unexpected error occurred. Please try again.");
+        toast.error("An unexpected error occurred. Please try again.");
       }
     }
   };
@@ -348,13 +351,13 @@ const handleSendOtp = async () => {
       if (!data.success) {
         setOtpVerified(false);
         setOtpError(true);
-        alert(data.message || "OTP verification failed.");
+        toast.error(data.message || "OTP verification failed.");
         return;
       }
   
       setOtpVerified(true);
       setOtpError(false);
-      alert("OTP verified successfully!");
+      toast.success("OTP verified successfully!");
   
       // 🔥 Now get Firebase custom token from your server
       const tokenRes = await fetch("/api/auth/custom-token", {
@@ -368,17 +371,17 @@ const handleSendOtp = async () => {
       if (tokenData.token) {
         // 🔐 Log the user in using Firebase
         await signInWithCustomToken(auth, tokenData.token);
-        alert("Logged in successfully!");
+        toast.success("Logged in successfully!");
         router.push("/myprofile"); // redirect after login
       } else {
-        alert("Token not received. Cannot log in.");
+        toast.error("Token not received. Cannot log in.");
       }
   
     } catch (err) {
       console.error("Error verifying OTP:", err);
       setOtpVerified(false);
       setOtpError(true);
-      alert("Something went wrong while verifying OTP.");
+      toast.error("Something went wrong while verifying OTP.");
     }
   };
 
@@ -387,7 +390,7 @@ const handleSendOtp = async () => {
 
     try {
       if (!emailOrMobile || !emailOrMobile.includes("@")) {
-        alert("Please enter a valid email address.");
+        toast.error("Please enter a valid email address.");
         return;
       }
 
@@ -398,19 +401,19 @@ const handleSendOtp = async () => {
       const userSnapshot = await getDocs(userQuery);
 
       if (userSnapshot.empty) {
-        alert("No account found with this email address.");
+        toast.error("No account found with this email address.");
         return;
       }
 
       await sendPasswordResetEmail(auth, emailOrMobile);
-      alert("Password reset email sent! Please check your inbox.");
+      toast.success("Password reset email sent! Please check your inbox.");
       setShowResetPassword(false);
       setFormData({ ...formData, emailOrMobile: "" });
     } catch (error) {
       if (error instanceof FirebaseError) {
-        alert("An error occurred. Please try again later.");
+        toast.error("An error occurred. Please try again later.");
       } else {
-        alert("An unexpected error occurred. Please try again.");
+        toast.error("An unexpected error occurred. Please try again.");
       }
     }
   };

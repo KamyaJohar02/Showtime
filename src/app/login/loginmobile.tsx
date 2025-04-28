@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { toast } from "react-hot-toast";
 import Image from "next/image";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import {
@@ -37,7 +38,7 @@ const LoginMobile: React.FC = () => {
     console.log("Login Password:", password); // Log password for debugging
   
     if (!email) {
-      alert("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
       return;
     }
   
@@ -69,10 +70,10 @@ const LoginMobile: React.FC = () => {
     } catch (error) {
       if (error instanceof Error) {
         console.error("Login failed:", error.message);
-        alert(error.message);
+        toast.error(error.message);
       } else {
         console.error("Unexpected error:", error);
-        alert("An unexpected error occurred. Please try again.");
+        toast.error("An unexpected error occurred. Please try again.");
       }
     }
   };
@@ -86,7 +87,7 @@ const LoginMobile: React.FC = () => {
     try {
       // Validate required fields
       if (!email || !password || !name || !mobile) {
-        alert("Please fill all the fields");
+        toast.error("Please fill all the fields");
         return;
       }
 
@@ -104,7 +105,7 @@ const LoginMobile: React.FC = () => {
       });
 
       // Success message
-      alert("Signup successful! Redirecting to login page...");
+      
 
       // Reset the form
       setFormData({
@@ -126,19 +127,19 @@ const LoginMobile: React.FC = () => {
       if (error instanceof FirebaseError) {
         switch (error.code) {
           case "auth/email-already-in-use":
-            alert("The email address is already in use. Please use a different email.");
+            toast.error("The email address is already in use. Please use a different email.");
             break;
           case "auth/invalid-email":
-            alert("Invalid email address. Please enter a valid email.");
+            toast.error("Invalid email address. Please enter a valid email.");
             break;
           case "auth/weak-password":
-            alert("Password is too weak. Please enter a stronger password.");
+            toast.error("Password is too weak. Please enter a stronger password.");
             break;
           default:
-            alert("An error occurred. Please try again.");
+            toast.error("An error occurred. Please try again.");
         }
       } else {
-        alert("An unexpected error occurred. Please try again.");
+        toast.error("An unexpected error occurred. Please try again.");
       }
     }
   };
@@ -275,7 +276,7 @@ const [loginMobileError, setLoginMobileError] = useState("");
       if (data.success) {
         setOtpSent(true);
         setCooldown(30);
-        alert("OTP sent successfully!");
+        toast.success("OTP sent successfully!");
       } else {
         setLoginMobileError(data.message || "Failed to send OTP");
       }
@@ -314,13 +315,13 @@ const [loginMobileError, setLoginMobileError] = useState("");
       if (data.success) {
         setOtpSent(true);
         setCooldown(30);
-        alert("OTP resent successfully!");
+        toast.success("OTP resent successfully!");
       } else {
-        alert(data.message || "Failed to resend OTP");
+        toast.error(data.message || "Failed to resend OTP");
       }
     } catch (err) {
       console.error("Error resending OTP:", err);
-      alert("Something went wrong while resending OTP.");
+      toast.error("Something went wrong while resending OTP.");
     }
   };
   
@@ -377,13 +378,13 @@ const verifyOtp = async () => {
     if (!data.success) {
       setOtpVerified(false);
       setOtpError(true);
-      alert(data.message || "OTP verification failed.");
+      toast.error(data.message || "OTP verification failed.");
       return;
     }
 
     setOtpVerified(true);
     setOtpError(false);
-    alert("OTP verified successfully!");
+    toast.success("OTP verified successfully!");
 
     // 🔥 Now get Firebase custom token from your server
     const tokenRes = await fetch("/api/auth/custom-token", {
@@ -397,17 +398,16 @@ const verifyOtp = async () => {
     if (tokenData.token) {
       // 🔐 Log the user in using Firebase
       await signInWithCustomToken(auth, tokenData.token);
-      alert("Logged in successfully!");
       router.push("/myprofile"); // redirect after login
     } else {
-      alert("Token not received. Cannot log in.");
+      toast.error("Token not received. Cannot log in.");
     }
 
   } catch (err) {
     console.error("Error verifying OTP:", err);
     setOtpVerified(false);
     setOtpError(true);
-    alert("Something went wrong while verifying OTP.");
+    toast.error("Something went wrong while verifying OTP.");
   }
 };
 
@@ -419,7 +419,7 @@ const verifyOtp = async () => {
     try {
       // Validate the email format
       if (!emailOrMobile || !emailOrMobile.includes("@")) {
-        alert("Please enter a valid email address.");
+        toast.error("Please enter a valid email address.");
         return;
       }
   
@@ -431,22 +431,22 @@ const verifyOtp = async () => {
       const userSnapshot = await getDocs(userQuery);
   
       if (userSnapshot.empty) {
-        alert("No account found with this email address.");
+        toast.error("No account found with this email address.");
         return;
       }
   
       // Send password reset email
       await sendPasswordResetEmail(auth, emailOrMobile);
-      alert("Password reset email sent! Please check your inbox.");
+      toast.success("Password reset email sent! Please check your inbox.");
       setShowResetPassword(false); // Close the reset modal
       setFormData({ ...formData, emailOrMobile: "" }); // Clear the input field
     } catch (error) {
       console.error("Error sending reset email:", error);
   
       if (error instanceof FirebaseError) {
-        alert("An error occurred. Please try again later.");
+        toast.error("An error occurred. Please try again later.");
       } else {
-        alert("An unexpected error occurred. Please try again.");
+        toast.error("An unexpected error occurred. Please try again.");
       }
     }
   };
