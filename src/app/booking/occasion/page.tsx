@@ -51,7 +51,7 @@ const OccasionPage = () => {
 
   const handleNext = () => {
     if (!selectedOccasion || !nameToInclude.trim()) {
-      toast.success("Please select an occasion and enter a name to be included.");
+      toast.error("Please select an occasion and enter a name to be included.");
       return;
     }
 

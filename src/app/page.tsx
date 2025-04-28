@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { toast } from "react-hot-toast";
 import Trending from "@/components/trending";
 import TopPage from "@/components/toppage";
 import RoomCards from "@/components/rooms";
@@ -195,7 +196,7 @@ function ActualHome() {
               const query = formData.get("query") as string;
 
               if (!name || !mobile || !query) {
-                alert("Please fill all the fields.");
+                toast.error("Please fill all the fields.");
                 return;
               }
 
@@ -205,11 +206,11 @@ function ActualHome() {
                   mobile,
                   query,
                 });
-                alert("Your query has been submitted successfully!");
+                toast.success("Your query has been submitted successfully!");
                 console.log("Document written with ID: ", docRef.id);
               } catch (error) {
                 console.error("Error adding document: ", error);
-                alert("There was an error submitting your query. Please try again.");
+                toast.error("There was an error submitting your query. Please try again.");
               }
 
               form.reset();

@@ -2,6 +2,7 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getAuth, Auth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
+import { toast } from "react-hot-toast";
 
 // Firebase configuration object (Replace these with your actual Firebase credentials)
 const firebaseConfig = {
@@ -26,7 +27,8 @@ setPersistence(auth, browserLocalPersistence)
     console.log("✅ Firebase auth persistence set to LOCAL.");
   })
   .catch((error) => {
-    console.error("❌ Error setting persistence:", error);
+    toast.error(`❌ Error setting persistence: ${error.message || "An unexpected error occurred."}`);
+
   });
 
 // Optional: Add debug logging in development mode

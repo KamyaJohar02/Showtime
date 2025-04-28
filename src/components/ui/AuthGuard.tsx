@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useAuth } from "@/components/context/AuthContext";
+import { useAuth } from "@/components/context/AuthContext"; // ✅ named import
 
 interface AuthGuardProps {
   children: React.ReactNode;
