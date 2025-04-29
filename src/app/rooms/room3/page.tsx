@@ -53,7 +53,6 @@ const Room3Page: React.FC = () => {
                 <li>💼 Business lounge and breakout areas</li>
                 <li>💡 Customizable lighting options</li>
                 <li>📞 Dedicated support team for assistance</li>
-                <li>⏱️ Extended booking options for special events</li>
               </ul>
             </div>
           </div>

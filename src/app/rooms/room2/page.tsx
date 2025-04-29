@@ -53,7 +53,7 @@ const Room2Page: React.FC = () => {
                 <li>👨‍👩‍👧 Family concierge services available</li>
                 <li>🧸 Special amenities for children</li>
                 <li>🚿 Modern washroom facilities</li>
-                <li>🛌 Extra bedding options upon request</li>
+                <li>🛌 Extra seating options upon request</li>
               </ul>
             </div>
           </div>

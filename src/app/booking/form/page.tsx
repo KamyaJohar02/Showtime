@@ -19,9 +19,9 @@ const FormPage = () => {
     string,
     { maxPeople: number; extraChargeStartsAfter: number; extraChargePerPerson: number }
   > = {
-    Sweet: { maxPeople: 6, extraChargeStartsAfter: 2, extraChargePerPerson: 450 },
-    Galaxy: { maxPeople: 13, extraChargeStartsAfter: 2, extraChargePerPerson: 450 },
-    Wonder: { maxPeople: 11, extraChargeStartsAfter: 2, extraChargePerPerson: 450 },
+    Sweet: { maxPeople: 6, extraChargeStartsAfter: 2, extraChargePerPerson: 399 },
+    Galaxy: { maxPeople: 13, extraChargeStartsAfter: 2, extraChargePerPerson: 399 },
+    Wonder: { maxPeople: 11, extraChargeStartsAfter: 2, extraChargePerPerson: 399 },
   };
 
   useEffect(() => {
@@ -69,11 +69,17 @@ const FormPage = () => {
     localStorage.setItem("selectedTheater", JSON.stringify(updatedTheater));
     localStorage.setItem("name", name);
     localStorage.setItem("phoneNumber", phoneNumber);
-    localStorage.setItem("email", email);
+    
+    // Store '-' if email is empty
+    const emailToStore = email ? email : '-';
+    localStorage.setItem("email", emailToStore);
+  
     localStorage.setItem("numPeople", String(numPeople));
   
     router.push("/booking/occasion");
   };
+  
+  
   
 
   const getMaxPeopleLimit = () => {
@@ -174,15 +180,14 @@ const FormPage = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 mb-1">Email ID *</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border p-2 rounded"
-              required
-            />
-          </div>
+  <label className="block text-gray-700 mb-1">Email ID (Optional) </label> {/* Removed '*' to make it optional */}
+  <input
+    type="email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    className="w-full border p-2 rounded"
+  />
+</div>
 
           <div className="mb-4">
             <label className="block text-gray-700 mb-1">Number of People *</label>

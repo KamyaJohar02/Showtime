@@ -246,116 +246,113 @@ const [couponError, setCouponError] = useState("");
 
   return (
     <div className="flex flex-col md:flex-row gap-6 p-6">
-      <div className="w-full md:w-2/3">
-        <h2 className="text-2xl font-bold mb-4">Extra Decoration <span className="text-sm text-gray-500">(optional)</span></h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
-          {extraDecorations.map((item) => (
-            <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-red-700 bg-red-100" : "border-gray-300"}`}>
-              <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
-              <p className="mt-2 font-medium">{item.name}</p>
-              <p className="text-sm">₹ {item.price}</p>
-            </div>
-          ))}
+  <div className="w-full md:w-2/3">
+    <h2 className="text-2xl font-bold mb-4">Extra Decoration <span className="text-sm text-gray-500">(optional)</span></h2>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
+      {extraDecorations.map((item) => (
+        <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-red-700 bg-red-100" : "border-gray-300"}`}>
+          <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
+          <p className="mt-2 font-medium">{item.name}</p>
+          <p className="text-sm">₹ {item.price}</p>
         </div>
+      ))}
+    </div>
 
-        <h2 className="text-2xl font-bold mb-4">Choose Gifts <span className="text-sm text-gray-500">(optional)</span></h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
-          {gifts.map((item) => (
-            <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-red-700 bg-red-100" : "border-gray-300"}`}>
-              <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
-              <p className="mt-2 font-medium">{item.name}</p>
-              <p className="text-sm">₹ {item.price}</p>
-            </div>
-          ))}
+    <h2 className="text-2xl font-bold mb-4">Choose Gifts <span className="text-sm text-gray-500">(optional)</span></h2>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
+      {gifts.map((item) => (
+        <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-red-700 bg-red-100" : "border-gray-300"}`}>
+          <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
+          <p className="mt-2 font-medium">{item.name}</p>
+          <p className="text-sm">₹ {item.price}</p>
         </div>
+      ))}
+    </div>
 
-        <h2 className="text-2xl font-bold mb-4">Special Services <span className="text-sm text-gray-500">(optional)</span></h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {specialServices.map((item) => (
-            <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-red-700 bg-red-100" : "border-gray-300"}`}>
-              <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
-              <p className="mt-2 font-medium">{item.name}</p>
-              <p className="text-sm">₹ {item.price}</p>
-            </div>
-          ))}
+    <h2 className="text-2xl font-bold mb-4">Special Services <span className="text-sm text-gray-500">(optional)</span></h2>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      {specialServices.map((item) => (
+        <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-red-700 bg-red-100" : "border-gray-300"}`}>
+          <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
+          <p className="mt-2 font-medium">{item.name}</p>
+          <p className="text-sm">₹ {item.price}</p>
         </div>
-
-        <div className="flex justify-between mt-10">
-          <button onClick={() => router.back()} className="py-3 px-8 bg-gray-300 text-black font-semibold rounded hover:bg-gray-400">Back</button>
-          <button
-            onClick={handlePaymentAndBooking}
-            className="py-3 px-8 rounded-full bg-red-900 text-white font-semibold shadow-md hover:bg-red-800"
-          >
-            Pay ₹{advance}
-          </button>
-        </div>
-      </div>
-
-      <div className="w-full md:w-1/3 bg-gray-100 p-6 rounded-lg shadow">
-        <h3 className="text-lg font-bold mb-2">Booking summary</h3>
-        <div className="text-sm space-y-1">
-          <div className="flex justify-between"><span>{selectedTheater?.name || "Room"} ({numPeople} ppl)</span><span>₹ {theaterCost}</span></div>
-          {selectedSlot?.time && <div className="flex justify-between"><span>Time Slot</span><span>{selectedSlot.time}</span></div>}
-          {selectedCake && <div className="flex justify-between"><span>{selectedCake.name}</span><span>₹ {cakeCost}</span></div>}
-          {selectedExtras.map((item) => (
-            <div key={item.name} className="flex justify-between"><span>{item.name}</span><span>₹ {item.price}</span></div>
-          ))}
-          <div className="flex justify-between border-t mt-2 pt-2 font-medium"><span>Subtotal</span><span>₹ {discountedTotal}</span></div>
-          <div className="mt-4 font-semibold">Advance amount payable</div>
-          <div className="flex justify-between"><span>₹ {advance}</span></div>
-          <div className="flex justify-between text-xs text-gray-500"><span>Balance amount</span><span>₹ {balance}</span></div>
-          <div className="text-xs text-gray-400 mt-1">(Payable at the venue)</div>
-          <hr className="my-3" />
-          <div className="text-xs text-gray-700 space-y-1">
-            <p><strong>Name:</strong> {name}</p>
-            <p><strong>Phone:</strong> {phoneNumber}</p>
-            <p><strong>Email:</strong> {email}</p>
-            <p><strong>Occasion:</strong> {occasion}</p>
-            <p><strong>Include Name:</strong> {nameToInclude}</p>
-            <p><strong>Date:</strong> {displayDate}</p>
-          {/* Coupon Input */}
-          <div className="mt-4">
-  <label className="block font-bold mb-1">Apply Coupon</label>
-  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-    <input
-      type="text"
-      value={couponCode}
-      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-      placeholder="Enter your coupon code"
-      className="px-4 py-2 rounded-md border border-gray-300 w-full sm:w-auto text-sm focus:outline-none focus:ring-2 focus:ring-red-500 uppercase"
-    />
-    {!couponApplied ? (
-      
-      <button
-        onClick={handleApplyCoupon}
-        className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
-      >
-        Apply
-      </button>
-    ) : (
-      <button
-        onClick={handleRemoveCoupon}
-        className="px-4 py-2 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600 transition"
-      >
-        Remove
-      </button>
-    )}
+      ))}
+    </div>
   </div>
-  {couponError && (
-    <p className="text-sm text-red-500 mt-1">{couponError}</p>
-  )}
-  {couponApplied && (
-  <p className="text-xs text-green-600 mt-2 italic">
-    NOTE: Prices have been reduced
-  </p>
-)}
-</div>
 
+  <div className="w-full md:w-1/3 bg-gray-100 p-6 rounded-lg shadow">
+    <h3 className="text-lg font-bold mb-2">Booking Summary</h3>
+    <div className="text-sm space-y-1">
+      <div className="flex justify-between"><span>{selectedTheater?.name || "Room"} ({numPeople} ppl)</span><span>₹ {theaterCost}</span></div>
+      {selectedSlot?.time && <div className="flex justify-between"><span>Time Slot</span><span>{selectedSlot.time}</span></div>}
+      {selectedCake && <div className="flex justify-between"><span>{selectedCake.name}</span><span>₹ {cakeCost}</span></div>}
+      {selectedExtras.map((item) => (
+        <div key={item.name} className="flex justify-between"><span>{item.name}</span><span>₹ {item.price}</span></div>
+      ))}
+      <div className="flex justify-between border-t mt-2 pt-2 font-medium"><span>Subtotal</span><span>₹ {discountedTotal}</span></div>
+      <div className="mt-4 font-semibold">Advance amount payable</div>
+      <div className="flex justify-between"><span>₹ {advance}</span></div>
+      <div className="flex justify-between text-xs text-gray-500"><span>Balance amount</span><span>₹ {balance}</span></div>
+      <div className="text-xs text-gray-400 mt-1">(Payable at the venue)</div>
+      <hr className="my-3" />
+      <div className="text-xs text-gray-700 space-y-1">
+        <p><strong>Name:</strong> {name}</p>
+        <p><strong>Phone:</strong> {phoneNumber}</p>
+        <p><strong>Email:</strong> {email}</p>
+        <p><strong>Occasion:</strong> {occasion}</p>
+        <p><strong>Include Name:</strong> {nameToInclude}</p>
+        <p><strong>Date:</strong> {displayDate}</p>
 
-
+        {/* Coupon Input */}
+        <div className="mt-4">
+          <label className="block font-bold mb-1">Apply Coupon</label>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              placeholder="Enter your coupon code"
+              className="px-4 py-2 rounded-md border border-gray-300 w-full sm:w-auto text-sm focus:outline-none focus:ring-2 focus:ring-red-500 uppercase"
+            />
+            {!couponApplied ? (
+              <button
+                onClick={handleApplyCoupon}
+                className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
+              >
+                Apply
+              </button>
+            ) : (
+              <button
+                onClick={handleRemoveCoupon}
+                className="px-4 py-2 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600 transition"
+              >
+                Remove
+              </button>
+            )}
           </div>
+          {couponError && (
+            <p className="text-sm text-red-500 mt-1">{couponError}</p>
+          )}
+          {couponApplied && (
+            <p className="text-xs text-green-600 mt-2 italic">
+              NOTE: Prices have been reduced
+            </p>
+          )}
         </div>
       </div>
+    </div>
+    {/* Moved the Pay button after the summary */}
+    <div className="flex justify-between mt-10">
+      <button onClick={() => router.back()} className="py-3 px-8 bg-gray-300 text-black font-semibold rounded hover:bg-gray-400">Back</button>
+      <button
+        onClick={handlePaymentAndBooking}
+        className="py-3 px-8 rounded-full bg-red-900 text-white font-semibold shadow-md hover:bg-red-800"
+      >
+        Pay ₹{advance}
+      </button>
+    </div>
+  </div>
     </div>
   );
 };
