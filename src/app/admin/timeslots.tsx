@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 interface Theater {
   id: string;
   name: string;
-  image: string;
+  imageUrl: string;
   maxPeople: number;
   timeSlots: string[];
 }
@@ -236,7 +236,7 @@ const ManageTimeSlots = () => {
             return (
               <div key={theater.id} className="border rounded-lg shadow-md p-4">
                 <Image
-                  src={theater.image || "/Images/Room1.jpg"}
+                  src={theater.imageUrl || "/Images/Room1.jpg"}
                   alt={theater.name}
                   width={400}
                   height={200}
