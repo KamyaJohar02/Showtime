@@ -20,7 +20,7 @@ interface Theater {
   price: number;
   basePeople: number;
   extraPeopleNote: string;
-  image: string;
+  imageUrl: string; 
   rating: number;
   timeSlots: string[];
 }
@@ -202,7 +202,7 @@ const Bookingx = () => {
             return (
               <div key={theater.id} className="border rounded-lg shadow-md p-4">
                 <Image
-                  src={theater.image || "/Images/Room1.jpg"}
+                  src={theater.imageUrl || "/Images/Room1.jpg"}
                   alt={theater.name}
                   width={400}
                   height={200}
