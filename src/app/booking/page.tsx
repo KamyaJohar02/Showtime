@@ -33,14 +33,6 @@ interface TimeSlot {
   isBooked?: boolean;
 }
 
-
-
-const roomPrices: Record<string, number> = {
-  "Sweet": 1999,
-  "Wonder": 2199,
-  "Galaxy": 2499,
-};
-
 const Bookingx = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
@@ -53,7 +45,6 @@ const Bookingx = () => {
   const router = useRouter();
   const today = new Date();
   const isOfferActive = true; // 🔁 Change to false later to remove offer
-
 
   useEffect(() => {
     const fetchDisabledDates = async () => {
@@ -69,6 +60,9 @@ const Bookingx = () => {
   }, []);
 
   useEffect(() => {
+    // Reset selected slot whenever the selected date changes
+    setSelectedSlot(null); // Deselect slot when date changes
+
     const fetchTheatersAndSlots = async () => {
       try {
         const theaterSnapshot = await getDocs(collection(db, "rooms"));
@@ -77,11 +71,11 @@ const Bookingx = () => {
           ...doc.data(),
         })) as Theater[];
         setTheaters(fetchedTheaters);
-  
+
         if (!selectedDate) return;
-  
+
         const formattedDate = selectedDate.toLocaleDateString("en-CA");
-  
+
         const bookedSnapshot = await getDocs(
           query(collection(db, "booked"), where("date", "==", formattedDate))
         );
@@ -92,12 +86,11 @@ const Bookingx = () => {
           if (!bookedMap[roomName]) bookedMap[roomName] = new Set();
           bookedMap[roomName].add(data.timeSlot);
         });
-  
+
         const slotMap: Record<string, TimeSlot[]> = {};
         for (const theater of fetchedTheaters) {
-          // 🔄 Fetch timeSlots from subcollection of each room
           const timeSlotSnapshot = await getDocs(collection(db, "rooms", theater.id, "timeSlots"));
-  
+
           const roomSlots: TimeSlot[] = timeSlotSnapshot.docs.map((doc) => ({
             id: doc.id,
             name: doc.data().name,
@@ -106,19 +99,18 @@ const Bookingx = () => {
             isBooked: !doc.data().availability ||
               (bookedMap[theater.name.toLowerCase()]?.has(doc.data().time) ?? false),
           }));
-  
-          slotMap[theater.id] = roomSlots; // ✅ map per-theater subcollection
+
+          slotMap[theater.id] = roomSlots;
         }
-  
+
         setSlotsMap(slotMap);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-  
+
     fetchTheatersAndSlots();
   }, [selectedDate]);
-  
 
   const handleNext = () => {
     if (selectedTheaterId && selectedSlot && selectedDate) {
@@ -128,11 +120,11 @@ const Bookingx = () => {
       );
 
       if (selectedTheater && selectedSlotObj) {
-        const originalPrice = roomPrices[selectedTheater.name] || selectedTheater.price;
-const discountedPrice = selectedTheater.name === "Sweet" ? 999 :
+        const originalPrice = selectedTheater.price; // Use the updated price from the rooms collection
+        const discountedPrice = selectedTheater.name === "Sweet" ? 999 :
                         selectedTheater.name === "Wonder" ? 999 :
                         selectedTheater.name === "Galaxy" ? 999 : originalPrice;
-const finalPrice = isOfferActive ? discountedPrice : originalPrice;
+        const finalPrice = isOfferActive ? discountedPrice : originalPrice;
 
         const fullTheaterData = {
           id: selectedTheater.id,
@@ -161,28 +153,28 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
       <header className="p-6">
         <h2 className="text-2xl font-bold mb-2">Select a Date</h2>
         <button
-  onClick={() => setShowCalendar(!showCalendar)}
-  className="border px-4 py-2 rounded shadow bg-white hover:bg-gray-100 flex items-center gap-2"
->
-  <span>
-    {selectedDate?.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }) || "Pick a date"}
-  </span>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={`h-4 w-4 transition-transform duration-200 ${
-      showCalendar ? "rotate-180" : "rotate-0"
-    }`}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-  </svg>
-</button>
+          onClick={() => setShowCalendar(!showCalendar)}
+          className="border px-4 py-2 rounded shadow bg-white hover:bg-gray-100 flex items-center gap-2"
+        >
+          <span>
+            {selectedDate?.toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }) || "Pick a date"}
+          </span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`h-4 w-4 transition-transform duration-200 ${
+              showCalendar ? "rotate-180" : "rotate-0"
+            }`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
         {showCalendar && (
           <div className="mt-4">
@@ -205,26 +197,17 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {theaters.map((theater) => {
             const availableSlots = (slotsMap[theater.id] || []).filter((slot) => !slot.isBooked).length;
-            const displayPrice = roomPrices[theater.name] || theater.price;
+            const displayPrice = theater.price; // Use the updated price from the Firestore collection
 
             return (
               <div key={theater.id} className="border rounded-lg shadow-md p-4">
                 <Image
-  src={
-    theater.image ||
-    (theater.name === "Sweet"
-      ? "/Images/sweetroom.jpg"
-      : theater.name === "Wonder"
-      ? "/Images/wondersroom.jpg"
-      : theater.name === "Galaxy"
-      ? "/Images/galaxyroom.jpg"
-      : "/Images/Room1.jpg")
-  }
-  alt={theater.name}
-  width={400}
-  height={200}
-  className="rounded-lg w-full h-48 object-cover mb-4"
-/>
+                  src={theater.image || "/Images/Room1.jpg"}
+                  alt={theater.name}
+                  width={400}
+                  height={200}
+                  className="rounded-lg w-full h-48 object-cover mb-4"
+                />
 
                 <h3 className="text-xl font-semibold mb-1">{theater.name}</h3>
                 <p className="text-red-500 text-sm mb-2">{availableSlots} Slots Available</p>
@@ -232,7 +215,7 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
                   <li>👥 Max {theater.maxPeople} People</li>
                   <li>🍽️ Food & Drinks available</li>
                   <li>✅ Free Cancellation*</li>
-                  <li>💼 Decoration {theater.decoration}</li>
+                  <li>💼 Decoration Included {theater.decoration}</li>
                 </ul>
                 <div className="mb-2">
                   <strong>Select Time Slot:</strong>
@@ -259,46 +242,25 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
                   </div>
                 </div>
                 <div className="mt-2 text-lg font-semibold">
-  {isOfferActive ? (
-    theater.name === "Sweet" ? (
-      <p>
-        <span className="line-through text-gray-500 mr-2">₹1999</span>
-        <span className="inline-block px-4 py-1 rounded-full bg-gray-300">
-    <span className="rainbow-text font-bold text-2xl">₹999</span>
-  </span>
-      </p>
-    ) : theater.name === "Galaxy" ? (
-      <p>
-        <span className="line-through text-gray-500 mr-2">₹2999</span>
-        <span className="inline-block px-4 py-1 rounded-full bg-gray-300">
-    <span className="rainbow-text font-bold text-2xl">₹999</span>
-  </span>
-      </p>
-    ) : theater.name === "Wonder" ? (
-      <p>
-        <span className="line-through text-gray-500 mr-2">₹2699</span>
-        <span className="inline-block px-4 py-1 rounded-full bg-gray-300">
-    <span className="rainbow-text font-bold text-2xl">₹999</span>
-  </span>
-      </p>
-    ) : (
-      <p>₹{displayPrice}</p>
-    )
-  ) : (
-    // 👇 Use this when offer is turned off
-    <p>₹{displayPrice}</p>
-  )}
-</div>
-{/* 🎯 New "Next" button inside the card */}
-  {selectedTheaterId === theater.id && selectedSlot && (
-    <button
-      onClick={handleNext}
-      className="bg-red-500 text-white px-4 py-2 rounded-full mt-4 w-full shadow-md hover:bg-red-600"
-    >
-      Next
-    </button>
-     )}
-
+                  {isOfferActive ? (
+                    <p>
+                      <span className="line-through text-gray-500 mr-2">₹{displayPrice}</span>
+                      <span className="inline-block px-4 py-1 rounded-full bg-gray-300">
+                        <span className="rainbow-text font-bold text-2xl">₹999</span>
+                      </span>
+                    </p>
+                  ) : (
+                    <p>₹{displayPrice}</p>
+                  )}
+                </div>
+                {selectedTheaterId === theater.id && selectedSlot && (
+                  <button
+                    onClick={handleNext}
+                    className="bg-red-500 text-white px-4 py-2 rounded-full mt-4 w-full shadow-md hover:bg-red-600"
+                  >
+                    Next
+                  </button>
+                )}
               </div>
             );
           })}
@@ -306,13 +268,12 @@ const finalPrice = isOfferActive ? discountedPrice : originalPrice;
       </main>
 
       <footer className="mt-10 text-center text-sm text-gray-600 py-4">
-      <button
-    onClick={() => router.push("/")}
-    className="bg-gray-400 text-black px-6 py-2 rounded-full shadow-sm mr-4 hover:bg-green-400"
-  >
-    ← Back to Home
-  </button>
-        
+        <button
+          onClick={() => router.push("/")}
+          className="bg-gray-400 text-black px-6 py-2 rounded-full shadow-sm mr-4 hover:bg-green-400"
+        >
+          ← Back to Home
+        </button>
       </footer>
     </div>
   );

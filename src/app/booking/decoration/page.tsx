@@ -102,6 +102,8 @@ const [couponError, setCouponError] = useState("");
   const advance = 499;
   const balance = subtotal - advance;
 
+  
+
 
 
   const handleApplyCoupon = async () => {

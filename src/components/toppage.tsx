@@ -11,11 +11,10 @@ const dancingScript = Dancing_Script({
 });
 
 const images = [
-  '/Images/photo1.png',
-  '/Images/photo2.png',
-  '/Images/Room1.JPG',
-  '/Images/Room2.JPG',
-  '/Images/Room3.JPG',
+  '/Images/wonders2.jpg',
+  '/Images/sweetroom.jpg',
+  '/Images/galaxy2.jpg',
+  '/Images/sweet2.jpg',
 ];
 
 const textToDisplay = "Celebrate your special moments in style with Showtime";
@@ -55,10 +54,14 @@ const TopPage: React.FC = () => {
       {/* 🔥 Gradient Marquee Ribbon */}
       <div className="w-full bg-gradient-to-r from-red-500 via-orange-400 to-yellow-300 overflow-hidden whitespace-nowrap py-2 z-50">
         <div className="inline-block animate-marquee text-black font-bold text-sm sm:text-base px-4">
-        ⏰ Hurry! Exclusive Discount Ending Soon — Book Now! —
-        🎉 Introductory Offer: All Rooms Now at Just ₹999!—
-          ⏰ Hurry! Exclusive Discount Ending Soon — Book Now! —
-          🎉 Introductory Offer: All Rooms Now at Just ₹999!
+        ⏰ Hurry! Exclusive Discount Ending Soon —   Book Now!   —
+        🎉 Introductory Offer: All Rooms Now at Just ₹999!   —
+          ⏰ Hurry! Exclusive Discount Ending Soon —   Book Now!   —
+          🎉 Introductory Offer: All Rooms Now at Just ₹999!   -
+          ⏰ Hurry! Exclusive Discount Ending Soon —   Book Now!   —
+          🎉 Introductory Offer: All Rooms Now at Just ₹999!   -
+          ⏰ Hurry! Exclusive Discount Ending Soon —   Book Now!   —
+          🎉 Introductory Offer: All Rooms Now at Just ₹999!   -
         </div>
       </div>
 

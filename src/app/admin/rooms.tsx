@@ -2,16 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { getAllDocuments, toggleAvailability, updateDocument } from "@/lib/firestoreUtils";
-import Image from "next/image";
 import { toast } from "react-hot-toast";
 
 interface Room {
   roomId: string; // Updated from `id` to `roomId`
   name: string;
-  description: string;
   availability: boolean;
-  imageUrl: string;
-  rate: string; // Allow `rate` to be edited as a string
+  price: string; // Changed from `rate` to `price`
+  maxPeople: number; // Added maxPeople to the interface
 }
 
 const ManageRooms: React.FC = () => {
@@ -29,10 +27,9 @@ const ManageRooms: React.FC = () => {
         const mappedRooms = fetchedDocuments.map((doc: any) => ({
           roomId: doc.id, // Map `id` to `roomId`
           name: doc.name,
-          description: doc.description,
           availability: doc.availability,
-          imageUrl: doc.imageUrl,
-          rate: doc.rate.toString(), // Cast rate to a string
+          price: doc.price.toString(), // Cast price to a string
+          maxPeople: doc.maxPeople, // Map `maxPeople`
         }));
         setRooms(mappedRooms as Room[]); // Cast to `Room[]` type
         setLoading(false);
@@ -46,7 +43,7 @@ const ManageRooms: React.FC = () => {
     loadRooms();
   }, []);
 
-  // Handle toggle
+  // Handle toggle availability
   const handleToggle = async (roomId: string) => {
     try {
       const updatedAvailability = await toggleAvailability("rooms", roomId);
@@ -69,8 +66,9 @@ const ManageRooms: React.FC = () => {
 
     try {
       await updateDocument("rooms", editingRoom.roomId, {
-        description: editingRoom.description,
-        rate: editingRoom.rate,
+        price: editingRoom.price, // Save price
+        availability: editingRoom.availability,
+        maxPeople: editingRoom.maxPeople, // Save maxPeople too
       });
       setRooms((prev) =>
         prev.map((room) =>
@@ -98,59 +96,79 @@ const ManageRooms: React.FC = () => {
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-gray-300 p-2">Name</th>
-              <th className="border border-gray-300 p-2">Description</th>
+              <th className="border border-gray-300 p-2">Max People</th>
               <th className="border border-gray-300 p-2">Availability</th>
-              <th className="border border-gray-300 p-2">Image</th>
-              <th className="border border-gray-300 p-2">Rate</th>
+              <th className="border border-gray-300 p-2">Price</th>
               <th className="border border-gray-300 p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {rooms.map((room) => (
               <tr key={room.roomId}>
-                <td className="border border-gray-300 p-2">{room.name}</td>
                 <td className="border border-gray-300 p-2">
                   {editingRoom?.roomId === room.roomId ? (
                     <input
                       type="text"
-                      value={editingRoom.description}
+                      value={editingRoom.name}
                       onChange={(e) =>
                         setEditingRoom((prev) =>
-                          prev ? { ...prev, description: e.target.value } : null
+                          prev ? { ...prev, name: e.target.value } : null
                         )
                       }
                       className="w-full border rounded p-1"
                     />
                   ) : (
-                    room.description
+                    room.name
                   )}
                 </td>
                 <td className="border border-gray-300 p-2">
-                  {String(room.availability)} {/* Display the raw boolean value */}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <Image
-                    src={room.imageUrl}
-                    alt={room.name}
-                    className="h-16 w-16 object-cover"
-                    width={500}
-                    height={400}
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
                   {editingRoom?.roomId === room.roomId ? (
                     <input
-                      type="text"
-                      value={editingRoom.rate}
+                      type="number"
+                      value={editingRoom.maxPeople}
                       onChange={(e) =>
                         setEditingRoom((prev) =>
-                          prev ? { ...prev, rate: e.target.value } : null
+                          prev ? { ...prev, maxPeople: Number(e.target.value) } : null
                         )
                       }
                       className="w-full border rounded p-1"
                     />
                   ) : (
-                    `₹${room.rate}`
+                    room.maxPeople
+                  )}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  {editingRoom?.roomId === room.roomId ? (
+                    <select
+                      value={editingRoom.availability ? "true" : "false"}
+                      onChange={(e) =>
+                        setEditingRoom((prev) =>
+                          prev ? { ...prev, availability: e.target.value === "true" } : null
+                        )
+                      }
+                      className="w-full border rounded p-1"
+                    >
+                      <option value="true">Available</option>
+                      <option value="false">Not Available</option>
+                    </select>
+                  ) : (
+                    (room.availability ? "Available" : "Not Available")
+                  )}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  {editingRoom?.roomId === room.roomId ? (
+                    <input
+                      type="text"
+                      value={editingRoom.price}
+                      onChange={(e) =>
+                        setEditingRoom((prev) =>
+                          prev ? { ...prev, price: e.target.value } : null
+                        )
+                      }
+                      className="w-full border rounded p-1"
+                    />
+                  ) : (
+                    `₹${room.price}` // Display price with ₹ symbol
                   )}
                 </td>
                 <td className="border border-gray-300 p-2 space-x-2">

@@ -26,7 +26,7 @@ const Footer = () => {
               href="https://www.instagram.com/theshowtimestudio?igsh=eGh3N2tiZXNuYjNw"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-red-600 hover:underline"
+              className="text-white hover:underline"
             >
               Instagram
             </a>
