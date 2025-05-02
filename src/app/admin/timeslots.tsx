@@ -56,6 +56,8 @@ const ManageTimeSlots = () => {
   }, []);
 
   useEffect(() => {
+    setSelectedSlot(null); // Clear selected slot whenever the date changes
+  setSlotsMap({}); // Clear the slot map to fetch fresh data
     const fetchTheatersAndSlots = async () => {
       try {
         const theaterSnapshot = await getDocs(collection(db, "rooms"));
@@ -112,7 +114,8 @@ const ManageTimeSlots = () => {
         const existingDocQuery = query(
           collection(db, "booked"),
           where("room", "==", selectedTheater.name),
-          where("timeSlot", "==", timeSlot)
+          where("timeSlot", "==", timeSlot),
+          where("date", "==", selectedDate?.toLocaleDateString("en-CA"))
         );
         const existingDocs = await getDocs(existingDocQuery);
 
