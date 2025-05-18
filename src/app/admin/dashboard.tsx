@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
+import { useRouter } from "next/navigation";
 
 interface DashboardProps {
   setActiveSection: (section: string) => void;
@@ -12,6 +13,8 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
   const [todayBookings, setTodayBookings] = useState<number>(0);
   const [totalRooms, setTotalRooms] = useState<number>(0);
   const [pendingQueries, setPendingQueries] = useState<number>(0);
+
+  const router = useRouter(); // Add the router for navigation
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,6 +34,10 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
 
     fetchData();
   }, []);
+
+  const handleAddBooking = () => {
+    {/*router.push("/admin/addbooking"); */} // Navigate to the add booking page
+  };
 
   return (
     <div className="p-6 w-full">
@@ -84,6 +91,16 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
           <h3 className="text-lg font-semibold">User Queries</h3>
           <p className="text-sm text-gray-500">Respond to customer questions and issues.</p>
         </div>
+      </div>
+
+      {/* Add New Booking Button */}
+      <div className="mt-6">
+        <button
+          onClick={handleAddBooking}
+          className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700"
+        >
+          Add New Booking
+        </button>
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ import Razorpay from "razorpay";
 const extraDecorations = [
   { name: "Occasion Themed Decoration", price: 450, image: "/Images/decorations/ocdeco.jpg" },
   { name: "Chocolates", price: 150, image: "/Images/decorations/chocolate.jpg" },
-  { name: "Sparkle Candle", price: 300, image: "/Images/decorations/sparklecandle.jpg" },
+  /* { name: "Sparkle Candle", price: 300, image: "/Images/decorations/sparklecandle.jpg" }, */
   { name: "LED Name", price: 100, image: "/Images/decorations/ledname.jpg" },
   { name: "Candle Path", price: 300, image: "/Images/decorations/candle_path.png" },
 
@@ -39,6 +39,8 @@ const specialServices = [
 
 const allItems = [...extraDecorations, ...gifts, ...specialServices];
 
+
+
 const DecorationPage = () => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [selectedTheater, setSelectedTheater] = useState<any>(null);
@@ -56,6 +58,13 @@ const DecorationPage = () => {
 const [couponApplied, setCouponApplied] = useState(false);
 const [discountPercent, setDiscountPercent] = useState(0);
 const [couponError, setCouponError] = useState("");
+const [showPaymentReminder, setShowPaymentReminder] = useState(false);
+
+const [showLedPopup, setShowLedPopup] = useState(false);
+const [ledName, setLedName] = useState("");
+const [ledPrice, setLedPrice] = useState(0);
+
+
 
   const router = useRouter();
 
@@ -71,6 +80,7 @@ const [couponError, setCouponError] = useState("");
     const storedNameToInclude = localStorage.getItem("nameToInclude") || "";
     const storedDate = localStorage.getItem("selectedDate");
     const formattedDate = storedDate ? new Date(storedDate).toLocaleDateString("en-GB") : "";
+
     setDisplayDate(formattedDate);
 
     setSelectedTheater(storedTheater);
@@ -85,16 +95,61 @@ const [couponError, setCouponError] = useState("");
   }, []);
 
   const handleSelect = (name: string) => {
-    setSelectedItems((prev) =>
-      prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
-    );
+    if (name === "LED Name" && !selectedItems.some(item => item.startsWith("LED Name:"))) {
+      setShowLedPopup(true); // Show the LED Name popup if not selected yet
+    } else {
+      // Remove "LED Name" entry from selectedItems when deselected, else toggle other items
+      if (name === "LED Name") {
+        setSelectedItems((prev) => prev.filter((item) => !item.startsWith("LED Name:"))); // Remove only "LED Name" from selectedItems
+        setLedName("");  // Reset the LED name
+        setLedPrice(0);  // Reset the LED price
+      }
+        else {
+          // For non-LED items, ensure no duplicates are selected
+          setSelectedItems((prev) => {
+            // If the item is already selected, remove it (deselect), otherwise add it
+            if (prev.includes(name)) {
+              return prev.filter((item) => item !== name); // Remove the item
+            } else {
+              return [...prev, name]; // Add the item
+            }
+        });
+      }
+    }
   };
+  
+  
+  
+  
+  
+  
+  
 
+  const handleLedNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLedName(event.target.value);
+    setLedPrice(event.target.value.length * 100); // Calculate price based on character count
+  };
+  
+  const handleLedPopupClose = () => {
+    if (ledName.trim() !== "") {
+      // Remove previous "LED Name" entries before adding a new one with updated name and price
+      setSelectedItems((prev) => [
+        ...prev.filter((item) => !item.startsWith("LED Name:")), // Remove old LED Name
+        `LED Name: ${ledName}` // Add new LED Name with the entered name and price
+      ]);
+    }
+    setShowLedPopup(false); // Close the LED Name popup
+  };
+  
+  
+  
+  
+  
   const selectedExtras = allItems.filter((item) => selectedItems.includes(item.name));
   const extrasTotal = selectedExtras.reduce((sum, item) => sum + item.price, 0);
   const cakeCost = selectedCake?.price || 0;
   const theaterCost = selectedTheater?.price || 0;
-  const subtotal = theaterCost + cakeCost + extrasTotal;
+  const subtotal = theaterCost + cakeCost + extrasTotal + ledPrice;
   const discountedTotal = couponApplied
   ? Math.round(subtotal - (subtotal * discountPercent) / 100)
   : subtotal;
@@ -102,8 +157,65 @@ const [couponError, setCouponError] = useState("");
   const advance = 499;
   const balance = subtotal - advance;
 
-  
+  // Function to open the reminder popup
+  const handleOpenPaymentReminder = () => {
+    setShowPaymentReminder(true); // Show the reminder popup
+  };
 
+  
+  {/*const handleBookingWithoutPayment = async () => {
+    // Get the selected extra decorations
+    const decorations = selectedExtras.map((item) => item.name);
+  
+    // Filter selected items to get "LED Name" (if any)
+    const ledDecorations = selectedItems.filter(item => item.startsWith("LED Name:")); // Filter out LED Name from selectedItems
+  
+    // Combine both selected extras and LED Name items
+    const allDecorations = [...decorations, ...ledDecorations]; // Merge them into one array
+  
+    const cakeName = selectedCake?.name || "";
+    const selectedDate = new Date(localStorage.getItem("selectedDate") || new Date());
+    const dateString = selectedDate.toLocaleDateString("en-CA");
+  
+    const bookingData = {
+      name,
+      mobile: phoneNumber,
+      email,
+      room: selectedTheater?.name?.toLowerCase() || "unknown",
+      date: dateString,
+      status: "pending", // Keep status as "pending" since no payment is made
+      timeSlot: selectedSlot?.time || "",
+      decorations: allDecorations,  // Store combined decorations, including LED Name
+      cake: cakeName,
+      advanceAmount: advance,
+      dueAmount: balance,
+      people: numPeople,
+      occasion,
+      occasionName: nameToInclude,
+    };
+  
+    const bookedData = {
+      date: dateString,
+      room: selectedTheater?.name?.toLowerCase() || "unknown",
+      timeSlot: selectedSlot?.time || "",
+    };
+  
+    try {
+      // Save the booking data without payment (no Razorpay logic here)
+      await addDoc(collection(db, "bookings"), bookingData);
+      await addDoc(collection(db, "booked"), bookedData);
+  
+      // Show confirmation popup
+      localStorage.setItem("bookingConfirmed", "true");
+      router.push("/"); // Redirect to home
+    } catch (err) {
+      console.error("Booking without payment failed:", err);
+      toast.error("Booking failed. Please try again.");
+    }
+  }; */}
+   
+  
+  
 
 
   const handleApplyCoupon = async () => {
@@ -140,9 +252,17 @@ const [couponError, setCouponError] = useState("");
   
   const handlePaymentAndBooking = async () => {
     const decorations = selectedExtras.map((item) => item.name);
+    // Filter selected items to get "LED Name" (if any)
+  const ledDecorations = selectedItems.filter(item => item.startsWith("LED Name:")); // Filter out LED Name from selectedItems
+
+  // Combine both selected extras and LED Name items
+  const allDecorations = [...decorations, ...ledDecorations]; // Merge them into one array
     const cakeName = selectedCake?.name || "";
     const selectedDate = new Date(localStorage.getItem("selectedDate") || new Date());
     const dateString = selectedDate.toLocaleDateString("en-CA");
+
+    
+    
   
     const bookingData = {
       name,
@@ -152,7 +272,7 @@ const [couponError, setCouponError] = useState("");
       date: dateString,
       status: "pending",
       timeSlot: selectedSlot?.time || "",
-      decorations,
+      decorations: allDecorations,  // Store combined decorations, including LED Name      
       cake: cakeName,
       advanceAmount: advance,
       dueAmount: balance,
@@ -251,13 +371,22 @@ const [couponError, setCouponError] = useState("");
   <div className="w-full md:w-2/3">
     <h2 className="text-2xl font-bold mb-4">Extra Decoration <span className="text-sm text-gray-500">(optional)</span></h2>
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
-      {extraDecorations.map((item) => (
-        <div key={item.name} onClick={() => handleSelect(item.name)} className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${selectedItems.includes(item.name) ? "border-red-700 bg-red-100" : "border-gray-300"}`}>
-          <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
-          <p className="mt-2 font-medium">{item.name}</p>
-          <p className="text-sm">₹ {item.price}</p>
-        </div>
-      ))}
+    {extraDecorations.map((item) => (
+  <div
+  key={item.name}
+  onClick={() => handleSelect(item.name)}
+  className={`cursor-pointer p-4 rounded-lg border-2 text-center transition-transform hover:scale-105 ${
+    selectedItems.includes(item.name) ||
+    (item.name === "LED Name" && selectedItems.some(i => i.startsWith("LED Name:"))) // Apply red border if selected
+      ? "border-red-700 bg-red-100"
+      : "border-gray-300"
+  }`}
+>
+  <Image src={item.image} alt={item.name} width={100} height={100} className="mx-auto" />
+  <p className="mt-2 font-medium">{item.name}</p>
+  <p className="text-sm">₹ {item.price}</p>
+</div>
+))}
     </div>
 
     <h2 className="text-2xl font-bold mb-4">Choose Gifts <span className="text-sm text-gray-500">(optional)</span></h2>
@@ -289,9 +418,42 @@ const [couponError, setCouponError] = useState("");
       <div className="flex justify-between"><span>{selectedTheater?.name || "Room"} ({numPeople} ppl)</span><span>₹ {theaterCost}</span></div>
       {selectedSlot?.time && <div className="flex justify-between"><span>Time Slot</span><span>{selectedSlot.time}</span></div>}
       {selectedCake && <div className="flex justify-between"><span>{selectedCake.name}</span><span>₹ {cakeCost}</span></div>}
-      {selectedExtras.map((item) => (
-        <div key={item.name} className="flex justify-between"><span>{item.name}</span><span>₹ {item.price}</span></div>
-      ))}
+      
+      {/* Render LED Name if selected */}
+      <div className="text-sm space-y-1">
+  {Array.from(new Set(selectedItems)).map((item, index) => { // Using Set to ensure no duplicates
+    // Handle LED Name separately
+    if (item.startsWith("LED Name:")) {
+      return (
+        <div key={`led-${index}`} className="flex justify-between"> {/* Use unique key */}
+          <span>{item}</span>
+          <span>₹ {ledPrice}</span> {/* Display the LED price */}
+        </div>
+      );
+    }
+
+    // For other selected items (e.g., gifts, decorations)
+    const itemData = allItems.find((i) => i.name === item); // Find the item data
+    if (itemData) {
+      return (
+        <div key={`item-${index}`} className="flex justify-between"> {/* Use unique key */}
+          <span>{item}</span>
+          <span>₹ {itemData.price}</span> {/* Display the price */}
+        </div>
+      );
+    }
+    return null;
+  })}
+</div>
+
+
+
+
+
+
+
+
+
       <div className="flex justify-between border-t mt-2 pt-2 font-medium"><span>Subtotal</span><span>₹ {discountedTotal}</span></div>
       <div className="mt-4 font-semibold">Advance amount payable</div>
       <div className="flex justify-between"><span>₹ {advance}</span></div>
@@ -305,6 +467,57 @@ const [couponError, setCouponError] = useState("");
         <p><strong>Occasion:</strong> {occasion}</p>
         <p><strong>Include Name:</strong> {nameToInclude}</p>
         <p><strong>Date:</strong> {displayDate}</p>
+
+        {/* Pre-payment Reminder Popup */}
+{showPaymentReminder && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg w-80 text-center">
+      <h3 className="text-lg font-bold text-red-600">Important Reminder For Mobile Users</h3>
+      <p className="mt-2 text-sm">
+        Note! After confirming your payment from PhonePe, GooglePay, PayTM, or any other external app, please return back to this page to complete your booking. 
+        Make sure you take a screenshot of the "Booking Confirmed" message for your reference.
+      </p>
+      <div className="mt-4 flex justify-center">
+        <button
+          onClick={() => {
+            setShowPaymentReminder(false); // Close the popup
+            handlePaymentAndBooking(); // Proceed with payment logic
+          }}
+          className="bg-green-600 text-white py-2 px-4 rounded-md"
+        >
+          Okay! I understood
+        </button>
+      </div>
+      </div>
+      </div>
+      )}
+
+{showLedPopup && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg w-80 text-center">
+      <h3 className="text-lg font-semibold">Enter Name for LED Sign</h3>
+      <p className="mt-2 text-sm">Please enter the name for the LED sign. ₹100 per letter.</p>
+      <input
+        type="text"
+        value={ledName}
+        onChange={handleLedNameChange}
+        className="mt-2 p-2 border rounded w-full"
+        placeholder="Enter name"
+      />
+      <p className="mt-2 text-sm">Price: ₹{ledPrice}</p>
+      <div className="mt-4 flex justify-center">
+        <button
+          onClick={handleLedPopupClose}
+          className="bg-green-600 text-white py-2 px-4 rounded-md"
+        >
+          Save Name
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
 
         {/* Coupon Input */}
         <div className="mt-4">
@@ -348,11 +561,17 @@ const [couponError, setCouponError] = useState("");
     <div className="flex justify-between mt-10">
       <button onClick={() => router.back()} className="py-3 px-8 bg-gray-300 text-black font-semibold rounded hover:bg-gray-400">Back</button>
       <button
-        onClick={handlePaymentAndBooking}
+        onClick={handleOpenPaymentReminder}
         className="py-3 px-8 rounded-full bg-red-900 text-white font-semibold shadow-md hover:bg-red-800"
       >
         Pay ₹{advance}
       </button>
+      {/*<button
+    onClick={handleBookingWithoutPayment}
+    className="py-3 px-8 rounded-full bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-500"
+  >
+    Book without Pay
+  </button> */}
     </div>
   </div>
     </div>
