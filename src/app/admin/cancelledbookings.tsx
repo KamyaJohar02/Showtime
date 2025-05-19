@@ -111,44 +111,45 @@ const CancelledBookings: React.FC = () => {
     <th className="p-1 border">Room</th>
     <th className="p-1 border">Date</th>
     <th className="p-1 border">Slot</th>
-    
     <th className="p-1 border">Cake</th>
     <th className="p-1 border">Decorations</th>
     <th className="p-1 border">Advance</th>
     <th className="p-1 border">Due</th>
     <th className="p-1 border">Status</th>
-    <th className="p-1 border">Payment ID</th> {/* Razorpay Payment ID Column */}
+    <th className="p-1 border">Payment ID</th>
     <th className="p-1 border">Actions</th>
   </tr>
 </thead>
 
-            <tbody>
-              {filteredBookings.map((booking) => (
-                <tr key={booking.id} className="hover:bg-gray-100">
-                  <td className="p-1 border">{booking.name}</td>
-                  <td className="p-1 border">{booking.email}</td>
-                  <td className="p-1 border">{booking.mobile}</td>
-                  <td className="p-1 border">{booking.people}</td>
-                  <td className="p-1 border">{booking.room}</td>
-                  <td className="p-1 border">{booking.date}</td>
-                  <td className="p-1 border">{booking.timeSlot}</td>
-                  <td className="p-1 border">{booking.cake || "No"}</td>
-                  <td className="p-1 border">{(booking.decorations || []).join(", ")}</td>
-                  <td className="p-1 border">₹{booking.advanceAmount}</td>
-                  <td className="p-1 border">₹{booking.dueAmount}</td>
-                  <td className="p-1 border">{booking.status}</td>
-                  <td className="p-1 border">{booking.razorpayPaymentId || "-"}</td> {/* Display Razorpay Payment ID */}
-                  <td className="p-1 border">
-                    <button
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                      onClick={() => handleDeleteBooking(booking.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+
+<tbody>
+  {filteredBookings.map((booking) => (
+    <tr key={booking.id} className="hover:bg-gray-100">
+      <td className="p-1 border">{booking.name}</td>
+      <td className="p-1 border">{booking.email}</td>
+      <td className="p-1 border">{booking.mobile}</td>
+      <td className="p-1 border">{booking.people}</td>
+      <td className="p-1 border">{booking.room}</td>
+      <td className="p-1 border">{booking.date}</td>
+      <td className="p-1 border">{booking.timeSlot}</td>
+      <td className="p-1 border">{booking.cake || "No"}</td>
+      <td className="p-1 border">{(booking.decorations || []).join(", ")}</td>
+      <td className="p-1 border">₹{booking.advanceAmount}</td>
+      <td className="p-1 border">₹{booking.dueAmount}</td>
+      <td className="p-1 border">{booking.status}</td>
+      <td className="p-1 border">{booking.razorpayPaymentId || "-"}</td>
+      <td className="p-1 border">
+        <button
+          className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+          onClick={() => handleDeleteBooking(booking.id)}
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
           </table>
         </div>
       )}

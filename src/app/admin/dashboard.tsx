@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { useState, useEffect } from "react";
+import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 interface DashboardProps {
   setActiveSection: (section: string) => void;
@@ -14,7 +15,14 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
   const [totalRooms, setTotalRooms] = useState<number>(0);
   const [pendingQueries, setPendingQueries] = useState<number>(0);
 
-  const router = useRouter(); // Add the router for navigation
+  // Updated state
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [passwordCorrect, setPasswordCorrect] = useState<boolean>(false);
+  const [showPasswordPopup, setShowPasswordPopup] = useState<boolean>(false);
+  const [adminCouponCode, setAdminCouponCode] = useState<string>("");
+  const [copySuccess, setCopySuccess] = useState<boolean>(false);  // New state for copied state
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,7 +44,51 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
   }, []);
 
   const handleAddBooking = () => {
-    {/*router.push("/admin/addbooking"); */} // Navigate to the add booking page
+    setShowPasswordPopup(true); // Show the username/password input popup
+  };
+
+  const handlePasswordSubmit = async () => {
+    // Hardcoded username and password validation
+    const hardcodedUsername = "admin";
+    const hardcodedPassword = "Showtime@0212";
+
+    // Check if the entered username and password match the hardcoded values
+    if (username === hardcodedUsername && password === hardcodedPassword) {
+      setPasswordCorrect(true);
+
+      // Fetch the coupon code from Firestore (coupons collection, document ID = 'specialcode')
+      try {
+        const couponDocRef = doc(db, "adminbooking", "specialcode"); // Document ID is 'specialcode'
+        const couponDocSnap = await getDoc(couponDocRef);
+
+        if (couponDocSnap.exists()) {
+          const couponData = couponDocSnap.data();
+          const couponCode = couponData?.name; // Assuming 'name' contains the coupon code
+          setAdminCouponCode(couponCode || "No coupon code found"); // Set the coupon code
+        } else {
+          setAdminCouponCode("Coupon not found");
+        }
+      } catch (error) {
+        console.error("Error fetching coupon code:", error);
+        setAdminCouponCode("Error fetching coupon code");
+      }
+
+      setShowPasswordPopup(false); // Close the password input popup
+    } else {
+      toast.error("Incorrect username or password.");
+      setPasswordCorrect(false);
+    }
+  };
+
+  const closePasswordPopup = () => {
+    setShowPasswordPopup(false); // Close the popup when the close button is clicked
+  };
+
+  // Copy to clipboard function
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(adminCouponCode);  // Copy the code
+    setCopySuccess(true);  // Set the state to indicate code was copied
+    setTimeout(() => setCopySuccess(false), 2000);  // Reset after 2 seconds
   };
 
   return (
@@ -102,6 +154,75 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
           Add New Booking
         </button>
       </div>
+
+      {/* Username/Password Popup */}
+      {showPasswordPopup && !passwordCorrect && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-80 text-center">
+            <h3 className="text-lg font-semibold">Enter Admin Username & Password</h3>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="mt-2 p-2 border rounded w-full"
+              placeholder="Enter username"
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-2 p-2 border rounded w-full"
+              placeholder="Enter password"
+            />
+            <button
+              onClick={handlePasswordSubmit}
+              className="mt-4 px-6 py-2 bg-green-600 text-white rounded-md"
+            >
+              Submit
+            </button>
+            <button
+              onClick={closePasswordPopup}
+              className="mt-4 text-sm text-red-600 hover:underline"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Show Coupon Code if Password is Correct */}
+      {passwordCorrect && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-80 text-center">
+            <h3 className="text-lg font-semibold">Booking Code</h3>
+            <p>Your booking code: <span className="font-bold">{adminCouponCode}</span></p>
+
+            {/* Button to Copy Code */}
+            <button
+              onClick={handleCopyCode}
+              className={`mt-2 px-6 py-2 rounded-md ${copySuccess ? 'bg-green-600' : 'bg-blue-600'} text-white`}
+            >
+              {copySuccess ? 'Copied!' : 'Copy Code'}
+            </button>
+
+            {/* Button to Open Booking Page in New Tab */}
+            <button
+  onClick={() => window.open("/booking", "_blank", "width=1000,height=800")}
+  className="mt-4 px-6 py-2 bg-green-600 text-white rounded-md"
+>
+  Open Booking Page
+</button>
+
+            {/* Close Popup */}
+            <button
+              onClick={closePasswordPopup}
+              className="mt-4 text-sm text-red-600 hover:underline"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

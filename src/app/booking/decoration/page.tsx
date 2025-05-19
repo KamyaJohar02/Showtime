@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { db } from "@/firebaseConfig";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { toast } from "react-hot-toast";
+import { doc, getDoc } from "firebase/firestore";  // Add this import for getDoc
 import Razorpay from "razorpay";
 
 const extraDecorations = [
@@ -64,9 +65,51 @@ const [showLedPopup, setShowLedPopup] = useState(false);
 const [ledName, setLedName] = useState("");
 const [ledPrice, setLedPrice] = useState(0);
 
+const [couponName, setCouponName] = useState<string | null>(null);
+
+const [isAdminBookingCouponVerified, setIsAdminBookingCouponVerified] = useState(false); 
+
+
 
 
   const router = useRouter();
+
+  const fetchSpecialCoupon = async () => {
+    try {
+      const couponRef = doc(db, "adminbooking", "specialcode"); // Use the 'adminbooking' collection and 'specialcode' document
+      const couponSnap = await getDoc(couponRef);
+  
+      if (couponSnap.exists()) {
+        const couponData = couponSnap.data();
+        // Check if the entered coupon code matches the name field in the document
+        if (couponData.name === couponCode.trim()) {
+          setIsAdminBookingCouponVerified(true); // Set the coupon as verified if names match
+        } else {
+          setIsAdminBookingCouponVerified(false); // Hide button if coupon doesn't match
+          console.log("Coupon name does not match.");
+        }
+      } else {
+        setIsAdminBookingCouponVerified(false); // Hide button if no coupon found
+        console.log("No such coupon!");
+      }
+    } catch (error) {
+      console.error("Error fetching special coupon:", error);
+      setIsAdminBookingCouponVerified(false); // Hide button on error
+    }
+  };
+  
+  
+  useEffect(() => {
+    if (couponCode.trim() !== "") {  // Ensure couponCode is not empty
+      fetchSpecialCoupon(); // Call the function to verify coupon when couponCode changes
+    } else {
+      setIsAdminBookingCouponVerified(false); // If coupon code is empty, hide the button
+    }
+  }, [couponCode]); // Trigger when couponCode changes
+  
+  
+  
+  
 
   useEffect(() => {
     const storedTheater = JSON.parse(localStorage.getItem("selectedTheater") || "null");
@@ -155,7 +198,8 @@ const [ledPrice, setLedPrice] = useState(0);
   : subtotal;
 
   const advance = 499;
-  const balance = subtotal - advance;
+  
+  const balance = discountedTotal - advance;
 
   // Function to open the reminder popup
   const handleOpenPaymentReminder = () => {
@@ -213,41 +257,118 @@ const [ledPrice, setLedPrice] = useState(0);
       toast.error("Booking failed. Please try again.");
     }
   }; */}
-   
+
+  const handleBookingWithoutPayment = async () => {
+  
+    // Prepare the booking data
+    const cakeName = selectedCake?.name || "";
+    const selectedDate = new Date(localStorage.getItem("selectedDate") || new Date());
+    const dateString = selectedDate.toLocaleDateString("en-CA");
+  
+    const bookingData = {
+      name,
+      mobile: phoneNumber,
+      email,
+      room: selectedTheater?.name?.toLowerCase() || "unknown",
+      date: dateString,
+      status: "pending", // Keep status as "pending"
+      timeSlot: selectedSlot?.time || "",
+      decorations: selectedItems, // Decorations list
+      cake: cakeName,
+      advanceAmount: advance,
+      dueAmount: balance,
+      people: numPeople,
+      occasion,
+      occasionName: nameToInclude,
+    };
+  
+    const bookedData = {
+      date: dateString,
+      room: selectedTheater?.name?.toLowerCase() || "unknown",
+      timeSlot: selectedSlot?.time || "",
+    };
+  
+    try {
+      // Save the booking data without payment (no Razorpay logic here)
+      await addDoc(collection(db, "bookings"), bookingData);
+      await addDoc(collection(db, "booked"), bookedData);
+  
+      // Show confirmation popup and redirect
+      localStorage.setItem("bookingConfirmed", "true");
+      router.push("/"); // Redirect to home
+    } catch (err) {
+      console.error("Booking without payment failed:", err);
+      toast.error("Booking failed. Please try again.");
+    }
+  };
   
   
+
+  
+
 
 
   const handleApplyCoupon = async () => {
     try {
-      const snapshot = await getDocs(collection(db, "coupons"));
+      // First, check if the coupon exists in the 'coupons' collection (for normal discount coupons)
+      const couponSnapshot = await getDocs(collection(db, "coupons"));
       let matched = false;
   
-      snapshot.forEach((doc) => {
+      couponSnapshot.forEach((doc) => {
         const data = doc.data();
         if (data.name === couponCode.trim().toUpperCase()) {
-          setDiscountPercent(Number(data.percentageDiscount));
-          setCouponApplied(true);
-          setCouponError("");
+          setDiscountPercent(Number(data.percentageDiscount)); // Set discount percentage
+          setCouponApplied(true); // Mark coupon as applied
+          setCouponError(""); // Clear previous errors
           matched = true;
         }
       });
   
+      // If no match was found in the 'coupons' collection, check the 'adminbooking' collection (for admin booking)
       if (!matched) {
-        setCouponError("Sorry, the code is invalid.");
+        const couponRef = doc(db, "adminbooking", "specialcode"); // Reference to the document with ID "specialcode"
+        const couponSnap = await getDoc(couponRef); // Get the document snapshot
+  
+        if (couponSnap.exists()) {
+          const couponData = couponSnap.data(); // Get the data of the document
+  
+          // Check if the entered coupon code matches the name field in the admin booking document
+          if (couponData.name === couponCode.trim()) {
+            setIsAdminBookingCouponVerified(true); // Set admin coupon verified flag to true
+            setCouponApplied(true); // Mark coupon as applied
+            setCouponError(""); // Clear previous errors
+  
+          } else {
+            setCouponError("Admin Coupon does not match the special code."); // Error for admin coupon mismatch
+            setIsAdminBookingCouponVerified(false); // Admin coupon verification failed
+          }
+        } else {
+          console.log("No such admin coupon!");
+          setCouponError("Admin Coupon does not exist."); // Error if the specialcode coupon is not found
+          setIsAdminBookingCouponVerified(false); // Admin coupon does not exist
+        }
+      }
+  
+      // If no coupon matched in both collections, show error
+      if (!matched && !isAdminBookingCouponVerified) {
+        setCouponError("Coupon does not exist or is invalid."); // General coupon error message
       }
     } catch (err) {
       console.error("Failed to apply coupon:", err);
-      setCouponError("Something went wrong. Try again.");
+      setCouponError("Something went wrong. Please try again."); // General error message
     }
   };
   
+  
+  
   const handleRemoveCoupon = () => {
-    setCouponApplied(false);
-    setDiscountPercent(0);
-    setCouponCode("");
-    setCouponError("");
+    setCouponApplied(false); // Mark coupon as not applied
+    setDiscountPercent(0); // Reset discount percentage
+    setCouponCode(""); // Clear the coupon code input
+    setCouponError(""); // Clear any coupon error messages
+    setIsAdminBookingCouponVerified(false); // Reset admin booking coupon verification flag
   };
+  
     
   
   const handlePaymentAndBooking = async () => {
@@ -572,6 +693,17 @@ const [ledPrice, setLedPrice] = useState(0);
   >
     Book without Pay
   </button> */}
+  {isAdminBookingCouponVerified && (
+  <button
+    onClick={handleBookingWithoutPayment} // Trigger booking without payment
+    className="py-3 px-8 rounded-full bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-500"
+  >
+    Make Admin Booking
+  </button>
+)}
+
+
+
     </div>
   </div>
     </div>
