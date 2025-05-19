@@ -13,9 +13,8 @@ import TodayBookings from "./todaybooking";
 import AuthGuard from "@/components/ui/AuthGuard";
 import UserQueries from "./userqueries";
 import Dashboard from "./dashboard"; // 👈 import your new dashboard
+import CancelledBookings from "./cancelledbookings"; // 👈 import CancelledBookings
 import { toast } from "react-hot-toast";
-
-
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSection] = useState<string>("dashboard");
@@ -35,26 +34,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const renderActiveSection = () => {
     switch (activeSection) {
       case "dashboard":
-  return <Dashboard setActiveSection={setActiveSection} />;
-
+        return <Dashboard setActiveSection={setActiveSection} />;
       case "todayBookings":
         return <TodayBookings />;
       case "bookings":
         return <ManageBookings />;
       case "completedBookings":
         return <CompletedBookings />;
-        case "userQueries":
-  return <UserQueries />;
-
+      case "cancelledBookings":
+        return <CancelledBookings />; // New section for cancelled bookings
+      case "userQueries":
+        return <UserQueries />;
       case "rooms":
         return <ManageRooms />;
       case "dates":
         return <ManageDates />;
       case "timeSlots":
         return <ManageTimeSlots />;
-        default:
-          return <Dashboard setActiveSection={setActiveSection} />;
-        
+      default:
+        return <Dashboard setActiveSection={setActiveSection} />;
     }
   };
 
@@ -72,7 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 Dashboard
               </button>
-              
+
               <button
                 onClick={() => setActiveSection("todayBookings")}
                 className={`block text-sm ${activeSection === "todayBookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
@@ -86,11 +84,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 Manage Bookings
               </button>
               <button
-  onClick={() => setActiveSection("userQueries")}
-  className={`block text-sm ${activeSection === "userQueries" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
->
-  User Queries
-</button>
+                onClick={() => setActiveSection("cancelledBookings")}
+                className={`block text-sm ${activeSection === "cancelledBookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
+              >
+                Cancelled Bookings
+              </button>
+              <button
+                onClick={() => setActiveSection("userQueries")}
+                className={`block text-sm ${activeSection === "userQueries" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
+              >
+                User Queries
+              </button>
               <button
                 onClick={() => setActiveSection("completedBookings")}
                 className={`block text-sm ${activeSection === "completedBookings" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
@@ -109,15 +113,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 Manage Dates
               </button>
-              
+
               <button
                 onClick={() => setActiveSection("timeSlots")}
                 className={`block text-sm ${activeSection === "timeSlots" ? "text-red-600" : "text-gray-800"} hover:text-red-600`}
               >
                 Manage Time Slots
               </button>
-
-              
             </nav>
           </div>
           {/* Logout Button */}

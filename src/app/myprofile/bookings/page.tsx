@@ -6,6 +6,7 @@ import {
   collection,
   query,
   where,
+  addDoc,
   getDocs,
   deleteDoc,
   doc,
@@ -99,6 +100,15 @@ const MyProfileBookingsPage = () => {
   const handleCancel = async (booking: Booking) => {
     if (!isCancellable(booking)) return;
     try {
+      // First, copy the booking data to the cancelled collection
+    const cancelledBooking = {
+      ...booking,
+      status: "Cancelled", // You can change the status or leave it as it is
+      cancellationDate: new Date().toISOString(),
+    };
+
+    // Add the booking to the cancelled collection
+    await addDoc(collection(db, "cancelled"), cancelledBooking);
       await deleteDoc(doc(db, "bookings", booking.id));
 
       const bookedQuery = query(
