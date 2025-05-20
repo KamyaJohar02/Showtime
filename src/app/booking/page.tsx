@@ -23,6 +23,7 @@ interface Theater {
   imageUrl: string; 
   rating: number;
   timeSlots: string[];
+  additionalImages: string[];
 }
 
 interface TimeSlot {
@@ -41,6 +42,17 @@ const Bookingx = () => {
   const [selectedTheaterId, setSelectedTheaterId] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [disabledDates, setDisabledDates] = useState<Date[]>([]);
+
+  const [showPopup, setShowPopup] = useState(false);
+const [currentRoom, setCurrentRoom] = useState<number | null>(null);  // Store the index of the room
+const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+
+
+
+const openPopup = (index: number) => {
+  setCurrentRoom(index); // Set the room that was clicked
+  setShowPopup(true);  // Show the popup
+};
 
   const router = useRouter();
   const today = new Date();
@@ -66,11 +78,36 @@ const Bookingx = () => {
     const fetchTheatersAndSlots = async () => {
       try {
         const theaterSnapshot = await getDocs(collection(db, "rooms"));
-        const fetchedTheaters: Theater[] = theaterSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Theater[];
+        const fetchedTheaters: Theater[] = theaterSnapshot.docs.map((doc) => {
+          const data = doc.data();
+  
+          // Hardcode the additional images for each room
+          const additionalImages = [
+            `${data.name.toLowerCase()}1.jpg`, 
+            `${data.name.toLowerCase()}2.jpg`, 
+            `${data.name.toLowerCase()}3.jpg`
+          ];
+  
+          return {
+            id: doc.id,
+            name: data.name,
+            slots: data.slots || 0,
+            maxPeople: data.maxPeople || 0,
+            foodDrinks: data.foodDrinks ?? false,
+            cancellation: data.cancellation ?? false,
+            decoration: data.decoration || "None",
+            price: data.price || 0,
+            basePeople: data.basePeople || 0,
+            extraPeopleNote: data.extraPeopleNote || "",
+            imageUrl: data.imageUrl || "/images/default-image.jpg", // Assuming imageUrl is fetched or hardcoded
+            rating: data.rating || 0,
+            timeSlots: data.timeSlots || [],
+            additionalImages, // Add the hardcoded additional images here
+          };
+        });
+  
         setTheaters(fetchedTheaters);
+  
 
         if (!selectedDate) return;
 
@@ -148,6 +185,28 @@ const Bookingx = () => {
     }
   };
 
+  const goToNextImage = () => {
+    if (currentRoom !== null) {
+      const nextIndex =
+        currentImageIndex === theaters[currentRoom].additionalImages.length - 1
+          ? 0
+          : currentImageIndex + 1;  // Move to the next image, loop back to 0 if it's the last image
+      setCurrentImageIndex(nextIndex);
+    }
+  };
+  
+  const goToPreviousImage = () => {
+    if (currentRoom !== null) {
+      const prevIndex =
+        currentImageIndex === 0
+          ? theaters[currentRoom].additionalImages.length - 1  // Go to the last image if it's the first one
+          : currentImageIndex - 1;
+      setCurrentImageIndex(prevIndex);
+    }
+  };
+  
+  
+
   return (
     <div className="flex flex-col min-h-screen justify-between">
       <header className="p-6">
@@ -195,19 +254,26 @@ const Bookingx = () => {
 
       <main className="px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {theaters.map((theater) => {
-            const availableSlots = (slotsMap[theater.id] || []).filter((slot) => !slot.isBooked).length;
-            const displayPrice = theater.price; // Use the updated price from the Firestore collection
+        {theaters.map((theater, index) => {  // Pass index here to map
+  const availableSlots = (slotsMap[theater.id] || []).filter((slot) => !slot.isBooked).length;
+  const displayPrice = theater.price; // Use the updated price from the Firestore collection
 
-            return (
-              <div key={theater.id} className="border rounded-lg shadow-md p-4">
-                <Image
-                  src={theater.imageUrl || "/Images/Room1.jpg"}
-                  alt={theater.name}
-                  width={400}
-                  height={200}
-                  className="rounded-lg w-full h-48 object-cover mb-4"
-                />
+  return (
+    <div key={theater.id} className="relative border rounded-lg shadow-md p-4">
+      <Image
+        src={theater.imageUrl || "/Images/Room1.jpg"}
+        alt={theater.name}
+        width={400}
+        height={200}
+        className="rounded-lg w-full h-48 object-cover mb-4"
+      />
+      {/* Show More Images Button (On the card, top-right) */}
+      <button
+        onClick={() => openPopup(index)}  // Use index here to open the correct popup for the room
+        className="absolute top-2 right-2 bg-yellow-500 text-black p-2 rounded-full shadow-md text-sm"
+      >
+        Show More Images
+      </button>
 
                 <h3 className="text-xl font-semibold mb-1">{theater.name}</h3>
                 <p className="text-red-500 text-sm mb-2">{availableSlots} Slots Available</p>
@@ -266,6 +332,48 @@ const Bookingx = () => {
           })}
         </div>
       </main>
+      {/* Slideshow Popup */}
+{showPopup && currentRoom !== null && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-4 max-w-md w-full">
+      <div className="relative">
+        {/* Dynamically loading images for the room */}
+        <Image
+  src={`/Images/${theaters[currentRoom].additionalImages[currentImageIndex]}`}  // Correct path with "Images" folder capitalized
+  alt={`Room ${theaters[currentRoom].name} Image`}
+  width={400}
+  height={250}
+  className="rounded-lg"
+/>
+        <button
+          onClick={goToPreviousImage}
+          className="absolute top-1/2 left-0 transform -translate-y-1/2 bg-gray-600 text-white p-2 rounded-full"
+        >
+          &lt;
+        </button>
+        <button
+          onClick={goToNextImage}
+          className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-gray-600 text-white p-2 rounded-full"
+        >
+          &gt;
+        </button>
+        <button
+          onClick={() => setShowPopup(false)}
+          className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full"
+        >
+          X
+        </button>
+      </div>
+      <div className="mt-2 text-center">
+        <p className="text-sm">
+          Image {currentImageIndex + 1} of {theaters[currentRoom].additionalImages.length} {/* Show total number of images */}
+        </p>
+      </div>
+    </div>
+  </div>
+)}
+
+
 
       <footer className="mt-10 text-center text-sm text-gray-600 py-4">
         <button

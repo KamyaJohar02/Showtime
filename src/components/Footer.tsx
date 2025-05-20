@@ -61,7 +61,7 @@ const Footer = () => {
               <address className="not-italic leading-relaxed">
                 Business Name: MR B SERVICES<br />
                 Billing Label: The Showtime Studio<br />
-                Operational Address: 87/3 Block-A Wazirpur, Near by Shalimar Bagh Metro Station Gate 4&5 (Approx 500 mts),<br />
+                Operational Address: 87/3 Block-A, 3rd floor Wazirpur Industrial Area, Ashok Vihar, Near by Shalimar Bagh Metro Station Gate 4&5 (Approx 500 mts),<br />
                 New Delhi- 110052
               </address>
               <div className="mt-2">
