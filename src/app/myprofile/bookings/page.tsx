@@ -97,6 +97,32 @@ const MyProfileBookingsPage = () => {
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`;
   }
 
+  const initiateRefund = async (paymentId: string) => {
+    try {
+      // Send the payment ID to your Razorpay refund API
+      const response = await fetch("/api/razorpay/refund", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ paymentId }), // Send the Razorpay payment ID
+      });
+  
+      const data = await response.json();
+  
+      if (data.success) {
+        toast.success("Refund initiated successfully.");
+      } else {
+        console.error("Refund failed:", data.message);
+        toast.error("Refund failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error initiating refund:", error);
+      toast.error("An error occurred while processing the refund.");
+    }
+  };
+  
+
   const handleCancel = async (booking: Booking) => {
     if (!isCancellable(booking)) return;
     try {
@@ -125,6 +151,10 @@ const MyProfileBookingsPage = () => {
       setBookings((prev) => prev.filter((b) => b.id !== booking.id));
       setCancelledPaymentId(booking.razorpayPaymentId || null);
       setShowCancelPopup(true);
+      if (booking.razorpayPaymentId) {
+        // Call the refund API here
+        await initiateRefund(booking.razorpayPaymentId);
+      }
     } catch (err) {
       console.error("Failed to cancel booking:", err);
       toast.error("Failed to cancel booking.");
