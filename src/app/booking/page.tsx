@@ -158,9 +158,9 @@ const openPopup = (index: number) => {
 
       if (selectedTheater && selectedSlotObj) {
         const originalPrice = selectedTheater.price; // Use the updated price from the rooms collection
-        const discountedPrice = selectedTheater.name === "Sweet" ? 999 :
-                        selectedTheater.name === "Wonder" ? 999 :
-                        selectedTheater.name === "Galaxy" ? 999 : originalPrice;
+        const discountedPrice = selectedTheater.name === "Sweet" ? 1499 :
+                        selectedTheater.name === "Wonder" ? 1499 :
+                        selectedTheater.name === "Galaxy" ? 1499 : originalPrice;
         const finalPrice = isOfferActive ? discountedPrice : originalPrice;
 
         const fullTheaterData = {
@@ -312,7 +312,7 @@ const openPopup = (index: number) => {
                     <p>
                       <span className="line-through text-gray-500 mr-2">₹{displayPrice}</span>
                       <span className="inline-block px-4 py-1 rounded-full bg-gray-300">
-                        <span className="rainbow-text font-bold text-2xl">₹999</span>
+                        <span className="rainbow-text font-bold text-2xl">₹1499</span>
                       </span>
                     </p>
                   ) : (

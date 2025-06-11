@@ -146,7 +146,7 @@ function ActualHome() {
 
       <section className="max-w-7xl mx-auto p-2">
         <h2 className="text-6xl font-[Great Vibes] italic text-center text-red-600 mb-5 mt-4 font-serif">
-          Where every life moment becomes an experience
+          Where every life moment becomes an experience!
         </h2>
       </section>
 
@@ -210,6 +210,7 @@ function ActualHome() {
                 console.log("Document written with ID: ", docRef.id);
               } catch (error) {
                 console.error("Error adding document: ", error);
+                
                 toast.error("There was an error submitting your query. Please try again.");
               }
 

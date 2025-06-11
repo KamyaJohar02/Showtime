@@ -36,7 +36,7 @@ const RoomsPage: React.FC = () => {
     <div className="container mx-auto px-4">
       {/* Heading */}
       <h1 className="text-3xl font-bold text-red-600 mb-6 text-center">
-        Explore Our Rooms
+        Explore Our Rooms!
       </h1>
 
       {/* Room Sections */}
