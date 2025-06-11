@@ -55,13 +55,13 @@ const TopPage: React.FC = () => {
       <div className="w-full bg-gradient-to-r from-red-500 via-orange-400 to-yellow-300 overflow-hidden whitespace-nowrap py-2 z-50">
         <div className="inline-block animate-marquee text-black font-bold text-sm sm:text-base px-4">
         ⏰ Hurry! Exclusive Discount Ending Soon —   Book Now!   —
-        🎉 Introductory Offer: All Rooms Now at Just ₹1499!   —
+        🎉 Introductory Offer: All Rooms Now at Just ₹1499!!   —
           ⏰ Hurry! Exclusive Discount Ending Soon —   Book Now!   —
-          🎉 Introductory Offer: All Rooms Now at Just ₹1499!   -
+          🎉 Introductory Offer: All Rooms Now at Just ₹1499!!   -
           ⏰ Hurry! Exclusive Discount Ending Soon —   Book Now!   —
-          🎉 Introductory Offer: All Rooms Now at Just ₹1499!   -
+          🎉 Introductory Offer: All Rooms Now at Just ₹1499!!   -
           ⏰ Hurry! Exclusive Discount Ending Soon —   Book Now!   —
-          🎉 Introductory Offer: All Rooms Now at Just ₹1499!   -
+          🎉 Introductory Offer: All Rooms Now at Just ₹1499!!   -
         </div>
       </div>
 
